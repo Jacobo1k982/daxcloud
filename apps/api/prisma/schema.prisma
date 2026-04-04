@@ -1,0 +1,1518 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum PlanName {
+  starter
+  growth
+  scale
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  past_due
+  trialing
+}
+
+enum UserRole {
+  superadmin
+  admin
+  manager
+  cashier
+}
+
+enum SaleStatus {
+  completed
+  cancelled
+  refunded
+}
+
+enum PaymentMethod {
+  cash
+  card
+  transfer
+  mixed
+}
+
+enum MovementType {
+  in
+  out
+  adjustment
+}
+
+enum AppointmentStatus {
+  scheduled
+  confirmed
+  in_progress
+  completed
+  cancelled
+  no_show
+}
+
+enum OrderStatus {
+  open
+  in_progress
+  ready
+  completed
+  cancelled
+}
+
+enum ProductionStatus {
+  planned
+  in_progress
+  completed
+  cancelled
+}
+
+// ─────────────────────────────────────────
+// PLANES
+// ─────────────────────────────────────────
+
+model Plan {
+  id           String   @id @default(uuid())
+  name         PlanName @unique
+  displayName  String
+  priceMonthly Decimal  @db.Decimal(10, 2)
+  features     Json
+  createdAt    DateTime @default(now())
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+// ─────────────────────────────────────────
+// TENANTS
+// ─────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  legalName String?
+  taxId     String?
+  industry  String?  @default("general")
+  website   String?
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  state     String?
+  country   String   @default("US")
+  zipCode   String?
+  currency  String   @default("USD")
+  locale    String   @default("en-US")
+  logoUrl   String?
+  settings  Json     @default("{}")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                User[]
+  branches             Branch[]
+  products             Product[]
+  sales                Sale[]
+  subscription         Subscription?
+  featureFlags         FeatureFlag[]
+  roles                Role[]
+  resetTokens          PasswordResetToken[]
+  industryConfig       IndustryConfig?
+  employees            Employee[]
+  appointments         Appointment[]
+  services             Service[]
+  tables               Table[]
+  orders               Order[]
+  recipes              Recipe[]
+  productions          Production[]
+  lots                 Lot[]
+  prescriptions        Prescription[]
+  clients              Client[]
+  productionShifts     ProductionShift[]
+  encargos             Encargo[]
+  wastes               Waste[]
+  dailyMinimums        DailyMinimum[]
+  laborCosts           LaborCost[]
+  suppliers            Supplier[]
+  purchaseOrders       PurchaseOrder[]
+  productPresentations ProductPresentation[]
+  collections          Collection[]
+  productVariants      ProductVariant[]
+  produceProducts      ProduceProduct[]
+  harvestLots          HarvestLot[]
+  produceWastes        ProduceWaste[]
+  producePriceHistory  ProducePriceHistory[]
+  storageSections      StorageSection[]
+  modifierGroups       MenuModifierGroup[]
+  combos               Combo[]
+  reservations         Reservation[]
+  kitchenStations      KitchenStation[]
+  deliveryOrders       DeliveryOrder[]
+  cashRegisterShifts   CashRegisterShift[]
+  happyHours           HappyHour[]
+  notifications        Notification[]
+
+  @@map("tenants")
+}
+
+// ─────────────────────────────────────────
+// SUSCRIPCIONES
+// ─────────────────────────────────────────
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  tenantId           String             @unique
+  planId             String
+  status             SubscriptionStatus @default(trialing)
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean            @default(false)
+  cancelledAt        DateTime?
+  stripeCustomerId   String?
+  stripeSubId        String?
+  paymentMethod      String?
+  lastFour           String?
+  cardBrand          String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  invoices Invoice[]
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String    @id @default(uuid())
+  subscriptionId String
+  amount         Decimal   @db.Decimal(10, 2)
+  currency       String    @default("USD")
+  status         String    @default("paid")
+  description    String?
+  invoiceUrl     String?
+  paidAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+// ─────────────────────────────────────────
+// FEATURE FLAGS
+// ─────────────────────────────────────────
+
+model FeatureFlag {
+  id         String  @id @default(uuid())
+  tenantId   String
+  featureKey String
+  enabled    Boolean @default(false)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, featureKey])
+  @@map("feature_flags")
+}
+
+// ─────────────────────────────────────────
+// USUARIOS
+// ─────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole @default(cashier)
+  customRoleId String?
+  permissions  Json     @default("[]")
+  phone        String?
+  jobTitle     String?
+  avatarUrl    String?
+  language     String?  @default("es")
+  timezone     String?  @default("America/Costa_Rica")
+  posPin       String?
+  signature    String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customRole         Role?                @relation(fields: [customRoleId], references: [id])
+  sales              Sale[]
+  orders             Order[]
+  resetTokens        PasswordResetToken[]
+  cashRegisterShifts CashRegisterShift[]
+
+  @@unique([tenantId, email])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// SUCURSALES
+// ─────────────────────────────────────────
+
+model Branch {
+  id           String   @id @default(uuid())
+  tenantId     String
+  name         String
+  address      String?
+  phone        String?
+  email        String?
+  manager      String?
+  taxId        String?
+  city         String?
+  state        String?
+  country      String?
+  zipCode      String?
+  openingHours String?
+  notes        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sales              Sale[]
+  inventory          Inventory[]
+  employees          Employee[]
+  appointments       Appointment[]
+  tables             Table[]
+  orders             Order[]
+  productions        Production[]
+  lots               Lot[]
+  prescriptions      Prescription[]
+  productionShifts   ProductionShift[]
+  encargos           Encargo[]
+  wastes             Waste[]
+  dailyMinimums      DailyMinimum[]
+  purchaseOrders     PurchaseOrder[]
+  harvestLots        HarvestLot[]
+  produceWastes      ProduceWaste[]
+  storageSections    StorageSection[]
+  reservations       Reservation[]
+  kitchenStations    KitchenStation[]
+  cashRegisterShifts CashRegisterShift[]
+
+  @@map("branches")
+}
+
+// ─────────────────────────────────────────
+// PRODUCTOS
+// ─────────────────────────────────────────
+
+model Product {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  sku         String?
+  barcode     String?
+  price       Decimal  @db.Decimal(10, 2)
+  cost        Decimal? @db.Decimal(10, 2)
+  category    String?
+  imageUrl    String?
+  metadata    Json     @default("{}")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant               Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  saleItems            SaleItem[]
+  inventory            Inventory[]
+  lots                 Lot[]
+  recipeIngredients    RecipeIngredient[]
+  orderItems           OrderItem[]
+  prescriptionItems    PrescriptionItem[]
+  encargoItems         EncargoItem[]
+  wastes               Waste[]
+  supplierProducts     SupplierProduct[]
+  purchaseOrderItems   PurchaseOrderItem[]
+  productPresentations ProductPresentation[]
+  variants             ProductVariant[]
+  collections          CollectionProduct[]
+  produceProducts      ProduceProduct[]
+  produceWastes        ProduceWaste[]
+  comboItems           ComboItem[]
+  stationProducts      StationProduct[]
+  happyHourProducts    HappyHourProduct[]
+  modifierGroups       ProductModifierGroup[]
+
+  @@unique([tenantId, sku])
+  @@map("products")
+}
+
+// ─────────────────────────────────────────
+// INVENTARIO
+// ─────────────────────────────────────────
+
+model Inventory {
+  id        String   @id @default(uuid())
+  productId String
+  branchId  String
+  quantity  Int      @default(0)
+  minStock  Int      @default(5)
+  maxStock  Int?
+  location  String?
+  updatedAt DateTime @updatedAt
+
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  movements Movement[]
+
+  @@unique([productId, branchId])
+  @@map("inventory")
+}
+
+model Movement {
+  id             String       @id @default(uuid())
+  inventoryId    String
+  type           MovementType
+  quantity       Int
+  reason         String?
+  documentNumber String?
+  supplier       String?
+  unitCost       Decimal?     @db.Decimal(10, 2)
+  location       String?
+  lotNumber      String?
+  expirationDate DateTime?
+  serialNumber   String?
+  lotBarcode     String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@map("movements")
+}
+
+// ─────────────────────────────────────────
+// VENTAS
+// ─────────────────────────────────────────
+
+model Sale {
+  id            String        @id @default(uuid())
+  tenantId      String
+  branchId      String
+  userId        String
+  status        SaleStatus    @default(completed)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @default(0) @db.Decimal(10, 2)
+  tax           Decimal       @default(0) @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod @default(cash)
+  notes         String?
+  createdAt     DateTime      @default(now())
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id])
+  branch Branch     @relation(fields: [branchId], references: [id])
+  user   User       @relation(fields: [userId], references: [id])
+  items  SaleItem[]
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id         String  @id @default(uuid())
+  saleId     String
+  productId  String
+  employeeId String?
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  discount   Decimal @default(0) @db.Decimal(10, 2)
+  subtotal   Decimal @db.Decimal(10, 2)
+
+  sale     Sale              @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product  Product           @relation(fields: [productId], references: [id])
+  employee Employee?         @relation(fields: [employeeId], references: [id])
+  variants SaleItemVariant[]
+
+  @@map("sale_items")
+}
+
+// ─────────────────────────────────────────
+// ROLES
+// ─────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  displayName String
+  color       String   @default("#FF5C35")
+  permissions Json     @default("[]")
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users  User[]
+
+  @@unique([tenantId, name])
+  @@map("roles")
+}
+
+// ─────────────────────────────────────────
+// RESET DE CONTRASEÑA
+// ─────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tenantId  String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: CONFIGURACIÓN POR INDUSTRIA
+// ─────────────────────────────────────────
+
+model IndustryConfig {
+  id        String   @id @default(uuid())
+  tenantId  String   @unique
+  industry  String
+  config    Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("industry_configs")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: CLIENTES / CRM
+// ─────────────────────────────────────────
+
+model Client {
+  id        String    @id @default(uuid())
+  tenantId  String
+  firstName String
+  lastName  String?
+  phone     String?
+  email     String?
+  idNumber  String?
+  birthDate DateTime?
+  notes     String?
+  points    Int       @default(0)
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+  prescriptions Prescription[]
+  encargos      Encargo[]
+  reservations  Reservation[]
+
+  @@map("clients")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: EMPLEADOS
+// ─────────────────────────────────────────
+
+model Employee {
+  id        String   @id @default(uuid())
+  tenantId  String
+  branchId  String?
+  firstName String
+  lastName  String
+  phone     String?
+  email     String?
+  role      String?
+  color     String   @default("#FF5C35")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch       Branch?       @relation(fields: [branchId], references: [id])
+  appointments Appointment[]
+  saleItems    SaleItem[]
+  laborCosts   LaborCost[]
+
+  @@map("employees")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: SERVICIOS
+// ─────────────────────────────────────────
+
+model Service {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  duration    Int      @default(60)
+  price       Decimal  @db.Decimal(10, 2)
+  category    String?
+  color       String   @default("#FF5C35")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: CITAS / AGENDA
+// ─────────────────────────────────────────
+
+model Appointment {
+  id          String            @id @default(uuid())
+  tenantId    String
+  branchId    String?
+  clientId    String?
+  employeeId  String?
+  serviceId   String?
+  clientName  String
+  clientPhone String?
+  startTime   DateTime
+  endTime     DateTime
+  status      AppointmentStatus @default(scheduled)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch   Branch?   @relation(fields: [branchId], references: [id])
+  client   Client?   @relation(fields: [clientId], references: [id])
+  employee Employee? @relation(fields: [employeeId], references: [id])
+  service  Service?  @relation(fields: [serviceId], references: [id])
+
+  @@map("appointments")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: MESAS (RESTAURANTE)
+// ─────────────────────────────────────────
+
+model Table {
+  id       String  @id @default(uuid())
+  tenantId String
+  branchId String?
+  number   Int
+  name     String?
+  capacity Int     @default(4)
+  status   String  @default("available")
+  section  String?
+  active   Boolean @default(true)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch       Branch?       @relation(fields: [branchId], references: [id])
+  orders       Order[]
+  reservations Reservation[]
+
+  @@map("tables")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: ÓRDENES / COMANDAS (RESTAURANTE)
+// ─────────────────────────────────────────
+
+model Order {
+  id        String      @id @default(uuid())
+  tenantId  String
+  branchId  String?
+  tableId   String?
+  userId    String
+  status    OrderStatus @default(open)
+  notes     String?
+  total     Decimal     @default(0) @db.Decimal(10, 2)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch         Branch?         @relation(fields: [branchId], references: [id])
+  table          Table?          @relation(fields: [tableId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+  orderPayments  OrderPayment[]
+  deliveryOrders DeliveryOrder[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  notes     String?
+  status    String  @default("pending")
+
+  order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product             @relation(fields: [productId], references: [id])
+  modifiers OrderItemModifier[]
+
+  @@map("order_items")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: RECETAS DE PRODUCCIÓN (PANADERÍA)
+// ─────────────────────────────────────────
+
+model Recipe {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  yield       Int      @default(1)
+  yieldUnit   String   @default("unidades")
+  prepTime    Int?
+  cost        Decimal? @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ingredients   RecipeIngredient[]
+  productions   Production[]
+  encargoItems  EncargoItem[]
+  dailyMinimums DailyMinimum[]
+  laborCosts    LaborCost[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id        String  @id @default(uuid())
+  recipeId  String
+  productId String
+  quantity  Decimal @db.Decimal(10, 4)
+  unit      String  @default("kg")
+
+  recipe  Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("recipe_ingredients")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: PRODUCCIÓN (PANADERÍA)
+// ─────────────────────────────────────────
+
+model Production {
+  id          String           @id @default(uuid())
+  tenantId    String
+  branchId    String?
+  recipeId    String?
+  shiftId     String?
+  quantity    Int
+  status      ProductionStatus @default(planned)
+  plannedAt   DateTime?
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime         @default(now())
+
+  tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch?          @relation(fields: [branchId], references: [id])
+  recipe Recipe?          @relation(fields: [recipeId], references: [id])
+  shift  ProductionShift? @relation(fields: [shiftId], references: [id])
+  wastes Waste[]
+
+  @@map("productions")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: LOTES Y VENCIMIENTOS (FARMACIA)
+// ─────────────────────────────────────────
+
+model Lot {
+  id             String    @id @default(uuid())
+  tenantId       String
+  productId      String
+  branchId       String?
+  lotNumber      String
+  quantity       Int
+  expirationDate DateTime?
+  supplier       String?
+  unitCost       Decimal?  @db.Decimal(10, 2)
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  branch  Branch? @relation(fields: [branchId], references: [id])
+
+  @@map("lots")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: PRESCRIPCIONES (FARMACIA)
+// ─────────────────────────────────────────
+
+model Prescription {
+  id         String   @id @default(uuid())
+  tenantId   String
+  branchId   String?
+  clientId   String?
+  clientName String
+  doctorName String?
+  notes      String?
+  status     String   @default("pending")
+  saleId     String?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch?            @relation(fields: [branchId], references: [id])
+  client Client?            @relation(fields: [clientId], references: [id])
+  items  PrescriptionItem[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String  @id @default(uuid())
+  prescriptionId String
+  productId      String
+  quantity       Int
+  dosage         String?
+  instructions   String?
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id])
+
+  @@map("prescription_items")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO PANADERÍA: TURNOS
+// ─────────────────────────────────────────
+
+enum ShiftType {
+  midnight // Madrugada 00:00 - 06:00
+  morning // Mañana 06:00 - 12:00
+  afternoon // Tarde 12:00 - 18:00
+  evening // Noche 18:00 - 00:00
+}
+
+model ProductionShift {
+  id           String    @id @default(uuid())
+  tenantId     String
+  branchId     String?
+  shift        ShiftType
+  date         DateTime
+  supervisorId String?
+  status       String    @default("open")
+  notes        String?
+  createdAt    DateTime  @default(now())
+  closedAt     DateTime?
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch      Branch?      @relation(fields: [branchId], references: [id])
+  productions Production[]
+
+  @@map("production_shifts")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO PANADERÍA: ENCARGOS
+// ─────────────────────────────────────────
+
+enum OrderEncargadoStatus {
+  pending
+  confirmed
+  in_production
+  ready
+  delivered
+  cancelled
+}
+
+model Encargo {
+  id           String               @id @default(uuid())
+  tenantId     String
+  branchId     String?
+  clientId     String?
+  clientName   String
+  clientPhone  String?
+  deliveryDate DateTime
+  status       OrderEncargadoStatus @default(pending)
+  totalAmount  Decimal              @default(0) @db.Decimal(10, 2)
+  deposit      Decimal              @default(0) @db.Decimal(10, 2)
+  notes        String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch?       @relation(fields: [branchId], references: [id])
+  client Client?       @relation(fields: [clientId], references: [id])
+  items  EncargoItem[]
+
+  @@map("encargos")
+}
+
+model EncargoItem {
+  id          String  @id @default(uuid())
+  encargoId   String
+  productId   String?
+  recipeId    String?
+  description String
+  quantity    Decimal @db.Decimal(10, 3)
+  unit        String  @default("unidades")
+  unitPrice   Decimal @db.Decimal(10, 2)
+  subtotal    Decimal @db.Decimal(10, 2)
+  notes       String?
+
+  encargo Encargo  @relation(fields: [encargoId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  recipe  Recipe?  @relation(fields: [recipeId], references: [id])
+
+  @@map("encargo_items")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO PANADERÍA: MERMAS
+// ─────────────────────────────────────────
+
+model Waste {
+  id           String   @id @default(uuid())
+  tenantId     String
+  branchId     String?
+  productionId String?
+  productId    String?
+  quantity     Decimal  @db.Decimal(10, 3)
+  unit         String   @default("unidades")
+  reason       String
+  cost         Decimal? @db.Decimal(10, 2)
+  reportedBy   String?
+  createdAt    DateTime @default(now())
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch     Branch?     @relation(fields: [branchId], references: [id])
+  production Production? @relation(fields: [productionId], references: [id])
+  product    Product?    @relation(fields: [productId], references: [id])
+
+  @@map("wastes")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO PANADERÍA: PRODUCCIÓN MÍNIMA DIARIA
+// ─────────────────────────────────────────
+
+model DailyMinimum {
+  id       String     @id @default(uuid())
+  tenantId String
+  branchId String?
+  recipeId String
+  quantity Int
+  shift    ShiftType?
+  active   Boolean    @default(true)
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+  recipe Recipe  @relation(fields: [recipeId], references: [id])
+
+  @@map("daily_minimums")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO PANADERÍA: MANO DE OBRA
+// ─────────────────────────────────────────
+
+model LaborCost {
+  id            String   @id @default(uuid())
+  tenantId      String
+  recipeId      String
+  employeeId    String?
+  role          String?
+  hoursPerBatch Decimal  @db.Decimal(5, 2)
+  hourlyRate    Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipe   Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id])
+
+  @@map("labor_costs")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: PROVEEDORES
+// ─────────────────────────────────────────
+
+model Supplier {
+  id           String   @id @default(uuid())
+  tenantId     String
+  name         String
+  contactName  String?
+  phone        String?
+  email        String?
+  address      String?
+  taxId        String?
+  paymentTerms String?
+  notes        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  purchaseOrders PurchaseOrder[]
+  products       SupplierProduct[]
+  harvestLots    HarvestLot[]
+
+  @@map("suppliers")
+}
+
+model SupplierProduct {
+  id         String   @id @default(uuid())
+  supplierId String
+  productId  String
+  unitCost   Decimal  @db.Decimal(10, 2)
+  unit       String   @default("kg")
+  leadTime   Int?
+  minOrder   Decimal? @db.Decimal(10, 3)
+  active     Boolean  @default(true)
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@map("supplier_products")
+}
+
+model PurchaseOrder {
+  id         String    @id @default(uuid())
+  tenantId   String
+  supplierId String
+  branchId   String?
+  status     String    @default("draft")
+  total      Decimal   @default(0) @db.Decimal(10, 2)
+  notes      String?
+  expectedAt DateTime?
+  receivedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  tenant   Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supplier Supplier            @relation(fields: [supplierId], references: [id])
+  branch   Branch?             @relation(fields: [branchId], references: [id])
+  items    PurchaseOrderItem[]
+
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String  @id @default(uuid())
+  purchaseOrderId String
+  productId       String
+  quantity        Decimal @db.Decimal(10, 3)
+  unit            String  @default("kg")
+  unitCost        Decimal @db.Decimal(10, 2)
+  subtotal        Decimal @db.Decimal(10, 2)
+  receivedQty     Decimal @default(0) @db.Decimal(10, 3)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+
+  @@map("purchase_order_items")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: PRESENTACIONES DE PRODUCTO
+// (venta por unidad, docena, caja, peso)
+// ─────────────────────────────────────────
+
+model ProductPresentation {
+  id        String  @id @default(uuid())
+  tenantId  String
+  productId String
+  name      String
+  quantity  Decimal @db.Decimal(10, 3)
+  unit      String
+  price     Decimal @db.Decimal(10, 2)
+  barcode   String?
+  active    Boolean @default(true)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_presentations")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: TIENDA DE ROPA
+// ─────────────────────────────────────────
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  tenantId  String
+  productId String
+  size      String?
+  color     String?
+  colorHex  String?
+  sku       String?
+  barcode   String?
+  price     Decimal? @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  saleItems SaleItemVariant[]
+
+  @@map("product_variants")
+}
+
+model SaleItemVariant {
+  id         String @id @default(uuid())
+  saleItemId String
+  variantId  String
+
+  saleItem SaleItem       @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
+  variant  ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@map("sale_item_variants")
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  season      String?
+  year        Int?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant   Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products CollectionProduct[]
+
+  @@map("collections")
+}
+
+model CollectionProduct {
+  id           String @id @default(uuid())
+  collectionId String
+  productId    String
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, productId])
+  @@map("collection_products")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO: VERDULERÍA
+// ─────────────────────────────────────────
+
+enum FreshnessStatus {
+  fresh // Fresco
+  good // Bueno
+  warning // Por vencer
+  critical // Crítico
+  expired // Vencido
+}
+
+enum WeightUnit {
+  kg
+  lb
+  g
+  oz
+  unidad
+  manojo
+  docena
+  caja
+}
+
+model ProduceProduct {
+  id             String     @id @default(uuid())
+  tenantId       String
+  productId      String
+  section        String
+  weightUnit     WeightUnit @default(kg)
+  pricePerUnit   Decimal    @db.Decimal(10, 2)
+  minTemperature Decimal?   @db.Decimal(5, 2)
+  maxTemperature Decimal?   @db.Decimal(5, 2)
+  shelfLifeDays  Int        @default(7)
+  origin         String?
+  seasonal       Boolean    @default(false)
+  seasonStart    Int?
+  seasonEnd      Int?
+  active         Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product      Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  harvestLots  HarvestLot[]
+  priceHistory ProducePriceHistory[]
+
+  @@unique([tenantId, productId])
+  @@map("produce_products")
+}
+
+model HarvestLot {
+  id               String          @id @default(uuid())
+  tenantId         String
+  produceProductId String
+  branchId         String?
+  supplierId       String?
+  lotCode          String
+  quantity         Decimal         @db.Decimal(10, 3)
+  weightUnit       WeightUnit      @default(kg)
+  unitCost         Decimal?        @db.Decimal(10, 2)
+  harvestDate      DateTime?
+  arrivalDate      DateTime        @default(now())
+  expirationDate   DateTime?
+  freshnessStatus  FreshnessStatus @default(fresh)
+  temperature      Decimal?        @db.Decimal(5, 2)
+  origin           String?
+  notes            String?
+  active           Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produceProduct ProduceProduct @relation(fields: [produceProductId], references: [id])
+  branch         Branch?        @relation(fields: [branchId], references: [id])
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  wastes         ProduceWaste[]
+
+  @@map("harvest_lots")
+}
+
+model ProduceWaste {
+  id           String     @id @default(uuid())
+  tenantId     String
+  harvestLotId String?
+  productId    String?
+  branchId     String?
+  quantity     Decimal    @db.Decimal(10, 3)
+  weightUnit   WeightUnit @default(kg)
+  reason       String
+  cost         Decimal?   @db.Decimal(10, 2)
+  reportedBy   String?
+  createdAt    DateTime   @default(now())
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  harvestLot HarvestLot? @relation(fields: [harvestLotId], references: [id])
+  product    Product?    @relation(fields: [productId], references: [id])
+  branch     Branch?     @relation(fields: [branchId], references: [id])
+
+  @@map("produce_wastes")
+}
+
+model ProducePriceHistory {
+  id               String   @id @default(uuid())
+  tenantId         String
+  produceProductId String
+  price            Decimal  @db.Decimal(10, 2)
+  reason           String?
+  createdAt        DateTime @default(now())
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produceProduct ProduceProduct @relation(fields: [produceProductId], references: [id])
+
+  @@map("produce_price_history")
+}
+
+model StorageSection {
+  id          String   @id @default(uuid())
+  tenantId    String
+  branchId    String?
+  name        String
+  description String?
+  temperature Decimal? @db.Decimal(5, 2)
+  humidity    Decimal? @db.Decimal(5, 2)
+  capacity    Decimal? @db.Decimal(10, 2)
+  unit        String   @default("kg")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@map("storage_sections")
+}
+
+// ─────────────────────────────────────────
+// MÓDULO RESTAURANTE: EXPANSIÓN COMPLETA
+// ─────────────────────────────────────────
+
+// Modificadores de platos
+model MenuModifierGroup {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  required    Boolean  @default(false)
+  multiple    Boolean  @default(false)
+  minSelect   Int      @default(0)
+  maxSelect   Int      @default(1)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant   Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  options  MenuModifierOption[]
+  products ProductModifierGroup[]
+
+  @@map("menu_modifier_groups")
+}
+
+model MenuModifierOption {
+  id         String  @id @default(uuid())
+  groupId    String
+  name       String
+  extraPrice Decimal @default(0) @db.Decimal(10, 2)
+  active     Boolean @default(true)
+
+  group      MenuModifierGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  orderItems OrderItemModifier[]
+
+  @@map("menu_modifier_options")
+}
+
+model ProductModifierGroup {
+  id        String @id @default(uuid())
+  productId String
+  groupId   String
+
+  product Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  group   MenuModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, groupId])
+  @@map("product_modifier_groups")
+}
+
+model OrderItemModifier {
+  id          String  @id @default(uuid())
+  orderItemId String
+  optionId    String
+  extraPrice  Decimal @default(0) @db.Decimal(10, 2)
+
+  orderItem OrderItem          @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  option    MenuModifierOption @relation(fields: [optionId], references: [id])
+
+  payments        OrderPayment[]
+  delivery        DeliveryOrder? @relation(fields: [deliveryOrderId], references: [id])
+  deliveryOrderId String?
+
+  @@map("order_item_modifiers")
+}
+
+// Combos y menús del día
+model Combo {
+  id            String   @id @default(uuid())
+  tenantId      String
+  name          String
+  description   String?
+  price         Decimal  @db.Decimal(10, 2)
+  imageUrl      String?
+  available     Boolean  @default(true)
+  availableFrom String?
+  availableTo   String?
+  daysOfWeek    String?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  ComboItem[]
+
+  @@map("combos")
+}
+
+model ComboItem {
+  id        String  @id @default(uuid())
+  comboId   String
+  productId String
+  quantity  Int     @default(1)
+  notes     String?
+
+  combo   Combo   @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("combo_items")
+}
+
+// Reservaciones
+model Reservation {
+  id          String   @id @default(uuid())
+  tenantId    String
+  branchId    String?
+  tableId     String?
+  clientName  String
+  clientPhone String?
+  clientEmail String?
+  clientId    String?
+  partySize   Int
+  date        DateTime
+  duration    Int      @default(90)
+  status      String   @default("pending")
+  notes       String?
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+  table  Table?  @relation(fields: [tableId], references: [id])
+  client Client? @relation(fields: [clientId], references: [id])
+
+  @@map("reservations")
+}
+
+// Propinas y división de cuenta
+model OrderPayment {
+  id            String   @id @default(uuid())
+  orderId       String
+  amount        Decimal  @db.Decimal(10, 2)
+  tip           Decimal  @default(0) @db.Decimal(10, 2)
+  paymentMethod String
+  reference     String?
+  guestName     String?
+  createdAt     DateTime @default(now())
+
+  order               Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemModifier   OrderItemModifier? @relation(fields: [orderItemModifierId], references: [id])
+  orderItemModifierId String?
+
+  @@map("order_payments")
+}
+
+// Estaciones de cocina
+model KitchenStation {
+  id          String   @id @default(uuid())
+  tenantId    String
+  branchId    String?
+  name        String
+  description String?
+  color       String   @default("#FF5C35")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch   Branch?          @relation(fields: [branchId], references: [id])
+  products StationProduct[]
+
+  @@map("kitchen_stations")
+}
+
+model StationProduct {
+  id        String @id @default(uuid())
+  stationId String
+  productId String
+
+  station KitchenStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+
+  @@unique([stationId, productId])
+  @@map("station_products")
+}
+
+// Delivery
+model DeliveryOrder {
+  id            String    @id @default(uuid())
+  tenantId      String
+  orderId       String
+  clientName    String
+  clientPhone   String?
+  address       String
+  reference     String?
+  deliveryFee   Decimal   @default(0) @db.Decimal(10, 2)
+  estimatedTime Int?
+  driverId      String?
+  status        String    @default("pending")
+  source        String    @default("direct")
+  notes         String?
+  createdAt     DateTime  @default(now())
+  deliveredAt   DateTime?
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order              Order               @relation(fields: [orderId], references: [id])
+  orderItemModifiers OrderItemModifier[]
+
+  @@map("delivery_orders")
+}
+
+// Cierre de caja por turno
+model CashRegisterShift {
+  id             String    @id @default(uuid())
+  tenantId       String
+  branchId       String?
+  userId         String
+  openingAmount  Decimal   @db.Decimal(10, 2)
+  closingAmount  Decimal?  @db.Decimal(10, 2)
+  expectedAmount Decimal?  @db.Decimal(10, 2)
+  difference     Decimal?  @db.Decimal(10, 2)
+  totalSales     Decimal   @default(0) @db.Decimal(10, 2)
+  totalOrders    Int       @default(0)
+  totalTips      Decimal   @default(0) @db.Decimal(10, 2)
+  notes          String?
+  status         String    @default("open")
+  openedAt       DateTime  @default(now())
+  closedAt       DateTime?
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
+
+  @@map("cash_register_shifts")
+}
+
+// Happy hour
+model HappyHour {
+  id           String   @id @default(uuid())
+  tenantId     String
+  name         String
+  discount     Decimal  @db.Decimal(5, 2)
+  discountType String   @default("percentage")
+  startTime    String
+  endTime      String
+  daysOfWeek   String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products HappyHourProduct[]
+
+  @@map("happy_hours")
+}
+
+model HappyHourProduct {
+  id          String @id @default(uuid())
+  happyHourId String
+  productId   String
+
+  happyHour HappyHour @relation(fields: [happyHourId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@unique([happyHourId, productId])
+  @@map("happy_hour_products")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  type      String
+  title     String
+  message   String
+  icon      String   @default("bell")
+  color     String   @default("#5AAAF0")
+  link      String?
+  meta      Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, read])
+  @@index([tenantId, createdAt])
+}

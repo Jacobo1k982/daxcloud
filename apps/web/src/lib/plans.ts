@@ -1,0 +1,73 @@
+export const PLANS = [
+  {
+    name: 'starter',
+    label: 'Starter',
+    monthlyPrice: 19,
+    annualPrice: 190,
+    annualMonthly: Math.round(190 / 12), // ~16/mes
+    desc: 'Para comenzar',
+    color: '#5AAAF0',
+    popular: false,
+    features: [
+      { text: 'POS básico',              included: true  },
+      { text: '1 sucursal',              included: true  },
+      { text: '3 usuarios',              included: true  },
+      { text: 'Inventario básico',       included: true  },
+      { text: 'Exportar reportes',       included: false },
+      { text: 'Analytics avanzado',      included: false },
+      { text: 'Módulos de industria',    included: false },
+      { text: 'Multi-sucursal',          included: false },
+      { text: 'Soporte prioritario',     included: false },
+    ],
+    cta: 'Empezar gratis',
+    limit: '1 sucursal · 3 usuarios',
+  },
+  {
+    name: 'growth',
+    label: 'Growth',
+    monthlyPrice: 40,
+    annualPrice: 400,
+    annualMonthly: Math.round(400 / 12), // ~33/mes
+    desc: 'El más popular',
+    color: '#FF5C35',
+    popular: true,
+    features: [
+      { text: 'POS completo',            included: true  },
+      { text: 'Hasta 3 sucursales',      included: true  },
+      { text: 'Hasta 15 usuarios',       included: true  },
+      { text: 'Inventario avanzado',     included: true  },
+      { text: 'Exportar reportes',       included: true  },
+      { text: 'Analytics avanzado',      included: true  },
+      { text: 'Módulos de industria',    included: true  },
+      { text: 'Multi-sucursal',          included: true  },
+      { text: 'Soporte prioritario',     included: false },
+    ],
+    cta: 'Empezar gratis',
+    limit: '3 sucursales · 15 usuarios',
+  },
+  {
+    name: 'scale',
+    label: 'Scale',
+    monthlyPrice: 60,
+    annualPrice: 600,
+    annualMonthly: Math.round(600 / 12), // 50/mes
+    desc: 'Sin límites',
+    color: '#A78BFA',
+    popular: false,
+    features: [
+      { text: 'POS completo',            included: true  },
+      { text: 'Sucursales ilimitadas',   included: true  },
+      { text: 'Usuarios ilimitados',     included: true  },
+      { text: 'Inventario con lotes',    included: true  },
+      { text: 'Exportar reportes',       included: true  },
+      { text: 'Analytics avanzado',      included: true  },
+      { text: 'Módulos de industria',    included: true  },
+      { text: 'Multi-sucursal',          included: true  },
+      { text: 'Soporte prioritario',     included: true  },
+    ],
+    cta: 'Empezar gratis',
+    limit: 'Ilimitado',
+  },
+] as const;
+
+export type PlanName = typeof PLANS[number]['name'];

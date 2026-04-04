@@ -1,0 +1,330 @@
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════════════════
+   DAXCLOUD — DESIGN SYSTEM
+   Paleta: Azul profundo enterprise + Coral acción
+══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Tipografía ── */
+  --font-primary: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  /* ── Marca ── */
+  --dax-coral:          #FF5C35;
+  --dax-coral-hover:    #E8440E;
+  --dax-coral-soft:     rgba(255, 92, 53, 0.10);
+  --dax-coral-border:   rgba(255, 92, 53, 0.25);
+
+  /* ── Azul profundo (nuevo) ── */
+  --dax-navy-950:       #080F1A;
+  --dax-navy-900:       #0F1924;
+  --dax-navy-800:       #162235;
+  --dax-navy-700:       #1A2840;
+  --dax-navy-600:       #1E3A5F;
+  --dax-navy-500:       #2A5280;
+  --dax-navy-400:       #3A6A9A;
+  --dax-navy-300:       #4A7FAF;
+  --dax-navy-200:       #7BBEE8;
+  --dax-navy-100:       #B8D8F0;
+  --dax-navy-50:        #E8F4FB;
+
+  /* ── Backgrounds ── */
+  --dax-bg:             #0F1924;
+  --dax-surface:        #1A2840;
+  --dax-surface-2:      #1E3050;
+  --dax-surface-3:      #243660;
+
+  /* ── Bordes ── */
+  --dax-border:         #1E3A5F;
+  --dax-border-soft:    rgba(30, 58, 95, 0.6);
+
+  /* ── Textos ── */
+  --dax-text-primary:   #F0F4FF;
+  --dax-text-secondary: #B8D0E8;
+  --dax-text-muted:     #4A7FAF;
+
+  /* ── Estados ── */
+  --dax-success:        #3DBF7F;
+  --dax-success-bg:     rgba(61, 191, 127, 0.10);
+  --dax-warning:        #F0A030;
+  --dax-warning-bg:     rgba(240, 160, 48, 0.10);
+  --dax-danger:         #E05050;
+  --dax-danger-bg:      rgba(224, 80, 80, 0.10);
+  --dax-info:           #5AAAF0;
+  --dax-info-bg:        rgba(90, 170, 240, 0.10);
+
+  /* ── Radios ── */
+  --dax-radius-sm:      6px;
+  --dax-radius-md:      10px;
+  --dax-radius-lg:      14px;
+  --dax-radius-xl:      18px;
+
+  /* ── Sombras ── */
+  --dax-shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.3);
+  --dax-shadow-md:      0 4px 12px rgba(0, 0, 0, 0.4);
+  --dax-shadow-lg:      0 8px 28px rgba(0, 0, 0, 0.5);
+  --dax-shadow-coral:   0 4px 16px rgba(255, 92, 53, 0.30);
+}
+
+/* ══ Reset ══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font-primary);
+  background: var(--dax-bg);
+  color: var(--dax-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--dax-bg);
+  color: var(--dax-text-primary);
+  font-family: var(--font-primary);
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dax-text-primary);
+  font-family: var(--font-primary);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+a { color: var(--dax-coral); text-decoration: none; }
+a:hover { color: var(--dax-coral-hover); }
+
+/* ══ Scrollbar ══════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--dax-navy-800); }
+::-webkit-scrollbar-thumb { background: var(--dax-navy-600); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dax-navy-400); }
+
+/* ══ Componentes base ═══════════════════════════════ */
+
+/* Cards */
+.dax-card {
+  background: var(--dax-surface);
+  border: 1px solid var(--dax-border);
+  border-radius: var(--dax-radius-lg);
+  transition: border-color .2s;
+}
+.dax-card:hover { border-color: var(--dax-navy-500); }
+
+/* Inputs */
+.dax-input {
+  width: 100%;
+  padding: 10px 13px;
+  background: var(--dax-navy-800);
+  border: 1px solid var(--dax-border);
+  border-radius: var(--dax-radius-md);
+  color: var(--dax-text-primary);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  margin-bottom: 4px;
+}
+.dax-input::placeholder { color: var(--dax-text-muted); }
+.dax-input:focus {
+  border-color: var(--dax-coral);
+  box-shadow: 0 0 0 3px var(--dax-coral-soft);
+}
+.dax-input:hover:not(:focus) { border-color: var(--dax-navy-400); }
+
+select.dax-input { cursor: pointer; }
+select.dax-input option {
+  background: var(--dax-navy-700);
+  color: var(--dax-text-primary);
+}
+
+/* Botones */
+.dax-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  background: var(--dax-coral);
+  color: #fff;
+  border: none;
+  border-radius: var(--dax-radius-md);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s cubic-bezier(.4,0,.2,1);
+  box-shadow: var(--dax-shadow-coral);
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.dax-btn-primary:hover:not(:disabled) {
+  background: var(--dax-coral-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 92, 53, 0.40);
+}
+.dax-btn-primary:active:not(:disabled) { transform: translateY(0); }
+.dax-btn-primary:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+.dax-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  background: var(--dax-surface-2);
+  color: var(--dax-text-secondary);
+  border: 1px solid var(--dax-border);
+  border-radius: var(--dax-radius-md);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.dax-btn-secondary:hover:not(:disabled) {
+  background: var(--dax-surface-3);
+  border-color: var(--dax-navy-400);
+  color: var(--dax-text-primary);
+}
+.dax-btn-secondary:disabled { opacity: .45; cursor: not-allowed; }
+
+.dax-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--dax-text-muted);
+  border: none;
+  border-radius: var(--dax-radius-md);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.dax-btn-ghost:hover { background: var(--dax-surface-2); color: var(--dax-text-primary); }
+
+/* Badges */
+.dax-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+.dax-badge-success  { background: var(--dax-success-bg);  color: var(--dax-success);  }
+.dax-badge-warning  { background: var(--dax-warning-bg);  color: var(--dax-warning);  }
+.dax-badge-danger   { background: var(--dax-danger-bg);   color: var(--dax-danger);   }
+.dax-badge-info     { background: var(--dax-info-bg);     color: var(--dax-info);     }
+.dax-badge-coral    { background: var(--dax-coral-soft);  color: var(--dax-coral);    }
+.dax-badge-default  { background: var(--dax-surface-2);   color: var(--dax-text-muted); }
+
+/* Tablas */
+.dax-table-wrap { overflow-x: auto; }
+
+.dax-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dax-table thead tr {
+  border-bottom: 1px solid var(--dax-border);
+}
+.dax-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dax-text-muted);
+  white-space: nowrap;
+}
+.dax-table td {
+  padding: 11px 14px;
+  color: var(--dax-text-secondary);
+  border-bottom: 1px solid var(--dax-border-soft);
+  vertical-align: middle;
+}
+.dax-table tbody tr:hover td { background: rgba(30, 58, 95, 0.3); }
+.dax-table tbody tr:last-child td { border-bottom: none; }
+
+/* Sidebar */
+.dax-sidebar {
+  background: var(--dax-navy-900);
+  border-right: 1px solid var(--dax-border);
+}
+
+.dax-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--dax-radius-md);
+  color: var(--dax-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dax-nav-item:hover {
+  background: var(--dax-surface-2);
+  color: var(--dax-text-secondary);
+}
+.dax-nav-item.active {
+  background: var(--dax-coral-soft);
+  color: var(--dax-coral);
+  font-weight: 700;
+}
+.dax-nav-item.active svg { color: var(--dax-coral); }
+
+/* ══ Animaciones globales ════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .5; }
+}
+
+/* ══ Utilidades ══════════════════════════════════════ */
+.spinning { animation: spin 1s linear infinite; }
+
+/* Selection */
+::selection {
+  background: var(--dax-coral-soft);
+  color: var(--dax-coral);
+}
+
+/* Autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 100px var(--dax-navy-800) inset !important;
+  -webkit-text-fill-color: var(--dax-text-primary) !important;
+  caret-color: var(--dax-text-primary);
+  border-color: var(--dax-border) !important;
+}

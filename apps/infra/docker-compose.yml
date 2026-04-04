@@ -1,0 +1,99 @@
+version: '3.9'
+
+services:
+
+  # ── PostgreSQL ───────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: daxcloud_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-daxcloud_prod}
+      POSTGRES_USER:     ${POSTGRES_USER:-daxcloud_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - daxcloud_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-daxcloud_user}"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+
+  # ── API (NestJS) ─────────────────────────────────────
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY}/daxcloud-api:${IMAGE_TAG:-latest}
+    container_name: daxcloud_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL:  postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET:    ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      PORT:          3001
+      NODE_ENV:      production
+      FRONTEND_URL:  ${FRONTEND_URL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+    networks:
+      - daxcloud_net
+    expose:
+      - "3001"
+
+  # ── Web (Next.js) ────────────────────────────────────
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}/daxcloud-web:${IMAGE_TAG:-latest}
+    container_name: daxcloud_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    networks:
+      - daxcloud_net
+    expose:
+      - "3005"
+
+  # ── Nginx ────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: daxcloud_nginx
+    restart: unless-stopped
+    depends_on:
+      - api
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    networks:
+      - daxcloud_net
+
+  # ── Certbot (SSL) ────────────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: daxcloud_certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c "trap exit TERM;
+      while :; do
+        certbot renew --webroot -w /var/www/certbot --quiet;
+        sleep 12h & wait $${!};
+      done"
+
+volumes:
+  postgres_data:
+  certbot_www:
+  certbot_conf:
+
+networks:
+  daxcloud_net:
+    driver: bridge

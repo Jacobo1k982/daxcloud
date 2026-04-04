@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "tenants" ADD COLUMN     "country" TEXT NOT NULL DEFAULT 'US',
+ADD COLUMN     "currency" TEXT NOT NULL DEFAULT 'USD',
+ADD COLUMN     "locale" TEXT NOT NULL DEFAULT 'en-US';
