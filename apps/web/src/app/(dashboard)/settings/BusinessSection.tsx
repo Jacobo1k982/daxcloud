@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/auth.store';
@@ -161,12 +162,9 @@ export function BusinessSection({ showToast }: { showToast: (msg: string, type?:
                     gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
                     gap: '8px',
                 }}>
-                    // En el grid de industrias, reemplaza el botón por:
                     {INDUSTRIES.map((ind, i) => {
                         const selected = form.industry === ind.value;
                         const isHov = hovered === ind.value;
-                        const isCurrent = currentIndustry === ind.value;
-                        const willCharge = ind.price > 0 && !isCurrent;
 
                         return (
                             <button
@@ -275,9 +273,6 @@ export function BusinessSection({ showToast }: { showToast: (msg: string, type?:
             </div>
 
             {/* ── Modal confirmación de cambio de industria ── */}
-            import {createPortal} from 'react-dom';
-
-            // Y el modal:
             {confirmIndustry && typeof window !== 'undefined' && createPortal(
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
