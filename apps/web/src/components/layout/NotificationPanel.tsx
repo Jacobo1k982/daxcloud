@@ -235,7 +235,7 @@ export function NotificationBell() {
       <button
         onClick={() => setOpen(p => !p)}
         style={{
-          position: 'relative', background: 'none', border: 'none', cursor: 'pointer',
+          position: 'relative', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: '36px', height: '36px', borderRadius: '10px',
           color: open ? '#FF5C35' : 'var(--dax-text-muted)',
