@@ -256,7 +256,7 @@ export default function DashboardPage() {
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Total semana</span>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>
-                {formatCurrency(weeklyData.reduce((a, d) => a + d.value, 0))}
+                {formatCurrency(weeklyData.reduce((acc: number, d: { label: string; value: number }) => acc + d.value, 0))}
               </span>
             </div>
           )}
