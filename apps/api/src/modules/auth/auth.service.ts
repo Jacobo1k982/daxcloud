@@ -92,6 +92,7 @@ export class AuthService {
     currency: string;
     locale: string;
     industry?: string;
+    plan?:  string;
     email: string;
     password: string;
     firstName: string;
@@ -119,7 +120,8 @@ export class AuthService {
         },
       });
 
-      const basicPlan = await tx.plan.findUnique({ where: { name: 'starter' } });
+      const planName = data.plan ?? 'starter';
+      const basicPlan = await tx.plan.findUnique({ where: { name: planName } });
       if (basicPlan) {
         await tx.subscription.create({
           data: {

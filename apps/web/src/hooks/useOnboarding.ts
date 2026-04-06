@@ -7,44 +7,44 @@ import { useAuthStore } from '@/store/auth.store';
 
 export const ONBOARDING_STEPS = [
   {
-    id:       'business',
-    title:    'Confirma tu negocio',
-    desc:     'Verifica el nombre e industria de tu negocio',
-    icon:     '🏪',
+    id: 'business',
+    title: 'Confirma tu negocio',
+    desc: 'Verifica el nombre e industria de tu negocio',
+    icon: '🏪',
     required: true,
-    link:     null,
+    link: null,
   },
   {
-    id:       'product',
-    title:    'Agrega tu primer producto',
-    desc:     'Crea al menos un producto con precio',
-    icon:     '📦',
+    id: 'product',
+    title: 'Agrega tu primer producto',
+    desc: 'Crea al menos un producto con precio',
+    icon: '📦',
     required: true,
-    link:     '/products',
+    link: '/products',
   },
   {
-    id:       'team',
-    title:    'Invita a tu equipo',
-    desc:     'Agrega un cajero o gerente (opcional)',
-    icon:     '👥',
+    id: 'team',
+    title: 'Invita a tu equipo',
+    desc: 'Agrega un cajero o gerente (opcional)',
+    icon: '👥',
     required: false,
-    link:     '/settings?tab=users',
+    link: '/settings?tab=users',
   },
   {
-    id:       'pos',
-    title:    'Abre el POS',
-    desc:     'Realiza tu primera venta de prueba',
-    icon:     '⚡',
+    id: 'pos',
+    title: 'Abre el POS',
+    desc: 'Realiza tu primera venta de prueba',
+    icon: '⚡',
     required: true,
-    link:     '/pos',
+    link: '/pos',
   },
   {
-    id:       'explore',
-    title:    'Explora el dashboard',
-    desc:     'Conoce tus KPIs y reportes',
-    icon:     '📊',
+    id: 'explore',
+    title: 'Explora el dashboard',
+    desc: 'Conoce tus KPIs y reportes',
+    icon: '📊',
     required: false,
-    link:     '/dashboard',
+    link: '/dashboard',
   },
 ] as const;
 
@@ -84,17 +84,27 @@ export function useOnboarding() {
 
   const progress = Math.round((completedCount / ONBOARDING_STEPS.length) * 100);
 
-  const showWizard = !isLoading && !data?.completed &&
-    completedCount === 0;
+  const [wizardDismissed, setWizardDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('dax_onboarding_dismissed') === 'true';
+  });
+
+  const dismissWizard = useCallback(() => {
+    localStorage.setItem('dax_onboarding_dismissed', 'true');
+    setWizardDismissed(true);
+  }, []);
+
+  const showWizard = !isLoading && !data?.completed && !wizardDismissed;
 
   return {
-    steps:          ONBOARDING_STEPS,
+    steps: ONBOARDING_STEPS,
     completedSteps: data?.steps ?? {},
-    completed:      data?.completed ?? false,
+    completed: data?.completed ?? false,
     completedCount,
     progress,
     showWizard,
     isLoading,
     completeStep,
+    dismissWizard,
   };
 }

@@ -22,6 +22,7 @@ export function useAuth() {
     currency: string;
     locale: string;
     industry?: string;
+    plan?:  string;
     email: string;
     password: string;
     firstName: string;

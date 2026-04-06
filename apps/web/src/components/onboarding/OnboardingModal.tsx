@@ -39,14 +39,14 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 export function OnboardingModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const { user, tenant, industry } = useAuth();
-  const { completeStep } = useOnboarding();
+  const { completeStep, dismissWizard } = useOnboarding();
   const [step, setStep] = useState<Step>('welcome');
   const [mounted, setMounted] = useState(false);
 
   // Producto rápido
-  const [productName,  setProductName]  = useState('');
+  const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
-  const [saving,       setSaving]       = useState(false);
+  const [saving, setSaving] = useState(false);
   const [productSaved, setProductSaved] = useState(false);
 
   // Equipo
@@ -72,8 +72,8 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
       const branchId = branches?.[0]?.id;
 
       await api.post('/products', {
-        name:     productName,
-        price:    Number(productPrice),
+        name: productName,
+        price: Number(productPrice),
         category: 'General',
         branchId,
       });
@@ -152,10 +152,10 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               {/* Mini checklist visual */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px', textAlign: 'left' }}>
                 {[
-                  { icon: Building2, text: 'Confirma tu negocio',    time: '30 seg' },
-                  { icon: Package,   text: 'Agrega tu primer producto', time: '1 min' },
-                  { icon: Zap,       text: 'Haz tu primera venta',   time: '2 min' },
-                  { icon: BarChart2, text: 'Explora el dashboard',   time: '1 min' },
+                  { icon: Building2, text: 'Confirma tu negocio', time: '30 seg' },
+                  { icon: Package, text: 'Agrega tu primer producto', time: '1 min' },
+                  { icon: Zap, text: 'Haz tu primera venta', time: '2 min' },
+                  { icon: BarChart2, text: 'Explora el dashboard', time: '1 min' },
                 ].map((item, i) => {
                   const Icon = item.icon;
                   return (
@@ -186,7 +186,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 Empecemos <ArrowRight size={16} />
               </button>
 
-              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', fontSize: '12px', marginTop: '12px', fontFamily: 'Outfit, sans-serif' }}>
+              <button onClick={() => { dismissWizard(); onClose(); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', fontSize: '12px', marginTop: '12px', fontFamily: 'Outfit, sans-serif' }}>
                 Saltar por ahora
               </button>
             </div>
@@ -208,11 +208,11 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
                 {[
-                  { label: 'Nombre',    value: tenant?.name ?? '—' },
+                  { label: 'Nombre', value: tenant?.name ?? '—' },
                   { label: 'Industria', value: `${INDUSTRY_EMOJI[industry] ?? ''} ${industry}` },
-                  { label: 'País',      value: tenant?.country ?? '—' },
-                  { label: 'Moneda',    value: tenant?.currency ?? '—' },
-                  { label: 'Plan',      value: `Starter · 14 días gratis` },
+                  { label: 'País', value: tenant?.country ?? '—' },
+                  { label: 'Moneda', value: tenant?.currency ?? '—' },
+                  { label: 'Plan', value: `Starter · 14 días gratis` },
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(15,25,36,.5)', borderRadius: '10px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{item.label}</span>
@@ -319,7 +319,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
 
               {!productSaved && (
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={goNext} style={{
+                  <button onClick={() => { dismissWizard(); goNext(); }} style={{
                     flex: 1, padding: '12px', background: 'transparent',
                     border: '1px solid rgba(30,58,95,.6)', borderRadius: '12px',
                     color: 'var(--dax-text-muted)', fontSize: '13px',
@@ -457,7 +457,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
 
-              <button onClick={handleGoToPOS} style={{
+              <button onClick={() => { dismissWizard(); handleGoToPOS(); }} style={{
                 width: '100%', padding: '14px',
                 background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)',
                 border: 'none', borderRadius: '12px',
@@ -469,7 +469,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               }}>
                 <Zap size={16} /> Abrir POS ahora
               </button>
-              <button onClick={handleFinish} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', fontSize: '12px', fontFamily: 'Outfit, sans-serif' }}>
+              <button onClick={() => { dismissWizard(); handleFinish(); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', fontSize: '12px', fontFamily: 'Outfit, sans-serif' }}>
                 Explorar el dashboard primero
               </button>
             </div>

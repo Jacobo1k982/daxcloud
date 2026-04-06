@@ -23,6 +23,7 @@ export class AuthController {
     password: string;
     firstName: string;
     lastName: string;
+    plan?:  string;
   }) {
     return this.authService.register(body);
   }
