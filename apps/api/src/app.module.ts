@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
@@ -20,8 +21,7 @@ import { ClothingModule } from './modules/clothing/clothing.module';
 import { ProduceModule } from './modules/produce/produce.module';
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-
-// En imports[]:
+import { SubscriptionGuard } from './modules/auth/guards/subscription.guard';
 
 @Module({
   imports: [
@@ -46,6 +46,12 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ProduceModule,
     RestaurantModule,
     NotificationsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: SubscriptionGuard,
+    },
   ],
 })
 export class AppModule { }

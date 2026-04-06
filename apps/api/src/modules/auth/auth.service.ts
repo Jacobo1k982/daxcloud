@@ -3,12 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
+const TRIAL_DAYS = 14;
+
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async login(email: string, password: string, tenantSlug: string) {
     const tenant = await this.prisma.tenant.findUnique({
@@ -48,6 +50,12 @@ export class AuthService {
       features,
     };
 
+    const sub = tenant.subscription;
+    const trialEndsAt = sub?.trialEndsAt ?? null;
+    const trialDaysLeft = trialEndsAt
+      ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+      : null;
+
     return {
       accessToken: this.jwtService.sign(payload),
       user: {
@@ -65,7 +73,13 @@ export class AuthService {
         currency: tenant.currency,
         locale: tenant.locale,
         industry: tenant.industry ?? 'general',
-        plan: tenant.subscription?.plan?.name ?? 'starter',
+        plan: sub?.plan?.name ?? 'starter',
+      },
+      subscription: {
+        status: sub?.status ?? 'trialing',
+        trialEndsAt,
+        trialDaysLeft,
+        cancelAtPeriodEnd: sub?.cancelAtPeriodEnd ?? false,
       },
       features,
     };
@@ -90,6 +104,8 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(data.password, 10);
 
+    const trialEnd = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+
     const result = await this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.create({
         data: {
@@ -106,17 +122,24 @@ export class AuthService {
       const basicPlan = await tx.plan.findUnique({ where: { name: 'starter' } });
       if (basicPlan) {
         await tx.subscription.create({
-          data: { tenantId: tenant.id, planId: basicPlan.id, status: 'trialing' },
+          data: {
+            tenantId: tenant.id,
+            planId: basicPlan.id,
+            status: 'trialing',
+            trialEndsAt: trialEnd,
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: trialEnd,
+          },
         });
       }
 
       const defaultFlags = [
-        { key: 'inventory',         enabled: true  },
+        { key: 'inventory', enabled: true },
         { key: 'restaurant_module', enabled: false },
-        { key: 'pharmacy_module',   enabled: false },
-        { key: 'analytics',         enabled: false },
-        { key: 'multi_branch',      enabled: false },
-        { key: 'loyalty',           enabled: false },
+        { key: 'pharmacy_module', enabled: false },
+        { key: 'analytics', enabled: false },
+        { key: 'multi_branch', enabled: false },
+        { key: 'loyalty', enabled: false },
       ];
 
       for (const flag of defaultFlags) {
@@ -144,7 +167,8 @@ export class AuthService {
     });
 
     return {
-      message: 'Tenant registrado exitosamente',
+      message: `Cuenta creada exitosamente. Tienes ${TRIAL_DAYS} días de prueba gratuita.`,
+      trialEndsAt: trialEnd,
       tenant: {
         id: result.tenant.id,
         slug: result.tenant.slug,
@@ -153,7 +177,10 @@ export class AuthService {
         locale: result.tenant.locale,
         industry: result.tenant.industry ?? 'general',
       },
-      user: { id: result.user.id, email: result.user.email },
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+      },
     };
   }
 
@@ -187,12 +214,24 @@ export class AuthService {
 
     if (!user || user.tenant.id !== tenantId) throw new UnauthorizedException();
 
+    const sub = (user.tenant as any).subscription;
+    const trialEndsAt = sub?.trialEndsAt ?? null;
+    const trialDaysLeft = trialEndsAt
+      ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+      : null;
+
     return {
       ...user,
       tenant: {
         ...user.tenant,
         industry: user.tenant.industry ?? 'general',
-        plan: (user.tenant as any).subscription?.plan?.name ?? 'starter',
+        plan: sub?.plan?.name ?? 'starter',
+      },
+      subscription: {
+        status: sub?.status ?? 'trialing',
+        trialEndsAt,
+        trialDaysLeft,
+        cancelAtPeriodEnd: sub?.cancelAtPeriodEnd ?? false,
       },
     };
   }
