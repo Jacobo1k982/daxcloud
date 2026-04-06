@@ -4,54 +4,54 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  ShoppingCart,
-  Package,
-  Warehouse,
-  LayoutDashboard,
-  BarChart2,
-  GitBranch,
-  Settings,
-  LogOut,
-  X,
-  MoreHorizontal,
+  ShoppingCart, Package, Warehouse, LayoutDashboard,
+  BarChart2, GitBranch, Settings, LogOut, X,
+  MoreHorizontal, ChefHat, Pill, Scissors,
+  Shirt, Leaf, Utensils, TrendingUp, Barcode,
 } from 'lucide-react';
-import { ChefHat } from 'lucide-react';
-import { Pill } from 'lucide-react';
-import { Scissors } from 'lucide-react';
-import { Shirt } from 'lucide-react';
-import { Leaf } from 'lucide-react';
-import { Utensils } from 'lucide-react';
 
-const mainItems = [
-  { href: '/pos', label: 'POS', icon: ShoppingCart },
-  { href: '/products', label: 'Productos', icon: Package },
-  { href: '/inventory', label: 'Inventario', icon: Warehouse },
-];
+// ── Módulo por industria (solo el del tenant) ─────────
+const INDUSTRY_MODULE: Record<string, { href: string; label: string; icon: React.ElementType }> = {
+  bakery:      { href: '/bakery',     label: 'Panadería',    icon: ChefHat   },
+  pharmacy:    { href: '/pharmacy',   label: 'Farmacia',     icon: Pill      },
+  salon:       { href: '/salon',      label: 'Peluquería',   icon: Scissors  },
+  clothing:    { href: '/clothing',   label: 'Ropa',         icon: Shirt     },
+  produce:     { href: '/produce',    label: 'Verdulería',   icon: Leaf      },
+  restaurant:  { href: '/restaurant', label: 'Restaurante',  icon: Utensils  },
+  supermarket: { href: '/products',   label: 'Catálogo',     icon: Barcode   },
+  general:     { href: '/sales',      label: 'Ventas',       icon: TrendingUp },
+};
 
-const moreItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/sales', label: 'Ventas', icon: BarChart2 },
-  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
-  { href: '/bakery',    label: 'Panadería', icon: ChefHat },
-  { href: '/pharmacy',  label: 'Farmacia',     icon: Pill },
-  { href: '/salon', label: 'Peluquería', icon: Scissors },
-  { href: '/clothing', label: 'Ropa', icon: Shirt },
-  { href: '/produce', label: 'Verdulería', icon: Leaf },
-  { href: '/restaurant', label: 'Restaurante', icon: Utensils },
-  { href: '/branches', label: 'Sucursales', icon: GitBranch },
-  { href: '/settings', label: 'Configuración', icon: Settings },
+const BASE_MORE: { href: string; label: string; icon: React.ElementType }[] = [
+  { href: '/dashboard', label: 'Dashboard',     icon: LayoutDashboard },
+  { href: '/sales',     label: 'Ventas',        icon: TrendingUp      },
+  { href: '/analytics', label: 'Analytics',     icon: BarChart2       },
+  { href: '/branches',  label: 'Sucursales',    icon: GitBranch       },
+  { href: '/settings',  label: 'Configuración', icon: Settings        },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { user, tenant, logout } = useAuth();
+  const { user, tenant, logout, industry } = useAuth();
   const [showMore, setShowMore] = useState(false);
 
   const isActive = (href: string) => pathname === href;
 
+  // Solo agrega el módulo de la industria actual del tenant
+  const industryModule = INDUSTRY_MODULE[industry ?? 'general'];
+  const moreItems = industryModule
+    ? [BASE_MORE[0], industryModule, ...BASE_MORE.slice(1)]
+    : BASE_MORE;
+
+  const mainItems = [
+    { href: '/pos',       label: 'POS',        icon: ShoppingCart as React.ElementType },
+    { href: '/products',  label: 'Productos',  icon: Package      as React.ElementType },
+    { href: '/inventory', label: 'Inventario', icon: Warehouse    as React.ElementType },
+  ];
+
   return (
     <>
-      {/* Overlay del menú more */}
+      {/* Overlay */}
       {showMore && (
         <div
           onClick={() => setShowMore(false)}
@@ -64,10 +64,10 @@ export function BottomNav() {
         />
       )}
 
-      {/* Panel more — sube desde abajo */}
+      {/* Panel more */}
       <div style={{
         position: 'fixed',
-        bottom: showMore ? '72px' : '-300px',
+        bottom: showMore ? '72px' : '-400px',
         left: 0, right: 0,
         background: 'var(--dax-surface)',
         borderTop: '1px solid var(--dax-border)',
@@ -77,26 +77,42 @@ export function BottomNav() {
         transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
         {/* Handle */}
-        <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'var(--dax-border)', margin: '0 auto 16px' }} />
+        <div style={{
+          width: '36px', height: '4px', borderRadius: '2px',
+          background: 'var(--dax-border)', margin: '0 auto 16px',
+        }} />
 
         {/* Info usuario */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '0 4px' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: '16px', padding: '0 4px',
+        }}>
           <div>
             <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>
               {user?.firstName} {user?.lastName}
             </p>
-            <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>{tenant?.name}</p>
+            <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>
+              {tenant?.name}
+            </p>
           </div>
           <button
             onClick={() => setShowMore(false)}
-            style={{ background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)' }}
+            style={{
+              background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer',
+              borderRadius: '50%', width: '32px', height: '32px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--dax-text-muted)',
+            }}
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Items adicionales */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px' }}>
+        {/* Items */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '8px', marginBottom: '12px',
+        }}>
           {moreItems.map(item => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -113,8 +129,16 @@ export function BottomNav() {
                   textDecoration: 'none', transition: 'all 0.15s ease',
                 }}
               >
-                <Icon size={20} color={active ? 'var(--dax-coral)' : 'var(--dax-text-tertiary)'} strokeWidth={1.8} />
-                <span style={{ fontSize: '10px', fontWeight: 600, color: active ? 'var(--dax-coral)' : 'var(--dax-text-muted)', textAlign: 'center', lineHeight: '1.2' }}>
+                <Icon
+                  size={20}
+                  color={active ? 'var(--dax-coral)' : 'var(--dax-text-tertiary)'}
+                  strokeWidth={1.8}
+                />
+                <span style={{
+                  fontSize: '10px', fontWeight: 600,
+                  color: active ? 'var(--dax-coral)' : 'var(--dax-text-muted)',
+                  textAlign: 'center', lineHeight: '1.2',
+                }}>
                   {item.label}
                 </span>
               </a>
@@ -126,29 +150,26 @@ export function BottomNav() {
         <button
           onClick={() => { logout(); setShowMore(false); }}
           style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            width: '100%', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '8px',
             padding: '12px', borderRadius: 'var(--dax-radius-md)',
-            background: 'var(--dax-danger-bg)', border: '1px solid rgba(224,80,80,0.15)',
-            cursor: 'pointer', color: 'var(--dax-danger)', fontSize: '13px', fontWeight: 600,
+            background: 'var(--dax-danger-bg)',
+            border: '1px solid rgba(224,80,80,0.15)',
+            cursor: 'pointer', color: 'var(--dax-danger)',
+            fontSize: '13px', fontWeight: 600,
+            fontFamily: 'var(--font-primary)',
           }}
         >
-          <LogOut size={16} />
-          Cerrar sesión
+          <LogOut size={16} /> Cerrar sesión
         </button>
       </div>
 
       {/* Barra inferior principal */}
       <nav style={{
-        position: 'fixed',
-        bottom: 0, left: 0, right: 0,
-        height: '72px',
-        background: 'var(--dax-surface)',
-        borderTop: '1px solid var(--dax-border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        zIndex: 80,
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        position: 'fixed', bottom: 0, left: 0, right: 0, height: '72px',
+        background: 'var(--dax-surface)', borderTop: '1px solid var(--dax-border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+        zIndex: 80, paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
         {mainItems.map(item => {
           const Icon = item.icon;
@@ -160,23 +181,24 @@ export function BottomNav() {
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
                 padding: '8px 20px', borderRadius: 'var(--dax-radius-lg)',
-                textDecoration: 'none', transition: 'all 0.15s ease',
-                flex: 1,
+                textDecoration: 'none', transition: 'all 0.15s ease', flex: 1,
               }}
             >
               <div style={{
-                width: '40px', height: '28px',
-                borderRadius: '14px',
+                width: '40px', height: '28px', borderRadius: '14px',
                 background: active ? 'var(--dax-coral-soft)' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s ease',
               }}>
-                <Icon size={20} color={active ? 'var(--dax-coral)' : 'var(--dax-text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
+                <Icon
+                  size={20}
+                  color={active ? 'var(--dax-coral)' : 'var(--dax-text-muted)'}
+                  strokeWidth={active ? 2.2 : 1.8}
+                />
               </div>
               <span style={{
                 fontSize: '10px', fontWeight: active ? 700 : 400,
                 color: active ? 'var(--dax-coral)' : 'var(--dax-text-muted)',
-                transition: 'all 0.15s ease',
               }}>
                 {item.label}
               </span>
@@ -195,14 +217,20 @@ export function BottomNav() {
           }}
         >
           <div style={{
-            width: '40px', height: '28px',
-            borderRadius: '14px',
+            width: '40px', height: '28px', borderRadius: '14px',
             background: showMore ? 'var(--dax-coral-soft)' : 'transparent',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <MoreHorizontal size={20} color={showMore ? 'var(--dax-coral)' : 'var(--dax-text-muted)'} strokeWidth={1.8} />
+            <MoreHorizontal
+              size={20}
+              color={showMore ? 'var(--dax-coral)' : 'var(--dax-text-muted)'}
+              strokeWidth={1.8}
+            />
           </div>
-          <span style={{ fontSize: '10px', fontWeight: showMore ? 700 : 400, color: showMore ? 'var(--dax-coral)' : 'var(--dax-text-muted)' }}>
+          <span style={{
+            fontSize: '10px', fontWeight: showMore ? 700 : 400,
+            color: showMore ? 'var(--dax-coral)' : 'var(--dax-text-muted)',
+          }}>
             Más
           </span>
         </button>
