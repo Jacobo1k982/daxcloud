@@ -4,33 +4,34 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Check, ChevronLeft, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { PLANS as PLAN_DATA } from '@/lib/plans';
+
 const COUNTRIES = [
-  { code: 'CR', name: 'Costa Rica',      currency: 'CRC', locale: 'es-CR' },
-  { code: 'GT', name: 'Guatemala',       currency: 'GTQ', locale: 'es-GT' },
-  { code: 'HN', name: 'Honduras',        currency: 'HNL', locale: 'es-HN' },
-  { code: 'NI', name: 'Nicaragua',       currency: 'NIO', locale: 'es-NI' },
-  { code: 'PA', name: 'Panamá',          currency: 'PAB', locale: 'es-PA' },
-  { code: 'SV', name: 'El Salvador',     currency: 'USD', locale: 'es-SV' },
-  { code: 'MX', name: 'México',          currency: 'MXN', locale: 'es-MX' },
+  { code: 'CR', name: 'Costa Rica', currency: 'CRC', locale: 'es-CR' },
+  { code: 'GT', name: 'Guatemala', currency: 'GTQ', locale: 'es-GT' },
+  { code: 'HN', name: 'Honduras', currency: 'HNL', locale: 'es-HN' },
+  { code: 'NI', name: 'Nicaragua', currency: 'NIO', locale: 'es-NI' },
+  { code: 'PA', name: 'Panamá', currency: 'PAB', locale: 'es-PA' },
+  { code: 'SV', name: 'El Salvador', currency: 'USD', locale: 'es-SV' },
+  { code: 'MX', name: 'México', currency: 'MXN', locale: 'es-MX' },
   { code: 'DO', name: 'Rep. Dominicana', currency: 'DOP', locale: 'es-DO' },
-  { code: 'CO', name: 'Colombia',        currency: 'COP', locale: 'es-CO' },
-  { code: 'PE', name: 'Perú',            currency: 'PEN', locale: 'es-PE' },
-  { code: 'CL', name: 'Chile',           currency: 'CLP', locale: 'es-CL' },
-  { code: 'AR', name: 'Argentina',       currency: 'ARS', locale: 'es-AR' },
-  { code: 'BR', name: 'Brasil',          currency: 'BRL', locale: 'pt-BR' },
-  { code: 'US', name: 'Estados Unidos',  currency: 'USD', locale: 'en-US' },
-  { code: 'ES', name: 'España',          currency: 'EUR', locale: 'es-ES' },
+  { code: 'CO', name: 'Colombia', currency: 'COP', locale: 'es-CO' },
+  { code: 'PE', name: 'Perú', currency: 'PEN', locale: 'es-PE' },
+  { code: 'CL', name: 'Chile', currency: 'CLP', locale: 'es-CL' },
+  { code: 'AR', name: 'Argentina', currency: 'ARS', locale: 'es-AR' },
+  { code: 'BR', name: 'Brasil', currency: 'BRL', locale: 'pt-BR' },
+  { code: 'US', name: 'Estados Unidos', currency: 'USD', locale: 'en-US' },
+  { code: 'ES', name: 'España', currency: 'EUR', locale: 'es-ES' },
 ];
 
 const INDUSTRIES = [
-  { value: 'general',     emoji: '🏪', label: 'Tienda',      desc: 'Retail, kiosko',   color: '#FF5C35' },
-  { value: 'restaurant',  emoji: '🍽️', label: 'Restaurante', desc: 'Comidas, bar',     color: '#F97316' },
-  { value: 'bakery',      emoji: '🥖', label: 'Panadería',   desc: 'Pan, pasteles',    color: '#FF5C35' },
-  { value: 'pharmacy',    emoji: '💊', label: 'Farmacia',    desc: 'Medicamentos',     color: '#5AAAF0' },
-  { value: 'salon',       emoji: '✂️', label: 'Peluquería',  desc: 'Estética, spa',    color: '#A78BFA' },
-  { value: 'clothing',    emoji: '👗', label: 'Ropa',        desc: 'Moda, calzado',    color: '#EAB308' },
-  { value: 'produce',     emoji: '🥦', label: 'Verdulería',  desc: 'Frutas, verduras', color: '#22C55E' },
-  { value: 'supermarket', emoji: '🛒', label: 'Súper',       desc: 'Abarrotes',        color: '#5AAAF0' },
+  { value: 'general', emoji: '🏪', label: 'Tienda', desc: 'Retail, kiosko', color: '#FF5C35' },
+  { value: 'restaurant', emoji: '🍽️', label: 'Restaurante', desc: 'Comidas, bar', color: '#F97316' },
+  { value: 'bakery', emoji: '🥖', label: 'Panadería', desc: 'Pan, pasteles', color: '#FF5C35' },
+  { value: 'pharmacy', emoji: '💊', label: 'Farmacia', desc: 'Medicamentos', color: '#5AAAF0' },
+  { value: 'salon', emoji: '✂️', label: 'Peluquería', desc: 'Estética, spa', color: '#A78BFA' },
+  { value: 'clothing', emoji: '👗', label: 'Ropa', desc: 'Moda, calzado', color: '#EAB308' },
+  { value: 'produce', emoji: '🥦', label: 'Verdulería', desc: 'Frutas, verduras', color: '#22C55E' },
+  { value: 'supermarket', emoji: '🛒', label: 'Súper', desc: 'Abarrotes', color: '#5AAAF0' },
 ];
 
 // ── Canvas fondo ──────────────────────────────────────
@@ -60,9 +61,9 @@ function BackgroundCanvas() {
       animId = requestAnimationFrame(animate);
       ctx.clearRect(0, 0, W, H); t += 0.004;
       drawGrid();
-      orb(W * 0.15, H * 0.2,  W * 0.4,  '255,92,53',  0.06 + 0.025 * Math.sin(t));
-      orb(W * 0.85, H * 0.8,  W * 0.35, '30,58,95',   0.15 + 0.05  * Math.cos(t * 0.7));
-      orb(W * 0.75, H * 0.15, W * 0.25, '90,170,240', 0.05 + 0.02  * Math.sin(t * 1.2));
+      orb(W * 0.15, H * 0.2, W * 0.4, '255,92,53', 0.06 + 0.025 * Math.sin(t));
+      orb(W * 0.85, H * 0.8, W * 0.35, '30,58,95', 0.15 + 0.05 * Math.cos(t * 0.7));
+      orb(W * 0.75, H * 0.15, W * 0.25, '90,170,240', 0.05 + 0.02 * Math.sin(t * 1.2));
     }
     resize(); animate();
     const ro = new ResizeObserver(resize);
@@ -207,12 +208,12 @@ function CloudLogo({ size = 'md' }: { size?: 'sm' | 'md' }) {
     <svg width={w} height={w * 0.75} viewBox="0 0 64 48" fill="none">
       <defs>
         <linearGradient id="regLogo" x1="0" y1="0" x2="64" y2="48" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FF8C00"/>
-          <stop offset="45%" stopColor="#FF5C35"/>
-          <stop offset="100%" stopColor="#00C8D4"/>
+          <stop offset="0%" stopColor="#FF8C00" />
+          <stop offset="45%" stopColor="#FF5C35" />
+          <stop offset="100%" stopColor="#00C8D4" />
         </linearGradient>
       </defs>
-      <path d="M 10 38 Q 2 38 2 29 Q 2 20 10 19 Q 11 11 20 10 Q 25 3 33 4 Q 43 2 46 12 Q 53 12 56 20 Q 62 21 61 30 Q 61 39 53 39 L 10 39 Z" fill="none" stroke="url(#regLogo)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round"/>
+      <path d="M 10 38 Q 2 38 2 29 Q 2 20 10 19 Q 11 11 20 10 Q 25 3 33 4 Q 43 2 46 12 Q 53 12 56 20 Q 62 21 61 30 Q 61 39 53 39 L 10 39 Z" fill="none" stroke="url(#regLogo)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
@@ -227,117 +228,45 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   return <span>{count.toLocaleString()}{suffix}</span>;
 }
 
-// ── Página principal ──────────────────────────────────
-export default function RegisterPage() {
-  const { register } = useAuth();
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [animKey, setAnimKey] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showPass, setShowPass] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+// ── Form Card (FUERA de RegisterPage para evitar remounts) ──
+interface FormCardProps {
+  step: number;
+  animKey: number;
+  form: {
+    tenantName: string; tenantSlug: string; industry: string;
+    firstName: string; lastName: string; email: string;
+    password: string; confirmPassword: string;
+    country: string; currency: string; locale: string;
+    plan: string; acceptTerms: boolean;
+  };
+  error: string;
+  loading: boolean;
+  isMobile: boolean;
+  showPass: boolean;
+  showConfirm: boolean;
+  strength: number;
+  strengthColors: string[];
+  strengthLabels: string[];
+  handleNext: () => void;
+  handlePrev: () => void;
+  set: (field: string, value: any) => void;
+  handleCountryChange: (code: string) => void;
+  setShowPass: (v: boolean | ((p: boolean) => boolean)) => void;
+  setShowConfirm: (v: boolean | ((p: boolean) => boolean)) => void;
+}
 
-  const [form, setForm] = useState({
-    tenantName: '', tenantSlug: '', industry: '',
-    firstName: '', lastName: '', email: '',
-    password: '', confirmPassword: '',
-    country: 'CR', currency: 'CRC', locale: 'es-CR',
-    plan: 'growth', acceptTerms: false,
-  });
-
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check(); window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  const set = (field: string, value: any) => setForm(p => ({ ...p, [field]: value }));
+function FormCard({
+  step, animKey, form, error, loading, isMobile,
+  showPass, showConfirm, strength, strengthColors, strengthLabels,
+  handleNext, handlePrev, set, handleCountryChange,
+  setShowPass, setShowConfirm,
+}: FormCardProps) {
 
   const autoSlug = (name: string) =>
     name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
 
-  const handleCountryChange = (code: string) => {
-    const c = COUNTRIES.find(x => x.code === code);
-    if (c) setForm(p => ({ ...p, country: code, currency: c.currency, locale: c.locale }));
-  };
-
-  const validate = () => {
-    setError('');
-    if (step === 1) {
-      if (!form.tenantName.trim()) return setError('El nombre del negocio es requerido'), false;
-      if (!form.tenantSlug.trim()) return setError('El ID del negocio es requerido'), false;
-      if (!/^[a-z0-9-]+$/.test(form.tenantSlug)) return setError('El ID solo puede tener letras, números y guiones'), false;
-      if (!form.industry) return setError('Selecciona el tipo de negocio'), false;
-    }
-    if (step === 2) {
-      if (!form.firstName.trim() || !form.lastName.trim()) return setError('Nombre y apellido son requeridos'), false;
-      if (!form.email.includes('@')) return setError('Correo inválido'), false;
-      if (form.password.length < 8) return setError('Contraseña mínimo 8 caracteres'), false;
-      if (form.password !== form.confirmPassword) return setError('Las contraseñas no coinciden'), false;
-    }
-    if (step === 3 && !form.acceptTerms) return setError('Acepta los términos para continuar'), false;
-    return true;
-  };
-
-  const handleNext = () => {
-    if (!validate()) return;
-    if (step < 3) { setStep(s => s + 1); setAnimKey(k => k + 1); }
-    else handleSubmit();
-  };
-
-  const handlePrev = () => { setStep(s => s - 1); setAnimKey(k => k + 1); setError(''); };
-
-  const handleSubmit = async () => {
-    setLoading(true); setError('');
-    try {
-      await register({ tenantName: form.tenantName, tenantSlug: form.tenantSlug, industry: form.industry, country: form.country, currency: form.currency, locale: form.locale, email: form.email, password: form.password, firstName: form.firstName, lastName: form.lastName });
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al crear la cuenta');
-    } finally { setLoading(false); }
-  };
-
-  const strength = [form.password.length >= 8, /[A-Z]/.test(form.password), /[0-9]/.test(form.password), /[^A-Za-z0-9]/.test(form.password)].filter(Boolean).length;
-  const strengthColors = ['', '#E05050', '#F0A030', '#5AAAF0', '#3DBF7F'];
-  const strengthLabels = ['', 'Débil', 'Regular', 'Buena', 'Fuerte ✓'];
-
-  // ── SUCCESS ──────────────────────────────────────────
-  if (success) {
-    const ind = INDUSTRIES.find(i => i.value === form.industry);
-    return (
-      <div style={{ minHeight: '100vh', background: '#080F1A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Outfit, sans-serif', position: 'relative', overflow: 'hidden' }}>
-        <BackgroundCanvas />
-        <div style={{ textAlign: 'center', maxWidth: '440px', position: 'relative', zIndex: 1, animation: 'fadeUp .6s ease' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(61,191,127,.1)', border: '1px solid rgba(61,191,127,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 36px rgba(61,191,127,.12)' }}>
-            <Check size={32} color="#3DBF7F" />
-          </div>
-          <h1 style={{ fontSize: 'clamp(24px,5vw,34px)', fontWeight: 700, color: '#F0F4FF', marginBottom: '10px', letterSpacing: '-.01em' }}>
-            ¡Bienvenido a DaxCloud!
-          </h1>
-          <p style={{ fontSize: '14px', color: '#3A6A9A', marginBottom: '6px', lineHeight: 1.6 }}>
-            Tu cuenta de <strong style={{ color: '#F0F4FF' }}>{form.tenantName}</strong> está lista.
-          </p>
-          {ind && <p style={{ fontSize: '13px', color: '#2A5280', marginBottom: '6px' }}>{ind.emoji} {ind.label}</p>}
-          <p style={{ fontSize: '12px', color: '#1E3A5F', marginBottom: '32px' }}>
-            Inicia sesión con el ID <strong style={{ color: '#FF5C35' }}>{form.tenantSlug}</strong>
-          </p>
-          <a href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 32px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: '#fff', borderRadius: '12px', textDecoration: 'none', fontSize: '14px', fontWeight: 700, boxShadow: '0 4px 20px rgba(255,92,53,.35)', transition: 'all .2s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 28px rgba(255,92,53,.45)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(255,92,53,.35)'; }}>
-            Iniciar sesión <ArrowRight size={15} />
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  // ── FORM CARD ─────────────────────────────────────────
-  const FormCard = () => (
+  return (
     <div style={{
       background: 'rgba(22,34,53,0.75)', backdropFilter: 'blur(20px)',
       border: '1px solid rgba(30,58,95,0.6)',
@@ -492,7 +421,6 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* ── Planes desde PLAN_DATA ── */}
             <div>
               <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#2A5280', marginBottom: '10px' }}>Plan</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -509,32 +437,23 @@ export default function RegisterPage() {
                       transition: 'all .18s cubic-bezier(.4,0,.2,1)',
                       boxShadow: sel ? `0 0 0 1px ${plan.color}25` : 'none',
                     }}>
-                      {/* Radio */}
                       <div style={{ width: '17px', height: '17px', borderRadius: '50%', border: `2px solid ${sel ? plan.color : '#1E3A5F'}`, background: sel ? plan.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .18s' }}>
                         {sel && <Check size={8} color="#fff" strokeWidth={3} />}
                       </div>
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
                           <span style={{ fontSize: '13px', fontWeight: 700, color: sel ? plan.color : '#7BBEE8' }}>{plan.label}</span>
                           {plan.popular && (
-                            <span style={{ fontSize: '8px', background: `${plan.color}20`, color: plan.color, padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
-                              Popular
-                            </span>
+                            <span style={{ fontSize: '8px', background: `${plan.color}20`, color: plan.color, padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>Popular</span>
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <span style={{ fontSize: '10px', color: '#2A5280' }}>{plan.desc}</span>
-                          <span style={{ fontSize: '9px', color: '#3DBF7F', fontWeight: 600 }}>
-                            Ahorra ${saving}/año
-                          </span>
+                          <span style={{ fontSize: '9px', color: '#3DBF7F', fontWeight: 600 }}>Ahorra ${saving}/año</span>
                         </div>
                       </div>
-                      {/* Precio */}
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <p style={{ fontSize: '15px', fontWeight: 800, color: sel ? plan.color : '#3A6A9A', lineHeight: 1 }}>
-                          ${plan.monthlyPrice}
-                        </p>
+                        <p style={{ fontSize: '15px', fontWeight: 800, color: sel ? plan.color : '#3A6A9A', lineHeight: 1 }}>${plan.monthlyPrice}</p>
                         <p style={{ fontSize: '9px', color: '#1E3A5F', marginTop: '1px' }}>/mes</p>
                       </div>
                     </button>
@@ -543,9 +462,7 @@ export default function RegisterPage() {
               </div>
               <p style={{ fontSize: '10px', color: '#1E3A5F', marginTop: '8px', textAlign: 'center' }}>
                 Todos incluyen 14 días gratis ·{' '}
-                <a href="/pricing" target="_blank" style={{ color: '#FF5C35', textDecoration: 'none', fontWeight: 600 }}>
-                  Comparar planes →
-                </a>
+                <a href="/pricing" target="_blank" style={{ color: '#FF5C35', textDecoration: 'none', fontWeight: 600 }}>Comparar planes →</a>
               </p>
             </div>
 
@@ -553,13 +470,13 @@ export default function RegisterPage() {
             <div style={{ padding: '14px', background: 'rgba(15,25,36,0.6)', border: '1px solid rgba(30,58,95,0.4)', borderRadius: '12px' }}>
               <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#1E3A5F', marginBottom: '10px' }}>Resumen</p>
               {[
-                ['Negocio',   form.tenantName || '—'],
-                ['ID',        form.tenantSlug || '—'],
+                ['Negocio', form.tenantName || '—'],
+                ['ID', form.tenantSlug || '—'],
                 ['Industria', INDUSTRIES.find(i => i.value === form.industry)?.label ?? '—'],
-                ['Admin',     `${form.firstName} ${form.lastName}`.trim() || '—'],
-                ['País',      COUNTRIES.find(c => c.code === form.country)?.name ?? form.country],
-                ['Moneda',    form.currency],
-                ['Plan',      (() => { const p = PLAN_DATA.find(p => p.name === form.plan); return p ? `${p.label} · $${p.monthlyPrice}/mes` : '—'; })()],
+                ['Admin', `${form.firstName} ${form.lastName}`.trim() || '—'],
+                ['País', COUNTRIES.find(c => c.code === form.country)?.name ?? form.country],
+                ['Moneda', form.currency],
+                ['Plan', (() => { const p = PLAN_DATA.find(p => p.name === form.plan); return p ? `${p.label} · $${p.monthlyPrice}/mes` : '—'; })()],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                   <span style={{ fontSize: '11px', color: '#1E3A5F' }}>{k}</span>
@@ -597,8 +514,7 @@ export default function RegisterPage() {
             padding: '12px 14px', background: 'transparent',
             border: '1px solid rgba(30,58,95,0.8)', borderRadius: '12px',
             color: '#3A6A9A', fontSize: '13px', fontFamily: 'Outfit, sans-serif',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
-            transition: 'all .15s',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', transition: 'all .15s',
           }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#2A5280'; (e.currentTarget as HTMLElement).style.color = '#4A7FAF'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(30,58,95,0.8)'; (e.currentTarget as HTMLElement).style.color = '#3A6A9A'; }}>
@@ -617,8 +533,8 @@ export default function RegisterPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
           letterSpacing: '.01em',
         }}
-          onMouseEnter={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 22px rgba(255,92,53,.4)'; }}}
-          onMouseLeave={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 16px rgba(255,92,53,.3)'; }}}>
+          onMouseEnter={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 22px rgba(255,92,53,.4)'; } }}
+          onMouseLeave={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 16px rgba(255,92,53,.3)'; } }}>
           {loading ? (
             <>
               <span style={{ width: '13px', height: '13px', borderRadius: '50%', border: '2px solid rgba(30,58,95,0.6)', borderTopColor: '#3A6A9A', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
@@ -640,6 +556,120 @@ export default function RegisterPage() {
       </p>
     </div>
   );
+}
+
+// ── Página principal ──────────────────────────────────
+export default function RegisterPage() {
+  const { register } = useAuth();
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [animKey, setAnimKey] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [form, setForm] = useState({
+    tenantName: '', tenantSlug: '', industry: '',
+    firstName: '', lastName: '', email: '',
+    password: '', confirmPassword: '',
+    country: 'CR', currency: 'CRC', locale: 'es-CR',
+    plan: 'growth', acceptTerms: false,
+  });
+
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check(); window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  const set = (field: string, value: any) => setForm(p => ({ ...p, [field]: value }));
+
+  const handleCountryChange = (code: string) => {
+    const c = COUNTRIES.find(x => x.code === code);
+    if (c) setForm(p => ({ ...p, country: code, currency: c.currency, locale: c.locale }));
+  };
+
+  const validate = () => {
+    setError('');
+    if (step === 1) {
+      if (!form.tenantName.trim()) return setError('El nombre del negocio es requerido'), false;
+      if (!form.tenantSlug.trim()) return setError('El ID del negocio es requerido'), false;
+      if (!/^[a-z0-9-]+$/.test(form.tenantSlug)) return setError('El ID solo puede tener letras, números y guiones'), false;
+      if (!form.industry) return setError('Selecciona el tipo de negocio'), false;
+    }
+    if (step === 2) {
+      if (!form.firstName.trim() || !form.lastName.trim()) return setError('Nombre y apellido son requeridos'), false;
+      if (!form.email.includes('@')) return setError('Correo inválido'), false;
+      if (form.password.length < 8) return setError('Contraseña mínimo 8 caracteres'), false;
+      if (form.password !== form.confirmPassword) return setError('Las contraseñas no coinciden'), false;
+    }
+    if (step === 3 && !form.acceptTerms) return setError('Acepta los términos para continuar'), false;
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validate()) return;
+    if (step < 3) { setStep(s => s + 1); setAnimKey(k => k + 1); }
+    else handleSubmit();
+  };
+
+  const handlePrev = () => { setStep(s => s - 1); setAnimKey(k => k + 1); setError(''); };
+
+  const handleSubmit = async () => {
+    setLoading(true); setError('');
+    try {
+      await register({ tenantName: form.tenantName, tenantSlug: form.tenantSlug, industry: form.industry, country: form.country, currency: form.currency, locale: form.locale, email: form.email, password: form.password, firstName: form.firstName, lastName: form.lastName });
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? 'Error al crear la cuenta');
+    } finally { setLoading(false); }
+  };
+
+  const strength = [form.password.length >= 8, /[A-Z]/.test(form.password), /[0-9]/.test(form.password), /[^A-Za-z0-9]/.test(form.password)].filter(Boolean).length;
+  const strengthColors = ['', '#E05050', '#F0A030', '#5AAAF0', '#3DBF7F'];
+  const strengthLabels = ['', 'Débil', 'Regular', 'Buena', 'Fuerte ✓'];
+
+  // Props compartidas para FormCard
+  const formCardProps: FormCardProps = {
+    step, animKey, form, error, loading, isMobile,
+    showPass, showConfirm, strength, strengthColors, strengthLabels,
+    handleNext, handlePrev, set, handleCountryChange,
+    setShowPass, setShowConfirm,
+  };
+
+  // ── SUCCESS ──────────────────────────────────────────
+  if (success) {
+    const ind = INDUSTRIES.find(i => i.value === form.industry);
+    return (
+      <div style={{ minHeight: '100vh', background: '#080F1A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Outfit, sans-serif', position: 'relative', overflow: 'hidden' }}>
+        <BackgroundCanvas />
+        <div style={{ textAlign: 'center', maxWidth: '440px', position: 'relative', zIndex: 1, animation: 'fadeUp .6s ease' }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(61,191,127,.1)', border: '1px solid rgba(61,191,127,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 36px rgba(61,191,127,.12)' }}>
+            <Check size={32} color="#3DBF7F" />
+          </div>
+          <h1 style={{ fontSize: 'clamp(24px,5vw,34px)', fontWeight: 700, color: '#F0F4FF', marginBottom: '10px', letterSpacing: '-.01em' }}>
+            ¡Bienvenido a DaxCloud!
+          </h1>
+          <p style={{ fontSize: '14px', color: '#3A6A9A', marginBottom: '6px', lineHeight: 1.6 }}>
+            Tu cuenta de <strong style={{ color: '#F0F4FF' }}>{form.tenantName}</strong> está lista.
+          </p>
+          {ind && <p style={{ fontSize: '13px', color: '#2A5280', marginBottom: '6px' }}>{ind.emoji} {ind.label}</p>}
+          <p style={{ fontSize: '12px', color: '#1E3A5F', marginBottom: '32px' }}>
+            Inicia sesión con el ID <strong style={{ color: '#FF5C35' }}>{form.tenantSlug}</strong>
+          </p>
+          <a href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 32px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: '#fff', borderRadius: '12px', textDecoration: 'none', fontSize: '14px', fontWeight: 700, boxShadow: '0 4px 20px rgba(255,92,53,.35)', transition: 'all .2s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 28px rgba(255,92,53,.45)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(255,92,53,.35)'; }}>
+            Iniciar sesión <ArrowRight size={15} />
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   // ── MOBILE ────────────────────────────────────────────
   if (isMobile) {
@@ -667,7 +697,7 @@ export default function RegisterPage() {
               ))}
             </div>
           </div>
-          <FormCard />
+          <FormCard {...formCardProps} />
         </div>
         <STYLES_EL />
       </div>
@@ -725,7 +755,7 @@ export default function RegisterPage() {
       {/* Panel derecho */}
       <div style={{ width: 'clamp(400px, 46vw, 560px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '28px', position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(16px)', transition: 'all .7s .1s cubic-bezier(.22,1,.36,1)' }}>
         <div style={{ width: '100%' }}>
-          <FormCard />
+          <FormCard {...formCardProps} />
           <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#162235', letterSpacing: '.04em' }}>
             © {new Date().getFullYear()} DaxCloud · Todos los derechos reservados
           </p>
