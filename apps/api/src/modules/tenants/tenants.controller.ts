@@ -66,4 +66,5 @@ export class TenantsController {
   ) {
     return this.tenantsService.updateFeatureFlag(user.tenantId, key, body.enabled);
   }
+
 }

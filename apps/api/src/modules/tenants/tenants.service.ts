@@ -86,6 +86,46 @@ export class TenantsService {
     return { totalSales, totalProducts, totalUsers, branches };
   }
 
+  async getOnboarding(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { onboardingCompleted: true, onboardingSteps: true },
+    });
+    return {
+      completed: tenant?.onboardingCompleted ?? false,
+      steps: (tenant?.onboardingSteps as Record<string, boolean>) ?? {},
+    };
+  }
+
+  async updateOnboarding(tenantId: string, data: {
+    step: string;
+    completed?: boolean;
+  }) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { onboardingSteps: true },
+    });
+
+    const currentSteps = (tenant?.onboardingSteps as Record<string, boolean>) ?? {};
+    const updatedSteps = { ...currentSteps, [data.step]: true };
+
+    // Pasos requeridos para completar el onboarding
+    const REQUIRED_STEPS = ['business', 'product', 'pos'];
+    const allCompleted = REQUIRED_STEPS.every(s => updatedSteps[s]);
+
+    return this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        onboardingSteps:     updatedSteps,
+        onboardingCompleted: data.completed ?? allCompleted,
+      },
+      select: {
+        onboardingCompleted: true,
+        onboardingSteps:     true,
+      },
+    });
+  }
+
   // ── Activa módulo de industria + feature flag ──────────────────────────────
   async activateIndustryModule(tenantId: string, industry: string) {
     // 1. Actualiza la industria del tenant

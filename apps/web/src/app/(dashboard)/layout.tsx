@@ -9,6 +9,9 @@ import { useHydration } from '@/hooks/useHydration';
 import { Logo } from '@/components/layout/Logo';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/layout/NotificationPanel';
+import { OnboardingModal }     from '@/components/onboarding/OnboardingModal';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { useOnboarding }       from '@/hooks/useOnboarding';
 
 // ── Ícono nube SVG inline ─────────────────────────────
 function CloudIcon({ size = 28 }: { size?: number }) {
@@ -39,10 +42,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const hydrated = useHydration();
   const [isMobile, setIsMobile] = useState(false);
+  const { showWizard, completed } = useOnboarding();
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) router.push('/login');
   }, [hydrated, isAuthenticated]);
+
+  useEffect(() => {
+    if (showWizard) {
+      const t = setTimeout(() => setShowModal(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, [showWizard]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
@@ -149,6 +161,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Bottom nav móvil ── */}
       {isMobile && <BottomNav />}
+
+      {showModal && <OnboardingModal onClose={() => setShowModal(false)} />}
+      {!completed  && <OnboardingChecklist />}
     </div>
   );
 }
