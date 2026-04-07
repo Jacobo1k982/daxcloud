@@ -166,12 +166,12 @@ function RecipeModal({ onClose, onSave, isPending, products, initial }: RecipeMo
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   const addIng = () => setForm(p => ({ ...p, ingredients: [...p.ingredients, { productId: '', quantity: 1, unit: 'kg' }] }));
-  const remIng = (i: number) => setForm(p => ({ ...p, ingredients: p.ingredients.filter((_, idx: number) => idx !== i) }));
-  const updIng = (i: number, k: string, v: any) => setForm(p => ({ ...p, ingredients: p.ingredients.map((x, idx) => idx === i ? { ...x, [k]: v } : x) }));
+  const remIng = (i: number) => setForm(p => ({ ...p, ingredients: p.ingredients.filter((_: any, idx: number) => idx !== i) }));
+  const updIng = (i: number, k: string, v: any) => setForm(p => ({ ...p, ingredients: p.ingredients.map((x: any, idx: number) => idx === i ? { ...x, [k]: v } : x) }));
 
   const addLab = () => setForm(p => ({ ...p, laborCosts: [...p.laborCosts, { role: '', hoursPerBatch: 1, hourlyRate: 0 }] }));
-  const remLab = (i: number) => setForm(p => ({ ...p, laborCosts: p.laborCosts.filter((_, idx) => idx !== i) }));
-  const updLab = (i: number, k: string, v: any) => setForm(p => ({ ...p, laborCosts: p.laborCosts.map((x, idx) => idx === i ? { ...x, [k]: v } : x) }));
+  const remLab = (i: number) => setForm(p => ({ ...p, laborCosts: p.laborCosts.filter((_: any, idx: number) => idx !== i) }));
+  const updLab = (i: number, k: string, v: any) => setForm(p => ({ ...p, laborCosts: p.laborCosts.map((x: any, idx: number) => idx === i ? { ...x, [k]: v } : x) }));
 
   return (
     <ModalWrap onClose={onClose} maxWidth="660px">
@@ -214,7 +214,7 @@ function RecipeModal({ onClose, onSave, isPending, products, initial }: RecipeMo
             </div>
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {form.ingredients.map((ing, i) => (
+            {form.ingredients.map((ing: any, i: number) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 90px 32px', gap: '8px', alignItems: 'center' }}>
                 <select className="dax-input" style={{ margin: 0 }} value={ing.productId} onChange={e => updIng(i, 'productId', e.target.value)}>
                   <option value="">Selecciona producto...</option>
@@ -241,7 +241,7 @@ function RecipeModal({ onClose, onSave, isPending, products, initial }: RecipeMo
             </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {form.laborCosts.map((lc, i) => (
+            {form.laborCosts.map((lc: any, i: number) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 110px 32px', gap: '8px', alignItems: 'center' }}>
                 <input className="dax-input" style={{ margin: 0 }} value={lc.role} onChange={e => updLab(i, 'role', e.target.value)} placeholder="Rol (ej: Panadero)" />
                 <input className="dax-input" style={{ margin: 0 }} type="number" min="0.5" step="0.5" value={lc.hoursPerBatch} onChange={e => updLab(i, 'hoursPerBatch', parseFloat(e.target.value) || 0)} placeholder="Horas" />
@@ -398,8 +398,8 @@ function EncargoModal({ onClose, onSave, isPending, formatCurrency }: EncargoMod
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   const addItem = () => setForm(p => ({ ...p, items: [...p.items, { description: '', quantity: 1, unit: 'unidades', unitPrice: 0 }] }));
-  const remItem = (i: number) => setForm(p => ({ ...p, items: p.items.filter((_, idx) => idx !== i) }));
-  const updItem = (i: number, k: string, v: any) => setForm(p => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, [k]: v } : x) }));
+  const remItem = (i: number) => setForm(p => ({ ...p, items: p.items.filter((_x: any, idx: number) => idx !== i) }));
+  const updItem = (i: number, k: string, v: any) => setForm(p => ({ ...p, items: p.items.map((x: any, idx: number) => idx === i ? { ...x, [k]: v } : x) }));
 
   const total = form.items.reduce((acc, i) => acc + i.quantity * i.unitPrice, 0);
   const balance = total - form.deposit;
@@ -636,9 +636,8 @@ function PurchaseOrderModal({ onClose, onSave, isPending, suppliers, products, f
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   const addItem = () => setForm(p => ({ ...p, items: [...p.items, { productId: '', quantity: 1, unit: 'kg', unitCost: 0 }] }));
-  const remItem = (i: number) => setForm(p => ({ ...p, items: p.items.filter((_, idx) => idx !== i) }));
-  const updItem = (i: number, k: string, v: any) => setForm(p => ({ ...p, items: p.items.map((x, idx) => idx === i ? { ...x, [k]: v } : x) }));
-
+  const remItem = (i: number) => setForm(p => ({ ...p, items: p.items.filter((_x: any, idx: number) => idx !== i) }));
+  const updItem = (i: number, k: string, v: any) => setForm(p => ({ ...p, items: p.items.map((x: any, idx: number) => idx === i ? { ...x, [k]: v } : x) }));
   const total = form.items.reduce((acc, i) => acc + i.quantity * i.unitCost, 0);
 
   return (
