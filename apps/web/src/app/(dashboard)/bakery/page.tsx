@@ -166,7 +166,7 @@ function RecipeModal({ onClose, onSave, isPending, products, initial }: RecipeMo
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   const addIng = () => setForm(p => ({ ...p, ingredients: [...p.ingredients, { productId: '', quantity: 1, unit: 'kg' }] }));
-  const remIng = (i: number) => setForm(p => ({ ...p, ingredients: p.ingredients.filter((_, idx) => idx !== i) }));
+  const remIng = (i: number) => setForm(p => ({ ...p, ingredients: p.ingredients.filter((_, idx: number) => idx !== i) }));
   const updIng = (i: number, k: string, v: any) => setForm(p => ({ ...p, ingredients: p.ingredients.map((x, idx) => idx === i ? { ...x, [k]: v } : x) }));
 
   const addLab = () => setForm(p => ({ ...p, laborCosts: [...p.laborCosts, { role: '', hoursPerBatch: 1, hourlyRate: 0 }] }));
