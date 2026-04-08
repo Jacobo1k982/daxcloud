@@ -8,12 +8,13 @@ interface Props {
   accentColor:  string;
   formatCurrency: (n: number) => string;
   onOpen:       (amount: number, notes?: string) => Promise<void>;
+  onCancel:     () => void;
   isLoading:    boolean;
 }
 
 const QUICK_AMOUNTS = [0, 5000, 10000, 20000, 50000];
 
-export function OpenShiftModal({ branchName, accentColor: C, formatCurrency, onOpen, isLoading }: Props) {
+export function OpenShiftModal({ branchName, accentColor: C, formatCurrency, onOpen, onCancel, isLoading }: Props) {
   const [amount, setAmount]   = useState('');
   const [notes,  setNotes]    = useState('');
   const [error,  setError]    = useState('');
@@ -57,7 +58,7 @@ export function OpenShiftModal({ branchName, accentColor: C, formatCurrency, onO
             }}>
               <Lock size={20} color={C} />
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               <p style={{ fontSize: '16px', fontWeight: 800, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>
                 Apertura de caja
               </p>
@@ -65,6 +66,16 @@ export function OpenShiftModal({ branchName, accentColor: C, formatCurrency, onO
                 {branchName}
               </p>
             </div>
+            <button
+              onClick={onCancel}
+              disabled={isLoading}
+              style={{
+                background: 'transparent', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
+                color: 'var(--dax-text-muted)', padding: '4px', display: 'flex',
+              }}
+            >
+              <X size={18} />
+            </button>
           </div>
         </div>
 

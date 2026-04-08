@@ -2,6 +2,7 @@
 
 import { useState }            from 'react';
 import { Lock, LogOut }        from 'lucide-react';
+import { useRouter }           from 'next/navigation';
 import { useCashRegister }     from '@/hooks/useCashRegister';
 import { OpenShiftModal }      from '@/components/pos/OpenShiftModal';
 import { CloseShiftModal }     from '@/components/pos/CloseShiftModal';
@@ -30,6 +31,7 @@ export function CashRegisterGate({
   children,
 }: Props) {
   const [showClose, setShowClose] = useState(false);
+  const router = useRouter();
 
   const { activeShift, isLoading, isOpen, openMutation, closeMutation } =
     useCashRegister(branchId);
@@ -65,6 +67,7 @@ export function CashRegisterGate({
         onOpen={async (amount, notes) => {
           await openMutation.mutateAsync({ openingAmount: amount, notes });
         }}
+        onCancel={() => router.back()}
       />
     );
   }
