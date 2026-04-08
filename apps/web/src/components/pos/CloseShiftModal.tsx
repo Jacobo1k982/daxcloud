@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, TrendingUp, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-import type { CashShift } from './useCashRegister';
+import type { CashShift } from '@/hooks/useCashRegister';
 
 interface Props {
   shift:          CashShift;
