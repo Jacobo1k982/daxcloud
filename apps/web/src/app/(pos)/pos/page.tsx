@@ -8,7 +8,7 @@ import { CashRegisterGate } from '@/components/pos/CashRegisterGate';
 import {
   Search, X, Plus, Minus, ShoppingCart,
   ChefHat, Scissors, Shirt, Leaf, Pill,
-  Package, Barcode, Tag, Trash2,
+  Package, Barcode, Tag, Trash2, AlertCircle,
 } from 'lucide-react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -30,48 +30,61 @@ interface CartItem {
   employeeId?: string;
 }
 
+interface MixedPayments {
+  cash: string;
+  card: string;
+  transfer: string;
+}
+
 const INDUSTRY_CONFIG: Record<string, { label: string; color: string; icon: any; description: string }> = {
-  restaurant: { label: 'Restaurante', color: '#F97316', icon: ChefHat, description: 'Mesas y comandas' },
-  bakery: { label: 'Panadería', color: '#FF5C35', icon: Package, description: 'Presentaciones' },
-  pharmacy: { label: 'Farmacia', color: '#5AAAF0', icon: Pill, description: 'Medicamentos' },
-  salon: { label: 'Peluquería', color: '#A78BFA', icon: Scissors, description: 'Servicios' },
-  clothing: { label: 'Ropa', color: '#EAB308', icon: Shirt, description: 'Tallas y colores' },
-  produce: { label: 'Verdulería', color: '#22C55E', icon: Leaf, description: 'Por peso' },
-  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode, description: 'Código de barras' },
-  general: { label: 'General', color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar' },
+  restaurant:  { label: 'Restaurante',  color: '#F97316', icon: ChefHat,      description: 'Mesas y comandas'   },
+  bakery:      { label: 'Panadería',    color: '#FF5C35', icon: Package,      description: 'Presentaciones'     },
+  pharmacy:    { label: 'Farmacia',     color: '#5AAAF0', icon: Pill,         description: 'Medicamentos'       },
+  salon:       { label: 'Peluquería',   color: '#A78BFA', icon: Scissors,     description: 'Servicios'          },
+  clothing:    { label: 'Ropa',         color: '#EAB308', icon: Shirt,        description: 'Tallas y colores'   },
+  produce:     { label: 'Verdulería',   color: '#22C55E', icon: Leaf,         description: 'Por peso'           },
+  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode,      description: 'Código de barras'   },
+  general:     { label: 'General',      color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar'    },
 };
 
 const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Efectivo', icon: '💵' },
-  { value: 'card', label: 'Tarjeta', icon: '💳' },
-  { value: 'transfer', label: 'SINPE', icon: '📱' },
-  { value: 'mixed', label: 'Mixto', icon: '🔀' },
+  { value: 'cash',     label: 'Efectivo', icon: '💵' },
+  { value: 'card',     label: 'Tarjeta',  icon: '💳' },
+  { value: 'transfer', label: 'SINPE',    icon: '📱' },
+  { value: 'mixed',    label: 'Mixto',    icon: '🔀' },
+];
+
+const MIXED_METHODS = [
+  { key: 'cash',     label: 'Efectivo', icon: '💵' },
+  { key: 'card',     label: 'Tarjeta',  icon: '💳' },
+  { key: 'transfer', label: 'SINPE',    icon: '📱' },
 ];
 
 export default function POSPage() {
 
-  const router = useRouter();
+  const router        = useRouter();
   const { formatCurrency, industry } = useAuth();
-  const queryClient = useQueryClient();
-  const searchRef = useRef<HTMLInputElement>(null);
+  const queryClient   = useQueryClient();
+  const searchRef     = useRef<HTMLInputElement>(null);
 
-  const cfg = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
+  const cfg  = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
   const Icon = cfg.icon;
-  const C = cfg.color;
+  const C    = cfg.color;
 
-  const [search, setSearch] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [discount, setDiscount] = useState(0);
-  const [showCart, setShowCart] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [note, setNote] = useState('');
-  const [selectedTable, setSelectedTable] = useState('');
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [weightInput, setWeightInput] = useState<Record<string, string>>({});
-  const [showVariantModal, setShowVariantModal] = useState<any>(null);
-  const [showModifierModal, setShowModifierModal] = useState<any>(null);
-  const [selectedModifiers, setSelectedModifiers] = useState<any[]>([]);
+  const [search,            setSearch]           = useState('');
+  const [cart,              setCart]             = useState<CartItem[]>([]);
+  const [paymentMethod,     setPaymentMethod]    = useState('cash');
+  const [mixedPayments,     setMixedPayments]    = useState<MixedPayments>({ cash: '', card: '', transfer: '' });
+  const [discount,          setDiscount]         = useState(0);
+  const [showCart,          setShowCart]         = useState(false);
+  const [selectedCategory,  setSelectedCategory] = useState('');
+  const [note,              setNote]             = useState('');
+  const [selectedTable,     setSelectedTable]    = useState('');
+  const [selectedEmployee,  setSelectedEmployee] = useState('');
+  const [weightInput,       setWeightInput]      = useState<Record<string, string>>({});
+  const [showVariantModal,  setShowVariantModal] = useState<any>(null);
+  const [showModifierModal, setShowModifierModal]= useState<any>(null);
+  const [selectedModifiers, setSelectedModifiers]= useState<any[]>([]);
 
   // ── Queries ────────────────────────────────────────────────────────────────
 
@@ -79,7 +92,7 @@ export default function POSPage() {
     queryKey: ['pos-products', search, selectedCategory],
     queryFn: async () => {
       const p = new URLSearchParams();
-      if (search) p.append('search', search);
+      if (search)           p.append('search',   search);
       if (selectedCategory) p.append('category', selectedCategory);
       const { data } = await api.get(`/products?${p}&active=true`);
       return data;
@@ -153,11 +166,11 @@ export default function POSPage() {
   };
 
   const addToCart = (product: any, options?: any) => {
-    const base = options?.price ?? getPrice(product);
-    const qty = options?.quantity ?? 1;
-    const modExtra = (options?.modifiers ?? []).reduce((a: number, m: any) => a + m.extraPrice, 0);
+    const base       = options?.price ?? getPrice(product);
+    const qty        = options?.quantity ?? 1;
+    const modExtra   = (options?.modifiers ?? []).reduce((a: number, m: any) => a + m.extraPrice, 0);
     const finalPrice = base + modExtra;
-    const itemId = `${product.id}-${options?.variantId ?? ''}-${options?.size ?? ''}-${options?.color ?? ''}-${(options?.modifiers ?? []).map((m: any) => m.optionId).join('-')}`;
+    const itemId     = `${product.id}-${options?.variantId ?? ''}-${options?.size ?? ''}-${options?.color ?? ''}-${(options?.modifiers ?? []).map((m: any) => m.optionId).join('-')}`;
 
     setCart(prev => {
       const ex = prev.find(i => i.id === itemId);
@@ -175,21 +188,35 @@ export default function POSPage() {
   const updateQty = (id: string, delta: number) =>
     setCart(prev =>
       prev.map(i => i.id !== id ? i : i.quantity + delta <= 0 ? null : { ...i, quantity: i.quantity + delta })
-        .filter(Boolean) as CartItem[],
+          .filter(Boolean) as CartItem[],
     );
 
-  const subtotal = cart.reduce((a, i) => a + i.price * i.quantity, 0);
+  const subtotal    = cart.reduce((a, i) => a + i.price * i.quantity, 0);
   const discountAmt = discount > 0 ? subtotal * discount / 100 : 0;
-  const total = subtotal - discountAmt;
-  const cartCount = cart.reduce((a, i) => a + i.quantity, 0);
+  const total       = subtotal - discountAmt;
+  const cartCount   = cart.reduce((a, i) => a + i.quantity, 0);
+
+  // Suma de montos mixtos
+  const mixedTotal = paymentMethod === 'mixed'
+    ? (parseFloat(mixedPayments.cash     || '0') +
+       parseFloat(mixedPayments.card     || '0') +
+       parseFloat(mixedPayments.transfer || '0'))
+    : 0;
+  const mixedDiff    = paymentMethod === 'mixed' ? mixedTotal - total : 0;
+  const mixedIsValid = paymentMethod === 'mixed' ? Math.abs(mixedDiff) < 1 : true;
 
   // ── Mutación de venta ──────────────────────────────────────────────────────
 
   const saleMutation = useMutation({
     mutationFn: async () => {
       const branchId = (branches as any[])[0]?.id;
-      if (!branchId) throw new Error('No hay sucursal disponible. Espera a que cargue o recarga la página.');
+      if (!branchId)         throw new Error('No hay sucursal disponible. Espera a que cargue o recarga la página.');
       if (cart.length === 0) throw new Error('El carrito está vacío.');
+
+      if (paymentMethod === 'mixed') {
+        if (mixedTotal <= 0)  throw new Error('Ingresa los montos para el pago mixto.');
+        if (!mixedIsValid)    throw new Error(`Los montos no suman el total. Diferencia: ${formatCurrency(Math.abs(mixedDiff))}`);
+      }
 
       if (industry === 'restaurant') {
         const { data } = await api.post('/restaurant/orders', {
@@ -207,32 +234,48 @@ export default function POSPage() {
         await api.post('/salon/appointments', {
           clientName: 'Cliente walk-in',
           employeeId: selectedEmployee || undefined,
-          serviceId: cart[0].serviceId,
-          startTime: new Date().toISOString(),
+          serviceId:  cart[0].serviceId,
+          startTime:  new Date().toISOString(),
           branchId,
         });
       }
 
       const { data } = await api.post('/sales', {
-        branchId, paymentMethod,
-        discount: discountAmt, subtotal, total,
+        branchId,
+        paymentMethod,
+        discount: discountAmt,
+        subtotal,
+        total,
         notes: note || undefined,
+        ...(paymentMethod === 'mixed' && {
+          mixedPayments: {
+            cash:     parseFloat(mixedPayments.cash     || '0'),
+            card:     parseFloat(mixedPayments.card     || '0'),
+            transfer: parseFloat(mixedPayments.transfer || '0'),
+          },
+        }),
         items: cart.map(item => ({
-          productId: item.productId, quantity: item.quantity,
-          unitPrice: item.price, subtotal: item.price * item.quantity,
-          discount: 0, notes: item.notes, variantId: item.variantId,
+          productId: item.productId, quantity:  item.quantity,
+          unitPrice: item.price,     subtotal:  item.price * item.quantity,
+          discount:  0,              notes:     item.notes,
+          variantId: item.variantId,
         })),
       });
       return data;
     },
 
     onSuccess: () => {
-      setCart([]); setDiscount(0); setNote('');
-      setSelectedTable(''); setSelectedEmployee(''); setShowCart(false);
+      setCart([]);
+      setDiscount(0);
+      setNote('');
+      setSelectedTable('');
+      setSelectedEmployee('');
+      setShowCart(false);
+      setMixedPayments({ cash: '', card: '', transfer: '' });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['pos-products'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant-tables'] });
-      queryClient.invalidateQueries({ queryKey: ['cash-register-active'] }); // refresca totales de caja
+      queryClient.invalidateQueries({ queryKey: ['cash-register-active'] });
     },
 
     onError: (error: any) => {
@@ -247,7 +290,7 @@ export default function POSPage() {
     return p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q) || p.barcode?.includes(search);
   });
 
-  const branchId = (branches as any[])[0]?.id;
+  const branchId   = (branches as any[])[0]?.id;
   const branchName = (branches as any[])[0]?.name ?? 'Sucursal';
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -309,7 +352,9 @@ export default function POSPage() {
           <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
             <div style={{ position: 'relative', flex: 1 }}>
               <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dax-text-muted)' }} />
-              <input ref={searchRef} className="dax-input" style={{ paddingLeft: '30px', margin: 0, height: '34px', fontSize: '12px' }} placeholder={industry === 'supermarket' || industry === 'pharmacy' ? 'Buscar o escanear código...' : 'Buscar producto...'} value={search} onChange={e => setSearch(e.target.value)}
+              <input ref={searchRef} className="dax-input" style={{ paddingLeft: '30px', margin: 0, height: '34px', fontSize: '12px' }}
+                placeholder={industry === 'supermarket' || industry === 'pharmacy' ? 'Buscar o escanear código...' : 'Buscar producto...'}
+                value={search} onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && (industry === 'pharmacy' || industry === 'supermarket')) {
                     const found = (products as any[]).find((p: any) => p.barcode === search || p.sku === search);
@@ -370,18 +415,18 @@ export default function POSPage() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
                 {filtered.map((product: any) => {
-                  const price = getPrice(product);
-                  const hasOffer = price < Number(product.price);
-                  const inCart = cart.find(i => i.productId === product.id);
+                  const price     = getPrice(product);
+                  const hasOffer  = price < Number(product.price);
+                  const inCart    = cart.find(i => i.productId === product.id);
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   return (
                     <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }} style={{ padding: '10px', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '10px', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', position: 'relative', boxShadow: inCart ? `0 0 0 1px ${C}30` : 'none' }}>
                       {product.imageUrl && <img src={product.imageUrl} alt="" style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
-                      {inCart && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
-                      {hasOffer && <div style={{ position: 'absolute', top: '7px', left: '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
+                      {inCart   && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
+                      {hasOffer && <div style={{ position: 'absolute', top: '7px', left:  '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
                       <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '3px', lineHeight: 1.3 }}>{product.name}</p>
-                      {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
-                      {hasOffer && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
+                      {product.sku  && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
+                      {hasOffer     && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
                       <p style={{ fontSize: '13px', fontWeight: 800, color: hasOffer ? '#F97316' : C, lineHeight: 1 }}>{formatCurrency(price)}</p>
                       {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 600 }}>{pvariants.length} variantes</p>}
                     </button>
@@ -394,7 +439,16 @@ export default function POSPage() {
 
         {/* ══ CARRITO DESKTOP ══ */}
         <div className="pos-cart-desktop" style={{ width: '300px', borderLeft: '1px solid var(--dax-border)', display: 'flex', flexDirection: 'column', background: 'var(--dax-surface)', flexShrink: 0 }}>
-          <CartSide cart={cart} subtotal={subtotal} discountAmt={discountAmt} total={total} discount={discount} setDiscount={setDiscount} note={note} setNote={setNote} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} updateQty={updateQty} removeFromCart={removeFromCart} onSell={() => saleMutation.mutate()} isSelling={saleMutation.isPending} C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable} />
+          <CartSide
+            cart={cart} subtotal={subtotal} discountAmt={discountAmt} total={total}
+            discount={discount} setDiscount={setDiscount} note={note} setNote={setNote}
+            paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod}
+            mixedPayments={mixedPayments} setMixedPayments={setMixedPayments}
+            mixedTotal={mixedTotal} mixedDiff={mixedDiff} mixedIsValid={mixedIsValid}
+            updateQty={updateQty} removeFromCart={removeFromCart}
+            onSell={() => saleMutation.mutate()} isSelling={saleMutation.isPending}
+            C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
+          />
         </div>
 
         {/* ══ CARRITO MÓVIL ══ */}
@@ -406,7 +460,16 @@ export default function POSPage() {
                 <button onClick={() => setShowCart(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex' }}><X size={18} /></button>
               </div>
               <div style={{ flex: 1, overflowY: 'auto' }}>
-                <CartSide cart={cart} subtotal={subtotal} discountAmt={discountAmt} total={total} discount={discount} setDiscount={setDiscount} note={note} setNote={setNote} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} updateQty={updateQty} removeFromCart={removeFromCart} onSell={() => { saleMutation.mutate(); setShowCart(false); }} isSelling={saleMutation.isPending} C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable} />
+                <CartSide
+                  cart={cart} subtotal={subtotal} discountAmt={discountAmt} total={total}
+                  discount={discount} setDiscount={setDiscount} note={note} setNote={setNote}
+                  paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod}
+                  mixedPayments={mixedPayments} setMixedPayments={setMixedPayments}
+                  mixedTotal={mixedTotal} mixedDiff={mixedDiff} mixedIsValid={mixedIsValid}
+                  updateQty={updateQty} removeFromCart={removeFromCart}
+                  onSell={() => { saleMutation.mutate(); setShowCart(false); }} isSelling={saleMutation.isPending}
+                  C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
+                />
               </div>
             </div>
           </div>
@@ -472,10 +535,30 @@ export default function POSPage() {
 
 // ══ CARRITO LATERAL ═══════════════════════════════════════════════════════════
 
-function CartSide({ cart, subtotal, discountAmt, total, discount, setDiscount, note, setNote, paymentMethod, setPaymentMethod, updateQty, removeFromCart, onSell, isSelling, C, fmt, industry, selectedTable }: any) {
+function CartSide({
+  cart, subtotal, discountAmt, total,
+  discount, setDiscount, note, setNote,
+  paymentMethod, setPaymentMethod,
+  mixedPayments, setMixedPayments,
+  mixedTotal, mixedDiff, mixedIsValid,
+  updateQty, removeFromCart,
+  onSell, isSelling,
+  C, fmt, industry, selectedTable,
+}: any) {
   const count = cart.reduce((a: number, i: any) => a + i.quantity, 0);
+
+  const handleSetPaymentMethod = (val: string) => {
+    setPaymentMethod(val);
+    if (val !== 'mixed') setMixedPayments({ cash: '', card: '', transfer: '' });
+  };
+
+  const remaining = total - mixedTotal;
+  const canSell   = paymentMethod !== 'mixed' || (mixedIsValid && mixedTotal > 0);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+      {/* Header */}
       <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Orden actual</p>
@@ -483,6 +566,8 @@ function CartSide({ cart, subtotal, discountAmt, total, discount, setDiscount, n
         </div>
         {industry === 'restaurant' && selectedTable && <p style={{ fontSize: '10px', color: C, marginTop: '2px', fontWeight: 600 }}>🍽️ Mesa asignada</p>}
       </div>
+
+      {/* Items */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
         {cart.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '8px', color: 'var(--dax-text-muted)' }}>
@@ -503,25 +588,35 @@ function CartSide({ cart, subtotal, discountAmt, total, discount, setDiscount, n
               <p style={{ fontSize: '12px', fontWeight: 700, color: C }}>{fmt(item.price * item.quantity)}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                 <button onClick={() => updateQty(item.id, -1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Minus size={9} /></button>
-                <button onClick={() => updateQty(item.id, 1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Plus size={9} /></button>
+                <button onClick={() => updateQty(item.id,  1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Plus  size={9} /></button>
                 <button onClick={() => removeFromCart(item.id)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: 'none', background: 'var(--dax-danger-bg)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-danger)' }}><Trash2 size={9} /></button>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Checkout */}
       {cart.length > 0 && (
         <div style={{ padding: '10px 12px', borderTop: '1px solid var(--dax-border)', flexShrink: 0 }}>
+
+          {/* Descuento */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
             <Tag size={11} color="var(--dax-text-muted)" />
             <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)', flex: 1 }}>Descuento</span>
             <div style={{ display: 'flex', gap: '3px' }}>
               {[0, 5, 10, 15, 20].map(p => (
-                <button key={p} onClick={() => setDiscount(p)} style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '9px', fontWeight: 700, border: 'none', cursor: 'pointer', background: discount === p ? C : 'var(--dax-surface-2)', color: discount === p ? '#fff' : 'var(--dax-text-muted)' }}>{p === 0 ? '—' : `${p}%`}</button>
+                <button key={p} onClick={() => setDiscount(p)} style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '9px', fontWeight: 700, border: 'none', cursor: 'pointer', background: discount === p ? C : 'var(--dax-surface-2)', color: discount === p ? '#fff' : 'var(--dax-text-muted)' }}>
+                  {p === 0 ? '—' : `${p}%`}
+                </button>
               ))}
             </div>
           </div>
+
+          {/* Nota */}
           <input value={note} onChange={e => setNote(e.target.value)} placeholder="Nota..." style={{ width: '100%', padding: '6px 9px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', marginBottom: '8px', boxSizing: 'border-box' }} />
+
+          {/* Total box */}
           <div style={{ background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '8px 10px', marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
               <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Subtotal</span>
@@ -538,15 +633,119 @@ function CartSide({ cart, subtotal, discountAmt, total, discount, setDiscount, n
               <span style={{ fontSize: '18px', fontWeight: 800, color: C }}>{fmt(total)}</span>
             </div>
           </div>
+
+          {/* Método de pago */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '8px' }}>
             {PAYMENT_METHODS.map(m => (
-              <button key={m.value} onClick={() => setPaymentMethod(m.value)} style={{ padding: '7px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 600, border: `1.5px solid ${paymentMethod === m.value ? C : 'var(--dax-border)'}`, background: paymentMethod === m.value ? `${C}10` : 'transparent', color: paymentMethod === m.value ? C : 'var(--dax-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              <button key={m.value} onClick={() => handleSetPaymentMethod(m.value)} style={{ padding: '7px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 600, border: `1.5px solid ${paymentMethod === m.value ? C : 'var(--dax-border)'}`, background: paymentMethod === m.value ? `${C}10` : 'transparent', color: paymentMethod === m.value ? C : 'var(--dax-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                 {m.icon} {m.label}
               </button>
             ))}
           </div>
-          <button onClick={onSell} disabled={isSelling} style={{ width: '100%', padding: '12px', background: isSelling ? 'var(--dax-surface-2)' : C, color: isSelling ? 'var(--dax-text-muted)' : '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800, cursor: isSelling ? 'not-allowed' : 'pointer', boxShadow: isSelling ? 'none' : `0 3px 12px ${C}35`, transition: 'all .15s' }}>
-            {isSelling ? '⏳ Procesando...' : industry === 'restaurant' && selectedTable ? `🍽️ Cocina · ${fmt(total)}` : `💳 Cobrar · ${fmt(total)}`}
+
+          {/* ── Panel pago mixto ── */}
+          {paymentMethod === 'mixed' && (
+            <div style={{ background: `${C}08`, border: `1px solid ${C}25`, borderRadius: '10px', padding: '10px', marginBottom: '8px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 700, color: C, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>
+                🔀 Desglose del pago
+              </p>
+
+              {MIXED_METHODS.map(({ key, label, icon }) => (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '13px', flexShrink: 0 }}>{icon}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', width: '58px', flexShrink: 0 }}>{label}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    placeholder="0"
+                    value={(mixedPayments as any)[key]}
+                    onChange={e => setMixedPayments((p: any) => ({ ...p, [key]: e.target.value }))}
+                    style={{
+                      flex: 1,
+                      padding: '5px 8px',
+                      borderRadius: '7px',
+                      border: `1px solid ${(mixedPayments as any)[key] ? C : 'var(--dax-border)'}`,
+                      background: 'var(--dax-surface)',
+                      color: 'var(--dax-text-primary)',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      boxSizing: 'border-box' as const,
+                      minWidth: 0,
+                    }}
+                  />
+                </div>
+              ))}
+
+              {/* Resumen */}
+              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: `1px solid ${C}20` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Ingresado</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: mixedIsValid ? '#22C55E' : 'var(--dax-text-secondary)' }}>{fmt(mixedTotal)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
+                    {mixedDiff > 0.5 ? 'Sobrante' : mixedDiff < -0.5 ? 'Faltante' : 'Diferencia'}
+                  </span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: Math.abs(mixedDiff) < 1 ? '#22C55E' : mixedDiff > 0 ? '#22C55E' : 'var(--dax-danger)' }}>
+                    {mixedDiff > 0 ? '+' : ''}{fmt(mixedDiff)}
+                  </span>
+                </div>
+
+                {/* Botón completar restante */}
+                {remaining > 0.5 && mixedTotal < total && (
+                  <button
+                    onClick={() => {
+                      const empty = MIXED_METHODS.find(m => !parseFloat((mixedPayments as any)[m.key] || '0'));
+                      const last  = [...MIXED_METHODS].reverse().find(m => parseFloat((mixedPayments as any)[m.key] || '0') > 0);
+                      const target = empty ?? last;
+                      if (target) {
+                        const current = parseFloat((mixedPayments as any)[target.key] || '0');
+                        setMixedPayments((p: any) => ({ ...p, [target.key]: String(Math.round(current + remaining)) }));
+                      }
+                    }}
+                    style={{ width: '100%', marginTop: '6px', padding: '5px', borderRadius: '7px', border: `1px dashed ${C}40`, background: 'transparent', color: C, fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    + Completar {fmt(remaining)} restante
+                  </button>
+                )}
+
+                {mixedTotal > 0 && !mixedIsValid && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px' }}>
+                    <AlertCircle size={11} color="var(--dax-danger)" />
+                    <span style={{ fontSize: '10px', color: 'var(--dax-danger)', fontWeight: 600 }}>
+                      Los montos deben sumar {fmt(total)}
+                    </span>
+                  </div>
+                )}
+
+                {mixedIsValid && mixedTotal > 0 && (
+                  <p style={{ fontSize: '10px', color: '#22C55E', fontWeight: 700, marginTop: '6px' }}>✓ Montos correctos</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Botón cobrar */}
+          <button
+            onClick={onSell}
+            disabled={isSelling || !canSell}
+            style={{
+              width: '100%', padding: '12px',
+              background: isSelling || !canSell ? 'var(--dax-surface-2)' : C,
+              color:      isSelling || !canSell ? 'var(--dax-text-muted)' : '#fff',
+              border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800,
+              cursor: isSelling || !canSell ? 'not-allowed' : 'pointer',
+              boxShadow: isSelling || !canSell ? 'none' : `0 3px 12px ${C}35`,
+              transition: 'all .15s',
+            }}
+          >
+            {isSelling
+              ? '⏳ Procesando...'
+              : industry === 'restaurant' && selectedTable
+                ? `🍽️ Cocina · ${fmt(total)}`
+                : `💳 Cobrar · ${fmt(total)}`
+            }
           </button>
         </div>
       )}
@@ -557,7 +756,7 @@ function CartSide({ cart, subtotal, discountAmt, total, discount, setDiscount, n
 // ══ MODAL VARIANTES ═══════════════════════════════════════════════════════════
 
 function VariantModal({ data, setData, C, fmt, addToCart }: any) {
-  const [selSize, setSelSize] = useState('');
+  const [selSize,  setSelSize]  = useState('');
   const [selColor, setSelColor] = useState('');
   const sizes = [...new Set<string>(data.variants.map((v: any) => v.size).filter(Boolean))];
   const match = data.variants.find((v: any) => (!selSize || v.size === selSize) && (!selColor || v.color === selColor));
