@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { X, TrendingUp, Clock, AlertTriangle, CheckCircle, DollarSign, CreditCard, Smartphone, Shuffle } from 'lucide-react';
+import { X, TrendingUp, Clock, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
 import type { CashShift, PaymentBreakdown } from '@/hooks/useCashRegister';
 
 interface Props {
@@ -13,12 +13,11 @@ interface Props {
   isLoading:      boolean;
 }
 
-// ── Configuración visual por método ───────────────────────────────────────────
-const METHOD_CFG: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  cash:     { label: 'Efectivo',  icon: <span style={{ fontSize: '16px' }}>💵</span>, color: '#22C55E', bg: 'rgba(34,197,94,0.1)'  },
-  card:     { label: 'Tarjeta',   icon: <span style={{ fontSize: '16px' }}>💳</span>, color: '#5AAAF0', bg: 'rgba(90,170,240,0.1)' },
-  transfer: { label: 'SINPE',     icon: <span style={{ fontSize: '16px' }}>📱</span>, color: '#A78BFA', bg: 'rgba(167,139,250,0.1)'},
-  mixed:    { label: 'Mixto',     icon: <span style={{ fontSize: '16px' }}>🔀</span>, color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
+const METHOD_CFG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+  cash:     { label: 'Efectivo', icon: '💵', color: '#22C55E', bg: 'rgba(34,197,94,0.1)'   },
+  card:     { label: 'Tarjeta',  icon: '💳', color: '#5AAAF0', bg: 'rgba(90,170,240,0.1)'  },
+  transfer: { label: 'SINPE',    icon: '📱', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' },
+  mixed:    { label: 'Mixto',    icon: '🔀', color: '#F97316', bg: 'rgba(249,115,22,0.1)'  },
 };
 
 function fmtDuration(from: string): string {
@@ -48,19 +47,21 @@ export function CloseShiftModal({
 
   const bd: PaymentBreakdown | undefined = shift.paymentBreakdown;
 
-  const parsed      = useMemo(() => parseFloat(amount.replace(/[^0-9.]/g, '')) || 0, [amount]);
-  const openingAmt  = Number(shift.openingAmount);
-  const totalSales  = Number(shift.totalSales);
+  const parsed     = useMemo(() => parseFloat(amount.replace(/[^0-9.]/g, '')) || 0, [amount]);
+  const openingAmt = Number(shift.openingAmount);
 
-  // Efectivo real en caja = apertura + efectivo puro + efectivo de ventas mixtas
-  const cashReal    = bd?.cashReal    ?? bd?.cashTotal ?? 0;
+  // ── Usa el breakdown para los totales reales en tiempo real ───────────────
+  const totalSalesReal  = bd?.total  ?? Number(shift.totalSales);
+  const totalOrdersReal = bd?.breakdown.reduce((a, r) => a + r.count, 0) ?? shift.totalOrders;
+
+  const cashReal    = bd?.cashReal ?? bd?.cashTotal ?? 0;
   const expectedAmt = openingAmt + cashReal;
 
-  const diff        = amount !== '' ? parsed - expectedAmt : null;
-  const diffAbs     = diff !== null ? Math.abs(diff) : 0;
-  const isExact     = diff !== null && diffAbs < 1;
-  const isOver      = diff !== null && diff > 0.99;
-  const isUnder     = diff !== null && diff < -0.99;
+  const diff    = amount !== '' ? parsed - expectedAmt : null;
+  const diffAbs = diff !== null ? Math.abs(diff) : 0;
+  const isExact = diff !== null && diffAbs < 1;
+  const isOver  = diff !== null && diff >  0.99;
+  const isUnder = diff !== null && diff < -0.99;
 
   const elapsed  = fmtDuration(shift.openedAt);
   const openTime = new Date(shift.openedAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
@@ -91,7 +92,7 @@ export function CloseShiftModal({
         maxHeight: '96vh',
       }}>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div style={{
           padding: '20px 24px 16px',
           borderBottom: '1px solid var(--dax-border)',
@@ -115,10 +116,10 @@ export function CloseShiftModal({
           </button>
         </div>
 
-        {/* ── Scroll body ── */}
+        {/* Scroll body */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '20px 24px' }}>
 
-          {/* Duración del turno */}
+          {/* Duración */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '16px', padding: '8px 12px', background: `${C}10`, borderRadius: '10px', border: `1px solid ${C}20` }}>
             <Clock size={13} color={C} />
             <span style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>
@@ -126,14 +127,28 @@ export function CloseShiftModal({
             </span>
           </div>
 
-          {/* ── Stats generales ── */}
+          {/* Stats — usa totales reales del breakdown */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
-            <StatCard label="Apertura"    value={formatCurrency(openingAmt)} color="var(--dax-text-secondary)" />
-            <StatCard label="Total ventas" value={formatCurrency(totalSales)}  color={C} sub={`${shift.totalOrders} transacc.`} />
-            <StatCard label="Efectivo esp." value={formatCurrency(expectedAmt)} color="#22C55E" sub="Apertura + efectivo" />
+            <StatCard
+              label="Apertura"
+              value={formatCurrency(openingAmt)}
+              color="var(--dax-text-secondary)"
+            />
+            <StatCard
+              label="Total ventas"
+              value={formatCurrency(totalSalesReal)}
+              color={C}
+              sub={`${totalOrdersReal} transacc.`}
+            />
+            <StatCard
+              label="Efectivo esp."
+              value={formatCurrency(expectedAmt)}
+              color="#22C55E"
+              sub="Apertura + efectivo"
+            />
           </div>
 
-          {/* ── Desglose por método de pago ── */}
+          {/* Desglose por método */}
           <div style={{
             background: 'var(--dax-surface-2)', borderRadius: '14px',
             padding: '16px', marginBottom: '16px',
@@ -143,14 +158,12 @@ export function CloseShiftModal({
               Desglose por método de pago
             </p>
 
-            {/* Sin datos aún */}
             {(!bd || bd.breakdown.length === 0) && (
               <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', textAlign: 'center', padding: '8px 0' }}>
                 Sin ventas registradas en este turno
               </p>
             )}
 
-            {/* Filas de métodos */}
             {bd?.breakdown.map((row) => {
               const cfg = METHOD_CFG[row.method] ?? { label: row.label, icon: '💰', color: C, bg: `${C}10` };
               const pct = bd.total > 0 ? (row.amount / bd.total) * 100 : 0;
@@ -158,7 +171,7 @@ export function CloseShiftModal({
                 <div key={row.method} style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
                         {cfg.icon}
                       </div>
                       <div>
@@ -171,7 +184,6 @@ export function CloseShiftModal({
                       <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{pct.toFixed(1)}%</p>
                     </div>
                   </div>
-                  {/* Barra de progreso */}
                   <div style={{ height: '3px', background: 'var(--dax-border)', borderRadius: '99px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: cfg.color, borderRadius: '99px', transition: 'width .4s' }} />
                   </div>
@@ -179,7 +191,7 @@ export function CloseShiftModal({
               );
             })}
 
-            {/* ── Sub-desglose de ventas mixtas ── */}
+            {/* Sub-desglose mixtos */}
             {bd && bd.mixed > 0 && (
               <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed var(--dax-border)' }}>
                 <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '8px' }}>
@@ -201,10 +213,10 @@ export function CloseShiftModal({
               </div>
             )}
 
-            {/* ── Total + efectivo esperado ── */}
+            {/* Total + efectivo esperado */}
             {bd && bd.breakdown.length > 0 && (
               <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Total recaudado</p>
                   <p style={{ fontSize: '16px', fontWeight: 800, color: C }}>{formatCurrency(bd.total)}</p>
                 </div>
@@ -221,13 +233,13 @@ export function CloseShiftModal({
             )}
           </div>
 
-          {/* ── Input de conteo físico ── */}
+          {/* Input conteo físico */}
           <div style={{ marginBottom: '14px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>
               Efectivo contado físicamente
             </p>
             <div style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+              <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}>
                 <DollarSign size={16} color="var(--dax-text-muted)" />
               </div>
               <input
@@ -246,27 +258,22 @@ export function CloseShiftModal({
                     isUnder ? 'var(--dax-danger)' :
                     'var(--dax-border)'
                   }`,
-                  background:  'var(--dax-surface-2)',
-                  color:       'var(--dax-text-primary)',
-                  fontSize:    '22px',
-                  fontWeight:  800,
-                  boxSizing:   'border-box',
-                  outline:     'none',
-                  transition:  'border-color .15s',
+                  background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)',
+                  fontSize: '22px', fontWeight: 800,
+                  boxSizing: 'border-box', outline: 'none', transition: 'border-color .15s',
                 }}
               />
             </div>
 
-            {/* Resultado del cuadre */}
             {diff !== null && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 marginTop: '8px', padding: '9px 12px', borderRadius: '10px',
-                background: isExact ? 'rgba(34,197,94,0.1)' : isOver ? 'rgba(34,197,94,0.08)' : 'var(--dax-danger-bg)',
-                border:     `1px solid ${isExact || isOver ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                background: isExact || isOver ? 'rgba(34,197,94,0.1)' : 'var(--dax-danger-bg)',
+                border: `1px solid ${isExact || isOver ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
               }}>
                 {isExact || isOver
-                  ? <CheckCircle size={14} color="#22C55E" />
+                  ? <CheckCircle   size={14} color="#22C55E" />
                   : <AlertTriangle size={14} color="var(--dax-danger)" />
                 }
                 <div>
@@ -288,27 +295,19 @@ export function CloseShiftModal({
             )}
           </div>
 
-          {/* ── Nota de cierre ── */}
+          {/* Nota */}
           <div style={{ marginBottom: '18px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '6px' }}>
               Nota de cierre <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '10px' }}>(opcional)</span>
             </p>
             <input
-              type="text"
-              placeholder="Observaciones, incidencias del turno..."
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: '10px',
-                border: '1.5px solid var(--dax-border)',
-                background: 'var(--dax-surface-2)',
-                color: 'var(--dax-text-primary)',
-                fontSize: '13px', boxSizing: 'border-box',
-              }}
+              type="text" placeholder="Observaciones, incidencias del turno..."
+              value={notes} onChange={e => setNotes(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
             />
           </div>
 
-          {/* ── Error ── */}
+          {/* Error */}
           {error && (
             <div style={{ background: 'var(--dax-danger-bg)', border: '1px solid var(--dax-danger)', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
               <AlertTriangle size={14} color="var(--dax-danger)" style={{ flexShrink: 0 }} />
@@ -316,7 +315,7 @@ export function CloseShiftModal({
             </div>
           )}
 
-          {/* ── Botones ── */}
+          {/* Botones */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
             <button
               onClick={onCancel}
@@ -331,16 +330,15 @@ export function CloseShiftModal({
                 padding: '13px', borderRadius: '12px', border: 'none',
                 background:  isLoading || amount === '' ? 'var(--dax-surface-2)' : '#EF4444',
                 color:       isLoading || amount === '' ? 'var(--dax-text-muted)' : '#fff',
-                fontSize:    '14px', fontWeight: 800,
-                cursor:      isLoading || amount === '' ? 'not-allowed' : 'pointer',
-                boxShadow:   isLoading || amount === '' ? 'none' : '0 4px 20px rgba(239,68,68,0.4)',
-                transition:  'all .15s',
+                fontSize: '14px', fontWeight: 800,
+                cursor:   isLoading || amount === '' ? 'not-allowed' : 'pointer',
+                boxShadow: isLoading || amount === '' ? 'none' : '0 4px 20px rgba(239,68,68,0.4)',
+                transition: 'all .15s',
               }}
             >
               {isLoading ? '⏳ Cerrando turno...' : '🔒 Cerrar turno'}
             </button>
           </div>
-
         </div>
       </div>
     </div>
