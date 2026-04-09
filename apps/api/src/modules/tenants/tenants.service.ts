@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TenantsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findById(tenantId: string) {
     const tenant = await this.prisma.tenant.findUnique({
@@ -46,18 +46,18 @@ export class TenantsService {
     return this.prisma.tenant.update({
       where: { id: tenantId },
       data: {
-        ...(data.name !== undefined      && { name: data.name }),
+        ...(data.name !== undefined && { name: data.name }),
         ...(data.legalName !== undefined && { legalName: data.legalName }),
-        ...(data.taxId !== undefined     && { taxId: data.taxId }),
-        ...(data.industry !== undefined  && { industry: data.industry }),
-        ...(data.website !== undefined   && { website: data.website }),
-        ...(data.phone !== undefined     && { phone: data.phone }),
-        ...(data.email !== undefined     && { email: data.email }),
-        ...(data.address !== undefined   && { address: data.address }),
-        ...(data.city !== undefined      && { city: data.city }),
-        ...(data.state !== undefined     && { state: data.state }),
-        ...(data.zipCode !== undefined   && { zipCode: data.zipCode }),
-        ...(data.logoUrl !== undefined   && { logoUrl: data.logoUrl }),
+        ...(data.taxId !== undefined && { taxId: data.taxId }),
+        ...(data.industry !== undefined && { industry: data.industry }),
+        ...(data.website !== undefined && { website: data.website }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.email !== undefined && { email: data.email }),
+        ...(data.address !== undefined && { address: data.address }),
+        ...(data.city !== undefined && { city: data.city }),
+        ...(data.state !== undefined && { state: data.state }),
+        ...(data.zipCode !== undefined && { zipCode: data.zipCode }),
+        ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
       },
     });
   }
@@ -92,7 +92,7 @@ export class TenantsService {
       select: { onboardingCompleted: true, onboardingSteps: true },
     });
     return {
-      completed: tenant?.onboardingCompleted ?? false,
+      completed: true,  // onboarding deshabilitado
       steps: (tenant?.onboardingSteps as Record<string, boolean>) ?? {},
     };
   }
@@ -116,12 +116,12 @@ export class TenantsService {
     return this.prisma.tenant.update({
       where: { id: tenantId },
       data: {
-        onboardingSteps:     updatedSteps,
+        onboardingSteps: updatedSteps,
         onboardingCompleted: data.completed ?? allCompleted,
       },
       select: {
         onboardingCompleted: true,
-        onboardingSteps:     true,
+        onboardingSteps: true,
       },
     });
   }
