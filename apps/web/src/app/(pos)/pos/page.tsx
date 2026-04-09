@@ -12,6 +12,10 @@ import {
 } from 'lucide-react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getImageUrl } from '@/lib/imageUrl';
+import { useReceiptPrinter } from '@/hooks/useReceiptPrinter';
+import { usePrintConfig } from '@/hooks/usePrintConfig';
+import type { ReceiptData } from '@/hooks/useReceiptPrinter';
 
 interface CartItem {
   id: string;
@@ -66,6 +70,8 @@ export default function POSPage() {
   const { formatCurrency, industry } = useAuth();
   const queryClient   = useQueryClient();
   const searchRef     = useRef<HTMLInputElement>(null);
+  const { print }      = useReceiptPrinter();
+  const { config: printConfig } = usePrintConfig();
 
   const cfg  = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
   const Icon = cfg.icon;
@@ -264,7 +270,36 @@ export default function POSPage() {
       return data;
     },
 
-    onSuccess: () => {
+    onSuccess: (saleData: any) => {
+      // Impresión automática si está habilitada
+      if (printConfig.autoPrint && saleData?.id) {
+        const branchId = (branches as any[])[0]?.id;
+        const receiptData: ReceiptData = {
+          businessName:  (branches as any[])[0]?.tenant?.name ?? 'Mi Negocio',
+          branchName:    (branches as any[])[0]?.name,
+          saleId:        saleData.id,
+          cashierName:   `${saleData.user?.firstName ?? ''} ${saleData.user?.lastName ?? ''}`.trim(),
+          createdAt:     saleData.createdAt ?? new Date().toISOString(),
+          items:         (saleData.items ?? []).map((i: any) => ({
+            name:      i.product?.name ?? 'Producto',
+            quantity:  i.quantity,
+            unitPrice: Number(i.unitPrice),
+            subtotal:  Number(i.subtotal),
+            discount:  Number(i.discount ?? 0),
+          })),
+          subtotal:      Number(saleData.subtotal),
+          discount:      Number(saleData.discount ?? 0),
+          tax:           Number(saleData.tax ?? 0),
+          total:         Number(saleData.total),
+          paymentMethod: saleData.paymentMethod,
+          mixedPayments: saleData.mixedPayments ?? null,
+          notes:         saleData.notes ?? undefined,
+          header:        printConfig.header,
+          footer:        printConfig.footer,
+        };
+        print(receiptData, printConfig);
+      }
+
       setCart([]);
       setDiscount(0);
       setNote('');
@@ -421,7 +456,7 @@ export default function POSPage() {
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   return (
                     <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }} style={{ padding: '10px', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '10px', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', position: 'relative', boxShadow: inCart ? `0 0 0 1px ${C}30` : 'none' }}>
-                      {product.imageUrl && <img src={product.imageUrl} alt="" style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
+                      {getImageUrl(product.imageUrl) && <img src={getImageUrl(product.imageUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
                       {inCart   && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
                       {hasOffer && <div style={{ position: 'absolute', top: '7px', left:  '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
                       <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '3px', lineHeight: 1.3 }}>{product.name}</p>

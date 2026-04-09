@@ -1,26 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { useAuthStore } from '@/store/auth.store';
-import { useRouter } from 'next/navigation';
-import { useHydration } from '@/hooks/useHydration';
-import { Logo } from '@/components/layout/Logo';
-import { useAuth } from '@/hooks/useAuth';
-import { NotificationBell } from '@/components/layout/NotificationPanel';
-import { OnboardingModal }     from '@/components/onboarding/OnboardingModal';
-import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
-import { useOnboarding }       from '@/hooks/useOnboarding';
+import { Sidebar }             from '@/components/layout/Sidebar';
+import { BottomNav }           from '@/components/layout/BottomNav';
+import { useAuthStore }        from '@/store/auth.store';
+import { useRouter }           from 'next/navigation';
+import { useHydration }        from '@/hooks/useHydration';
+import { useAuth }             from '@/hooks/useAuth';
+import { NotificationBell }    from '@/components/layout/NotificationPanel';
 
-// ── Ícono nube SVG inline ─────────────────────────────
 function CloudIcon({ size = 28 }: { size?: number }) {
   return (
     <svg width={size} height={size * 0.75} viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="cloudNavGrad" x1="0" y1="0" x2="64" y2="48" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FF8C00" />
-          <stop offset="45%" stopColor="#FF5C35" />
+          <stop offset="0%"   stopColor="#FF8C00" />
+          <stop offset="45%"  stopColor="#FF5C35" />
           <stop offset="100%" stopColor="#00C8D4" />
         </linearGradient>
       </defs>
@@ -38,23 +33,14 @@ function CloudIcon({ size = 28 }: { size?: number }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
-  const { user, tenant } = useAuth();
-  const router = useRouter();
-  const hydrated = useHydration();
+  const { user, tenant }    = useAuth();
+  const router              = useRouter();
+  const hydrated            = useHydration();
   const [isMobile, setIsMobile] = useState(false);
-  const { showWizard, completed } = useOnboarding();
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) router.push('/login');
   }, [hydrated, isAuthenticated]);
-
-  useEffect(() => {
-    if (showWizard) {
-      const t = setTimeout(() => setShowModal(true), 800);
-      return () => clearTimeout(t);
-    }
-  }, [showWizard]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
@@ -81,71 +67,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--dax-bg)' }}>
 
-      {/* ── Sidebar desktop ── */}
+      {/* Sidebar desktop */}
       {!isMobile && (
         <div style={{ width: '220px', flexShrink: 0 }}>
           <div
             className="dax-sidebar"
-            style={{
-              position: 'fixed', top: 0, left: 0,
-              height: '100vh', width: '220px',
-              padding: '0',
-              overflowY: 'auto',
-            }}
+            style={{ position: 'fixed', top: 0, left: 0, height: '100vh', width: '220px', padding: '0', overflowY: 'auto' }}
           >
             <Sidebar />
           </div>
         </div>
       )}
 
-      {/* ── Contenido principal ── */}
+      {/* Contenido principal */}
       <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? '72px' : '0' }}>
 
-        {/* ── Topbar móvil ── */}
+        {/* Topbar móvil */}
         {isMobile && (
           <div style={{
             position: 'sticky', top: 0, zIndex: 40,
             height: '52px',
             background: 'var(--dax-navy-900)',
             borderBottom: '1px solid var(--dax-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '0 16px',
           }}>
             <NotificationBell />
-            {/* Nube + nombre */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <CloudIcon size={32} />
               <div>
-                <p style={{
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: 'var(--dax-text-primary)',
-                  lineHeight: 1,
-                }}>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1 }}>
                   {tenant?.name ?? 'DaxCloud'}
                 </p>
-                <p style={{
-                  fontSize: '10px',
-                  color: 'var(--dax-text-muted)',
-                  lineHeight: 1,
-                  marginTop: '2px',
-                }}>
+                <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', lineHeight: 1, marginTop: '2px' }}>
                   {user?.firstName} {user?.lastName}
                 </p>
               </div>
             </div>
-
-            {/* Avatar inicial */}
             <div style={{
-              width: '32px', height: '32px',
-              borderRadius: '9px',
-              background: 'rgba(255,92,53,0.15)',
-              border: '1px solid rgba(255,92,53,0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: '32px', height: '32px', borderRadius: '9px',
+              background: 'rgba(255,92,53,0.15)', border: '1px solid rgba(255,92,53,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>
                 {user?.firstName?.[0]?.toUpperCase() ?? '?'}
@@ -159,11 +121,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      {/* ── Bottom nav móvil ── */}
+      {/* Bottom nav móvil */}
       {isMobile && <BottomNav />}
-
-      {showModal && <OnboardingModal onClose={() => setShowModal(false)} />}
-      {!completed  && <OnboardingChecklist />}
     </div>
   );
 }
