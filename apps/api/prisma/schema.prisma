@@ -416,6 +416,7 @@ model Sale {
   paymentMethod PaymentMethod @default(cash)
   notes         String?
   createdAt     DateTime      @default(now())
+  mixedPayments  Json?   // { cash: number, card: number, transfer: number }
 
   tenant Tenant     @relation(fields: [tenantId], references: [id])
   branch Branch     @relation(fields: [branchId], references: [id])

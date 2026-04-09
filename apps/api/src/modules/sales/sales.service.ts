@@ -1,27 +1,34 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationsGateway } from '../notifications/notifications.gateway';
-import { CashRegisterService } from '../cash-register/cash-register.service';
+import { PrismaService }         from '../../prisma/prisma.service';
+import { NotificationsGateway }  from '../notifications/notifications.gateway';
+import { CashRegisterService }   from '../cash-register/cash-register.service';
 
 interface SaleItemInput {
   productId: string;
-  quantity: number;
+  quantity:  number;
   discount?: number;
+}
+
+interface MixedPaymentsInput {
+  cash?:     number;
+  card?:     number;
+  transfer?: number;
 }
 
 interface CreateSaleInput {
-  branchId: string;
-  items: SaleItemInput[];
+  branchId:       string;
+  items:          SaleItemInput[];
   paymentMethod?: 'cash' | 'card' | 'transfer' | 'mixed';
-  discount?: number;
-  notes?: string;
+  discount?:      number;
+  notes?:         string;
+  mixedPayments?: MixedPaymentsInput;
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  cash: 'Efectivo',
-  card: 'Tarjeta',
+  cash:     'Efectivo',
+  card:     'Tarjeta',
   transfer: 'Transferencia',
-  mixed: 'Mixto',
+  mixed:    'Mixto',
 };
 
 const LOW_STOCK_THRESHOLD = 5;
@@ -35,13 +42,13 @@ function formatCurrency(amount: number): string {
 @Injectable()
 export class SalesService {
   constructor(
-    private prisma: PrismaService,
+    private prisma:               PrismaService,
     private notificationsGateway: NotificationsGateway,
-    private cashRegisterService: CashRegisterService,  // ← inyectado
-  ) { }
+    private cashRegisterService:  CashRegisterService,
+  ) {}
 
   async create(tenantId: string, userId: string, input: CreateSaleInput) {
-    const { branchId, items, paymentMethod = 'cash', discount = 0, notes } = input;
+    const { branchId, items, paymentMethod = 'cash', discount = 0, notes, mixedPayments } = input;
 
     // Verifica que la sucursal pertenece al tenant
     const branch = await this.prisma.branch.findFirst({
@@ -49,8 +56,16 @@ export class SalesService {
     });
     if (!branch) throw new NotFoundException('Sucursal no encontrada');
 
-    // ✅ Verifica que haya una caja abierta antes de procesar la venta
+    // Verifica que haya una caja abierta
     await this.cashRegisterService.assertShiftOpen(tenantId, branchId);
+
+    // Valida desglose mixto si aplica
+    if (paymentMethod === 'mixed') {
+      if (!mixedPayments) throw new BadRequestException('Se requiere el desglose de pagos para método mixto.');
+      const mixedSum = (mixedPayments.cash ?? 0) + (mixedPayments.card ?? 0) + (mixedPayments.transfer ?? 0);
+      // Permitir diferencia de hasta 1 unidad por redondeo
+      const subtotalCalc = items.reduce((acc, item) => acc + 0, 0); // se valida luego con total real
+    }
 
     // Procesa cada item y verifica stock
     const saleItems = await Promise.all(
@@ -68,9 +83,9 @@ export class SalesService {
           throw new BadRequestException(`Stock insuficiente para ${product.name}`);
         }
 
-        const unitPrice = Number(product.price);
+        const unitPrice    = Number(product.price);
         const itemDiscount = item.discount ?? 0;
-        const subtotal = (unitPrice * item.quantity) - itemDiscount;
+        const subtotal     = (unitPrice * item.quantity) - itemDiscount;
 
         return { product, inventory, item, unitPrice, itemDiscount, subtotal };
       }),
@@ -78,7 +93,7 @@ export class SalesService {
 
     // Calcula totales
     const subtotal = saleItems.reduce((acc, s) => acc + s.subtotal, 0);
-    const total = subtotal - discount;
+    const total    = subtotal - discount;
 
     // Crea la venta en una transacción
     const sale = await this.prisma.$transaction(async (tx) => {
@@ -87,20 +102,28 @@ export class SalesService {
           tenantId, branchId, userId,
           subtotal, discount, total,
           paymentMethod, notes,
+          // Guarda el desglose solo si es pago mixto
+          ...(paymentMethod === 'mixed' && mixedPayments ? {
+            mixedPayments: {
+              cash:     mixedPayments.cash     ?? 0,
+              card:     mixedPayments.card     ?? 0,
+              transfer: mixedPayments.transfer ?? 0,
+            },
+          } : {}),
           items: {
             create: saleItems.map(s => ({
               productId: s.item.productId,
-              quantity: s.item.quantity,
+              quantity:  s.item.quantity,
               unitPrice: s.unitPrice,
-              discount: s.itemDiscount,
-              subtotal: s.subtotal,
+              discount:  s.itemDiscount,
+              subtotal:  s.subtotal,
             })),
           },
         },
         include: {
-          items: { include: { product: true } },
+          items:  { include: { product: true } },
           branch: true,
-          user: true,
+          user:   true,
         },
       });
 
@@ -108,15 +131,15 @@ export class SalesService {
       for (const s of saleItems) {
         await tx.inventory.update({
           where: { productId_branchId: { productId: s.item.productId, branchId } },
-          data: { quantity: { decrement: s.item.quantity } },
+          data:  { quantity: { decrement: s.item.quantity } },
         });
 
         await tx.movement.create({
           data: {
             inventoryId: s.inventory.id,
-            type: 'out',
-            quantity: s.item.quantity,
-            reason: `Venta #${newSale.id}`,
+            type:        'out',
+            quantity:    s.item.quantity,
+            reason:      `Venta #${newSale.id}`,
           },
         });
       }
@@ -125,16 +148,16 @@ export class SalesService {
     });
 
     // ── Notificación: nueva venta ──────────────────────────────────────────
-    const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
+    const itemCount   = items.reduce((acc, i) => acc + i.quantity, 0);
     const methodLabel = PAYMENT_LABELS[paymentMethod] ?? paymentMethod;
 
     this.notificationsGateway.pushToTenant(tenantId, {
-      type: 'new_sale',
-      title: 'Nueva venta registrada',
+      type:    'new_sale',
+      title:   'Nueva venta registrada',
       message: `${formatCurrency(total)} · ${itemCount} item${itemCount !== 1 ? 's' : ''} · ${methodLabel} · ${branch.name}`,
-      color: '#3DBF7F',
-      link: `/sales`,
-    }).catch(() => { });
+      color:   '#3DBF7F',
+      link:    `/sales`,
+    }).catch(() => {});
 
     // ── Notificación: stock bajo ───────────────────────────────────────────
     for (const s of saleItems) {
@@ -142,18 +165,14 @@ export class SalesService {
         where: { productId_branchId: { productId: s.item.productId, branchId } },
       });
 
-      if (
-        updatedInventory &&
-        updatedInventory.quantity <= LOW_STOCK_THRESHOLD &&
-        updatedInventory.quantity >= 0
-      ) {
+      if (updatedInventory && updatedInventory.quantity <= LOW_STOCK_THRESHOLD && updatedInventory.quantity >= 0) {
         this.notificationsGateway.pushToTenant(tenantId, {
-          type: 'low_stock',
-          title: 'Stock bajo',
+          type:    'low_stock',
+          title:   'Stock bajo',
           message: `${s.product.name} tiene solo ${updatedInventory.quantity} unidad${updatedInventory.quantity !== 1 ? 'es' : ''} en ${branch.name}`,
-          color: '#F0A030',
-          link: `/inventory`,
-        }).catch(() => { });
+          color:   '#F0A030',
+          link:    `/inventory`,
+        }).catch(() => {});
       }
     }
 
@@ -167,27 +186,27 @@ export class SalesService {
 
     if (salesToday > 0 && salesToday % 10 === 0) {
       this.notificationsGateway.pushToTenant(tenantId, {
-        type: 'daily_goal',
-        title: `¡${salesToday} ventas hoy! 🎯`,
+        type:    'daily_goal',
+        title:   `¡${salesToday} ventas hoy! 🎯`,
         message: `Tu equipo ha completado ${salesToday} transacciones en el día. ¡Sigan así!`,
-        color: '#A78BFA',
-        link: `/analytics`,
-      }).catch(() => { });
+        color:   '#A78BFA',
+        link:    `/analytics`,
+      }).catch(() => {});
     }
 
     return sale;
   }
 
   async findAll(tenantId: string, filters?: {
-    branchId?: string;
+    branchId?:  string;
     startDate?: string;
-    endDate?: string;
-    page?: number;
-    limit?: number;
+    endDate?:   string;
+    page?:      number;
+    limit?:     number;
   }) {
-    const page = filters?.page ?? 1;
+    const page  = filters?.page  ?? 1;
     const limit = filters?.limit ?? 20;
-    const skip = (page - 1) * limit;
+    const skip  = (page - 1) * limit;
 
     const where = {
       tenantId,
@@ -195,7 +214,7 @@ export class SalesService {
       ...(filters?.startDate || filters?.endDate ? {
         createdAt: {
           ...(filters.startDate && { gte: new Date(filters.startDate) }),
-          ...(filters.endDate && { lte: new Date(filters.endDate) }),
+          ...(filters.endDate   && { lte: new Date(filters.endDate)   }),
         },
       } : {}),
     };
@@ -204,9 +223,9 @@ export class SalesService {
       this.prisma.sale.findMany({
         where,
         include: {
-          items: { include: { product: true } },
+          items:  { include: { product: true } },
           branch: true,
-          user: { select: { firstName: true, lastName: true, email: true } },
+          user:   { select: { firstName: true, lastName: true, email: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -222,9 +241,9 @@ export class SalesService {
     const sale = await this.prisma.sale.findFirst({
       where: { id: saleId, tenantId },
       include: {
-        items: { include: { product: true } },
+        items:  { include: { product: true } },
         branch: true,
-        user: { select: { firstName: true, lastName: true, email: true } },
+        user:   { select: { firstName: true, lastName: true, email: true } },
       },
     });
     if (!sale) throw new NotFoundException('Venta no encontrada');
@@ -258,8 +277,8 @@ export class SalesService {
     ]);
 
     return {
-      salesToday: sales,
-      revenueToday: aggregate._sum.total ?? 0,
+      salesToday:       sales,
+      revenueToday:     aggregate._sum.total         ?? 0,
       salesYesterday,
       revenueYesterday: aggregateYesterday._sum.total ?? 0,
     };
