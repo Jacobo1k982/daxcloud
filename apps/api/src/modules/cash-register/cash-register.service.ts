@@ -8,7 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { OpenShiftDto }  from './dto/open-shift.dto';
 import { CloseShiftDto } from './dto/close-shift.dto';
 
-interface PaymentBreakdownRow {
+export interface PaymentBreakdownRow {
   method: string;
   label:  string;
   icon:   string;
@@ -16,7 +16,7 @@ interface PaymentBreakdownRow {
   count:  number;
 }
 
-interface PaymentBreakdown {
+export interface PaymentBreakdown {
   cash:          number;
   card:          number;
   transfer:      number;
@@ -30,10 +30,10 @@ interface PaymentBreakdown {
 }
 
 const METHOD_META: Record<string, { label: string; icon: string }> = {
-  cash:     { label: 'Efectivo',       icon: '💵' },
-  card:     { label: 'Tarjeta',        icon: '💳' },
-  transfer: { label: 'SINPE',          icon: '📱' },
-  mixed:    { label: 'Mixto',          icon: '🔀' },
+  cash:     { label: 'Efectivo', icon: '💵' },
+  card:     { label: 'Tarjeta',  icon: '💳' },
+  transfer: { label: 'SINPE',    icon: '📱' },
+  mixed:    { label: 'Mixto',    icon: '🔀' },
 };
 
 @Injectable()
@@ -86,7 +86,6 @@ export class CashRegisterService {
     });
     if (!shift) throw new NotFoundException('Turno no encontrado o ya cerrado');
 
-    // Resumen de ventas del turno
     const salesAgg = await this.prisma.sale.aggregate({
       where: {
         tenantId,
@@ -100,14 +99,12 @@ export class CashRegisterService {
     const totalSales  = Number(salesAgg._sum.total ?? 0);
     const totalOrders = salesAgg._count.id;
 
-    // Desglose por método de pago
     const breakdown = await this._getPaymentBreakdown(
       tenantId,
       shift.branchId ?? undefined,
       shift.openedAt,
     );
 
-    // Efectivo esperado = apertura + todo el efectivo (puro + parte de mixtos)
     const expectedAmount = Number(shift.openingAmount) + breakdown.cashReal;
     const difference     = dto.closingAmount - expectedAmount;
 
@@ -152,7 +149,7 @@ export class CashRegisterService {
     return { ...shift, paymentBreakdown };
   }
 
-  // ── Valida caja abierta (usado por SalesService) ──────────────────────────
+  // ── Valida caja abierta ───────────────────────────────────────────────────
   async assertShiftOpen(tenantId: string, branchId: string): Promise<void> {
     const shift = await this.prisma.cashRegisterShift.findFirst({
       where: { tenantId, branchId, status: 'open' },
@@ -207,7 +204,7 @@ export class CashRegisterService {
     return { data, total, page, limit };
   }
 
-  // ── Detalle de un turno con desglose ─────────────────────────────────────
+  // ── Detalle de un turno ───────────────────────────────────────────────────
   async findOne(tenantId: string, shiftId: string) {
     const shift = await this.prisma.cashRegisterShift.findFirst({
       where:   { id: shiftId, tenantId },
@@ -247,7 +244,6 @@ export class CashRegisterService {
       createdAt: dateFilter,
     };
 
-    // 1. Agrupación por método de pago
     const grouped = await this.prisma.sale.groupBy({
       by:     ['paymentMethod'],
       where:  baseWhere,
@@ -255,7 +251,6 @@ export class CashRegisterService {
       _count: { id: true },
     });
 
-    // 2. Ventas mixtas — extrae desglose del campo JSON
     const mixedSales = await this.prisma.sale.findMany({
       where:  { ...baseWhere, paymentMethod: 'mixed' },
       select: { mixedPayments: true, total: true },
@@ -274,15 +269,8 @@ export class CashRegisterService {
       }
     }
 
-    // 3. Construye resultado base
-    const base: Record<string, number> = {
-      cash:     0,
-      card:     0,
-      transfer: 0,
-      mixed:    0,
-    };
+    const base: Record<string, number> = { cash: 0, card: 0, transfer: 0, mixed: 0 };
     let grandTotal = 0;
-
     const breakdownRows: PaymentBreakdownRow[] = [];
 
     for (const row of grouped) {
@@ -302,7 +290,6 @@ export class CashRegisterService {
       });
     }
 
-    // Ordena: efectivo → tarjeta → sinpe → mixto
     const ORDER = ['cash', 'card', 'transfer', 'mixed'];
     breakdownRows.sort((a, b) => {
       const ia = ORDER.indexOf(a.method);
@@ -310,11 +297,10 @@ export class CashRegisterService {
       return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
     });
 
-    // 4. Totales reales distribuyendo mixtos
     const cashTotal     = base.cash     + mixedCash;
     const cardTotal     = base.card     + mixedCard;
     const transferTotal = base.transfer + mixedTransfer;
-    const cashReal      = cashTotal; // efectivo físico esperado en caja
+    const cashReal      = cashTotal;
 
     return {
       cash:          base.cash,
