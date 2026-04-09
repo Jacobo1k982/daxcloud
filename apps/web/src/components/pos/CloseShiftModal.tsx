@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { X, TrendingUp, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-import type { CashShift } from '@/hooks/useCashRegister';
+import { useState, useMemo } from 'react';
+import { X, TrendingUp, Clock, AlertTriangle, CheckCircle, DollarSign, CreditCard, Smartphone, Shuffle } from 'lucide-react';
+import type { CashShift, PaymentBreakdown } from '@/hooks/useCashRegister';
 
 interface Props {
   shift:          CashShift;
@@ -13,37 +13,57 @@ interface Props {
   isLoading:      boolean;
 }
 
-const METHOD_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  cash:     { label: 'Efectivo', icon: '💵', color: '#22C55E' },
-  card:     { label: 'Tarjeta',  icon: '💳', color: '#5AAAF0' },
-  transfer: { label: 'SINPE',    icon: '📱', color: '#A78BFA' },
-  mixed:    { label: 'Mixto',    icon: '🔀', color: '#F97316' },
+// ── Configuración visual por método ───────────────────────────────────────────
+const METHOD_CFG: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
+  cash:     { label: 'Efectivo',  icon: <span style={{ fontSize: '16px' }}>💵</span>, color: '#22C55E', bg: 'rgba(34,197,94,0.1)'  },
+  card:     { label: 'Tarjeta',   icon: <span style={{ fontSize: '16px' }}>💳</span>, color: '#5AAAF0', bg: 'rgba(90,170,240,0.1)' },
+  transfer: { label: 'SINPE',     icon: <span style={{ fontSize: '16px' }}>📱</span>, color: '#A78BFA', bg: 'rgba(167,139,250,0.1)'},
+  mixed:    { label: 'Mixto',     icon: <span style={{ fontSize: '16px' }}>🔀</span>, color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
 };
 
-export function CloseShiftModal({ shift, accentColor: C, formatCurrency, onClose, onCancel, isLoading }: Props) {
+function fmtDuration(from: string): string {
+  const ms = Date.now() - new Date(from).getTime();
+  const h  = Math.floor(ms / 3_600_000);
+  const m  = Math.floor((ms % 3_600_000) / 60_000);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function StatCard({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
+  return (
+    <div style={{ background: 'var(--dax-surface-2)', borderRadius: '12px', padding: '12px 14px' }}>
+      <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '6px' }}>{label}</p>
+      <p style={{ fontSize: '17px', fontWeight: 800, color, lineHeight: 1 }}>{value}</p>
+      {sub && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginTop: '3px' }}>{sub}</p>}
+    </div>
+  );
+}
+
+export function CloseShiftModal({
+  shift, accentColor: C, formatCurrency,
+  onClose, onCancel, isLoading,
+}: Props) {
   const [amount, setAmount] = useState('');
   const [notes,  setNotes]  = useState('');
   const [error,  setError]  = useState('');
 
-  const parsed     = parseFloat(amount.replace(/[^0-9.]/g, '')) || 0;
-  const openingAmt = Number(shift.openingAmount);
-  const totalSales = Number(shift.totalSales);
+  const bd: PaymentBreakdown | undefined = shift.paymentBreakdown;
 
-  // Desglose por método de pago del turno
-  const breakdown  = (shift as any).paymentBreakdown;
-  const cashReal   = breakdown?.cashReal   ?? breakdown?.cashTotal ?? 0;
+  const parsed      = useMemo(() => parseFloat(amount.replace(/[^0-9.]/g, '')) || 0, [amount]);
+  const openingAmt  = Number(shift.openingAmount);
+  const totalSales  = Number(shift.totalSales);
 
-  // Efectivo esperado = apertura + todo lo que entró en efectivo (puro + parte de mixtos)
-  const expectedCash = openingAmt + cashReal;
-  const diff         = parsed > 0 ? parsed - expectedCash : 0;
-  const hasDiff      = amount !== '' && parsed > 0;
+  // Efectivo real en caja = apertura + efectivo puro + efectivo de ventas mixtas
+  const cashReal    = bd?.cashReal    ?? bd?.cashTotal ?? 0;
+  const expectedAmt = openingAmt + cashReal;
 
-  const elapsed = (() => {
-    const ms = Date.now() - new Date(shift.openedAt).getTime();
-    const h  = Math.floor(ms / 3_600_000);
-    const m  = Math.floor((ms % 3_600_000) / 60_000);
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-  })();
+  const diff        = amount !== '' ? parsed - expectedAmt : null;
+  const diffAbs     = diff !== null ? Math.abs(diff) : 0;
+  const isExact     = diff !== null && diffAbs < 1;
+  const isOver      = diff !== null && diff > 0.99;
+  const isUnder     = diff !== null && diff < -0.99;
+
+  const elapsed  = fmtDuration(shift.openedAt);
+  const openTime = new Date(shift.openedAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
 
   const handleSubmit = async () => {
     setError('');
@@ -58,228 +78,269 @@ export function CloseShiftModal({ shift, accentColor: C, formatCurrency, onClose
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+      background: 'rgba(0,0,0,0.80)', backdropFilter: 'blur(6px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
+      padding: '16px',
     }}>
       <div style={{
-        background: 'var(--dax-surface)', borderRadius: '18px',
-        width: '100%', maxWidth: '500px',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+        background: 'var(--dax-surface)', borderRadius: '20px',
+        width: '100%', maxWidth: '520px',
+        boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
         overflow: 'hidden',
-        maxHeight: '92vh',
         display: 'flex', flexDirection: 'column',
+        maxHeight: '96vh',
       }}>
 
-        {/* Header */}
+        {/* ── Header ── */}
         <div style={{
-          padding: '22px 24px 18px',
+          padding: '20px 24px 16px',
           borderBottom: '1px solid var(--dax-border)',
-          background: 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, transparent 60%)',
+          background: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, transparent 70%)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
           flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={20} color="#EF4444" />
+            <div style={{ width: '44px', height: '44px', borderRadius: '13px', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TrendingUp size={22} color="#EF4444" />
             </div>
             <div>
-              <p style={{ fontSize: '16px', fontWeight: 800, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>Cierre de caja</p>
-              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>
+              <p style={{ fontSize: '17px', fontWeight: 800, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>Cierre de caja</p>
+              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginTop: '3px' }}>
                 {shift.branch.name} · {shift.user.firstName} {shift.user.lastName}
               </p>
             </div>
           </div>
-          <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex' }}>
-            <X size={18} />
+          <button onClick={onCancel} style={{ background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', padding: '6px', borderRadius: '8px' }}>
+            <X size={16} />
           </button>
         </div>
 
-        {/* Scroll body */}
+        {/* ── Scroll body ── */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '20px 24px' }}>
 
-          {/* Resumen general */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
-            {[
-              { label: 'Apertura', value: formatCurrency(openingAmt),        color: 'var(--dax-text-secondary)' },
-              { label: 'Ventas',   value: formatCurrency(totalSales),         color: C },
-              { label: 'Órdenes',  value: String(shift.totalOrders),          color: C },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
-                <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '4px' }}>{label}</p>
-                <p style={{ fontSize: '14px', fontWeight: 800, color }}>{value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Desglose por método de pago ── */}
-          {breakdown && (
-            <div style={{
-              background: 'var(--dax-surface-2)', borderRadius: '12px',
-              padding: '14px', marginBottom: '16px',
-              border: '1px solid var(--dax-border)',
-            }}>
-              <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '12px' }}>
-                Desglose por método de pago
-              </p>
-
-              {/* Filas por método */}
-              {breakdown.breakdown?.map((row: any) => {
-                const cfg = METHOD_CONFIG[row.method] ?? { label: row.label, icon: '💰', color: C };
-                return (
-                  <div key={row.method} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px' }}>{cfg.icon}</span>
-                      <div>
-                        <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1 }}>{cfg.label}</p>
-                        <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{row.count} venta{row.count !== 1 ? 's' : ''}</p>
-                      </div>
-                    </div>
-                    <p style={{ fontSize: '13px', fontWeight: 800, color: cfg.color }}>{formatCurrency(row.amount)}</p>
-                  </div>
-                );
-              })}
-
-              {/* Separador */}
-              <div style={{ borderTop: '1px solid var(--dax-border)', marginTop: '8px', paddingTop: '10px' }}>
-
-                {/* Si hay mixtos, mostrar el sub-desglose */}
-                {(breakdown.mixed ?? 0) > 0 && (
-                  <div style={{ marginBottom: '10px' }}>
-                    <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '6px' }}>
-                      Distribución de ventas mixtas
-                    </p>
-                    {[
-                      { key: 'cashTotal',     label: 'Efectivo total',  icon: '💵', color: '#22C55E' },
-                      { key: 'cardTotal',     label: 'Tarjeta total',   icon: '💳', color: '#5AAAF0' },
-                      { key: 'transferTotal', label: 'SINPE total',     icon: '📱', color: '#A78BFA' },
-                    ].filter(({ key }) => breakdown[key] > 0).map(({ key, label, icon, color }) => (
-                      <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontSize: '12px' }}>{icon}</span>
-                          <p style={{ fontSize: '11px', color: 'var(--dax-text-secondary)' }}>{label}</p>
-                        </div>
-                        <p style={{ fontSize: '12px', fontWeight: 700, color }}>{formatCurrency(breakdown[key])}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Total */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Total recaudado</p>
-                  <p style={{ fontSize: '16px', fontWeight: 800, color: C }}>{formatCurrency(breakdown.total ?? totalSales)}</p>
-                </div>
-
-                {/* Efectivo esperado en caja */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
-                    Efectivo esperado en caja
-                    <span style={{ fontSize: '10px', display: 'block', color: 'var(--dax-text-muted)', opacity: .7 }}>
-                      (apertura {formatCurrency(openingAmt)} + efectivo {formatCurrency(cashReal)})
-                    </span>
-                  </p>
-                  <p style={{ fontSize: '14px', fontWeight: 800, color: '#22C55E' }}>{formatCurrency(expectedCash)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Duración */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-            <Clock size={12} color="var(--dax-text-muted)" />
-            <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
-              Turno activo por <strong style={{ color: 'var(--dax-text-secondary)' }}>{elapsed}</strong> · abierto {new Date(shift.openedAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}
+          {/* Duración del turno */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '16px', padding: '8px 12px', background: `${C}10`, borderRadius: '10px', border: `1px solid ${C}20` }}>
+            <Clock size={13} color={C} />
+            <span style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>
+              Turno activo hace <strong style={{ color: C }}>{elapsed}</strong> · abierto a las <strong style={{ color: C }}>{openTime}</strong>
             </span>
           </div>
 
-          {/* Monto de cierre */}
-          <label style={{ display: 'block', marginBottom: '14px' }}>
-            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '6px' }}>
-              Efectivo contado en caja
-            </p>
-            <input
-              type="number" min="0" step="1000" placeholder="0" autoFocus
-              value={amount}
-              onChange={e => { setAmount(e.target.value); setError(''); }}
-              style={{
-                width: '100%', padding: '11px 12px', borderRadius: '10px',
-                border: `1.5px solid ${error ? 'var(--dax-danger)' : hasDiff && diff !== 0 ? (diff < 0 ? 'var(--dax-danger)' : '#22C55E') : 'var(--dax-border)'}`,
-                background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)',
-                fontSize: '20px', fontWeight: 800, boxSizing: 'border-box', outline: 'none',
-              }}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            />
+          {/* ── Stats generales ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+            <StatCard label="Apertura"    value={formatCurrency(openingAmt)} color="var(--dax-text-secondary)" />
+            <StatCard label="Total ventas" value={formatCurrency(totalSales)}  color={C} sub={`${shift.totalOrders} transacc.`} />
+            <StatCard label="Efectivo esp." value={formatCurrency(expectedAmt)} color="#22C55E" sub="Apertura + efectivo" />
+          </div>
 
-            {/* Diferencia en tiempo real */}
-            {hasDiff && diff !== 0 && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px',
-                padding: '6px 10px', borderRadius: '8px',
-                background: diff < 0 ? 'var(--dax-danger-bg)' : 'rgba(34,197,94,0.08)',
-              }}>
-                {diff < 0
-                  ? <AlertTriangle size={12} color="var(--dax-danger)" />
-                  : <CheckCircle   size={12} color="#22C55E" />
-                }
-                <p style={{ fontSize: '12px', fontWeight: 700, color: diff < 0 ? 'var(--dax-danger)' : '#22C55E' }}>
-                  {diff < 0
-                    ? `Faltante: ${formatCurrency(Math.abs(diff))}`
-                    : `Sobrante: ${formatCurrency(diff)}`
-                  }
+          {/* ── Desglose por método de pago ── */}
+          <div style={{
+            background: 'var(--dax-surface-2)', borderRadius: '14px',
+            padding: '16px', marginBottom: '16px',
+            border: '1px solid var(--dax-border)',
+          }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '14px' }}>
+              Desglose por método de pago
+            </p>
+
+            {/* Sin datos aún */}
+            {(!bd || bd.breakdown.length === 0) && (
+              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', textAlign: 'center', padding: '8px 0' }}>
+                Sin ventas registradas en este turno
+              </p>
+            )}
+
+            {/* Filas de métodos */}
+            {bd?.breakdown.map((row) => {
+              const cfg = METHOD_CFG[row.method] ?? { label: row.label, icon: '💰', color: C, bg: `${C}10` };
+              const pct = bd.total > 0 ? (row.amount / bd.total) * 100 : 0;
+              return (
+                <div key={row.method} style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {cfg.icon}
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1 }}>{cfg.label}</p>
+                        <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{row.count} venta{row.count !== 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 800, color: cfg.color }}>{formatCurrency(row.amount)}</p>
+                      <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{pct.toFixed(1)}%</p>
+                    </div>
+                  </div>
+                  {/* Barra de progreso */}
+                  <div style={{ height: '3px', background: 'var(--dax-border)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: cfg.color, borderRadius: '99px', transition: 'width .4s' }} />
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* ── Sub-desglose de ventas mixtas ── */}
+            {bd && bd.mixed > 0 && (
+              <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed var(--dax-border)' }}>
+                <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '8px' }}>
+                  Distribución real de ventas mixtas
                 </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+                  {[
+                    { key: 'cashTotal',     label: 'Efectivo', color: '#22C55E', icon: '💵' },
+                    { key: 'cardTotal',     label: 'Tarjeta',  color: '#5AAAF0', icon: '💳' },
+                    { key: 'transferTotal', label: 'SINPE',    color: '#A78BFA', icon: '📱' },
+                  ].filter(({ key }) => (bd as any)[key] > 0).map(({ key, label, color, icon }) => (
+                    <div key={key} style={{ background: `${color}12`, borderRadius: '9px', padding: '8px 10px', border: `1px solid ${color}25`, textAlign: 'center' }}>
+                      <p style={{ fontSize: '14px', marginBottom: '2px' }}>{icon}</p>
+                      <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginBottom: '2px' }}>{label}</p>
+                      <p style={{ fontSize: '12px', fontWeight: 800, color }}>{formatCurrency((bd as any)[key])}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {hasDiff && diff === 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', padding: '6px 10px', borderRadius: '8px', background: 'rgba(34,197,94,0.08)' }}>
-                <CheckCircle size={12} color="#22C55E" />
-                <p style={{ fontSize: '12px', fontWeight: 700, color: '#22C55E' }}>¡El efectivo cuadra perfectamente!</p>
+            {/* ── Total + efectivo esperado ── */}
+            {bd && bd.breakdown.length > 0 && (
+              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Total recaudado</p>
+                  <p style={{ fontSize: '16px', fontWeight: 800, color: C }}>{formatCurrency(bd.total)}</p>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'rgba(34,197,94,0.08)', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)' }}>
+                  <div>
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#22C55E' }}>💵 Efectivo esperado en caja</p>
+                    <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
+                      Apertura {formatCurrency(openingAmt)} + cobrado en efectivo {formatCurrency(cashReal)}
+                    </p>
+                  </div>
+                  <p style={{ fontSize: '15px', fontWeight: 800, color: '#22C55E' }}>{formatCurrency(expectedAmt)}</p>
+                </div>
               </div>
             )}
-          </label>
+          </div>
 
-          {/* Nota */}
-          <label style={{ display: 'block', marginBottom: '18px' }}>
+          {/* ── Input de conteo físico ── */}
+          <div style={{ marginBottom: '14px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>
+              Efectivo contado físicamente
+            </p>
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                <DollarSign size={16} color="var(--dax-text-muted)" />
+              </div>
+              <input
+                type="number" min="0" step="1000" placeholder="0"
+                autoFocus
+                value={amount}
+                onChange={e => { setAmount(e.target.value); setError(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                style={{
+                  width: '100%', padding: '13px 14px 13px 38px',
+                  borderRadius: '12px',
+                  border: `2px solid ${
+                    error   ? 'var(--dax-danger)' :
+                    isExact ? '#22C55E' :
+                    isOver  ? '#22C55E' :
+                    isUnder ? 'var(--dax-danger)' :
+                    'var(--dax-border)'
+                  }`,
+                  background:  'var(--dax-surface-2)',
+                  color:       'var(--dax-text-primary)',
+                  fontSize:    '22px',
+                  fontWeight:  800,
+                  boxSizing:   'border-box',
+                  outline:     'none',
+                  transition:  'border-color .15s',
+                }}
+              />
+            </div>
+
+            {/* Resultado del cuadre */}
+            {diff !== null && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                marginTop: '8px', padding: '9px 12px', borderRadius: '10px',
+                background: isExact ? 'rgba(34,197,94,0.1)' : isOver ? 'rgba(34,197,94,0.08)' : 'var(--dax-danger-bg)',
+                border:     `1px solid ${isExact || isOver ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+              }}>
+                {isExact || isOver
+                  ? <CheckCircle size={14} color="#22C55E" />
+                  : <AlertTriangle size={14} color="var(--dax-danger)" />
+                }
+                <div>
+                  <p style={{ fontSize: '12px', fontWeight: 700, color: isExact || isOver ? '#22C55E' : 'var(--dax-danger)', lineHeight: 1.2 }}>
+                    {isExact
+                      ? '✓ El efectivo cuadra perfectamente'
+                      : isOver
+                        ? `Sobrante de ${formatCurrency(diffAbs)}`
+                        : `Faltante de ${formatCurrency(diffAbs)}`
+                    }
+                  </p>
+                  {!isExact && (
+                    <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginTop: '1px' }}>
+                      Esperado: {formatCurrency(expectedAmt)} · Contado: {formatCurrency(parsed)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Nota de cierre ── */}
+          <div style={{ marginBottom: '18px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '6px' }}>
-              Nota de cierre <span style={{ fontWeight: 400, textTransform: 'none' }}>(opcional)</span>
+              Nota de cierre <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '10px' }}>(opcional)</span>
             </p>
             <input
-              type="text" placeholder="Observaciones del turno..."
-              value={notes} onChange={e => setNotes(e.target.value)}
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
+              type="text"
+              placeholder="Observaciones, incidencias del turno..."
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: '10px',
+                border: '1.5px solid var(--dax-border)',
+                background: 'var(--dax-surface-2)',
+                color: 'var(--dax-text-primary)',
+                fontSize: '13px', boxSizing: 'border-box',
+              }}
             />
-          </label>
+          </div>
 
-          {/* Error */}
+          {/* ── Error ── */}
           {error && (
-            <div style={{ background: 'var(--dax-danger-bg)', border: '1px solid var(--dax-danger)', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <AlertTriangle size={13} color="var(--dax-danger)" style={{ flexShrink: 0 }} />
+            <div style={{ background: 'var(--dax-danger-bg)', border: '1px solid var(--dax-danger)', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <AlertTriangle size={14} color="var(--dax-danger)" style={{ flexShrink: 0 }} />
               <p style={{ fontSize: '12px', color: 'var(--dax-danger)', fontWeight: 600 }}>{error}</p>
             </div>
           )}
 
-          {/* Botones */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
-            <button onClick={onCancel} style={{ padding: '12px', borderRadius: '12px', border: '1.5px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+          {/* ── Botones ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
+            <button
+              onClick={onCancel}
+              style={{ padding: '13px', borderRadius: '12px', border: '1.5px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+            >
               Cancelar
             </button>
             <button
               onClick={handleSubmit}
               disabled={isLoading || amount === ''}
               style={{
-                padding: '12px', borderRadius: '12px', border: 'none',
-                background: isLoading || amount === '' ? 'var(--dax-surface-2)' : '#EF4444',
-                color:      isLoading || amount === '' ? 'var(--dax-text-muted)' : '#fff',
-                fontSize: '13px', fontWeight: 800,
-                cursor: isLoading || amount === '' ? 'not-allowed' : 'pointer',
-                boxShadow: isLoading || amount === '' ? 'none' : '0 4px 16px rgba(239,68,68,0.35)',
-                transition: 'all .15s',
+                padding: '13px', borderRadius: '12px', border: 'none',
+                background:  isLoading || amount === '' ? 'var(--dax-surface-2)' : '#EF4444',
+                color:       isLoading || amount === '' ? 'var(--dax-text-muted)' : '#fff',
+                fontSize:    '14px', fontWeight: 800,
+                cursor:      isLoading || amount === '' ? 'not-allowed' : 'pointer',
+                boxShadow:   isLoading || amount === '' ? 'none' : '0 4px 20px rgba(239,68,68,0.4)',
+                transition:  'all .15s',
               }}
             >
-              {isLoading ? '⏳ Cerrando...' : '🔒 Cerrar turno'}
+              {isLoading ? '⏳ Cerrando turno...' : '🔒 Cerrar turno'}
             </button>
           </div>
+
         </div>
       </div>
     </div>
