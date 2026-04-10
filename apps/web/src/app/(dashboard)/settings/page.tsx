@@ -175,46 +175,8 @@ export default function SettingsPage() {
         <div>
           <SectionHeader title="Plan y suscripción" desc="Gestiona tu plan y facturación" />
           <PlanSection showToast={showToast} />
-          <div style={{ background: 'var(--dax-coral-soft)', border: '1px solid var(--dax-coral-border)', borderRadius: 'var(--dax-radius-lg)', padding: '20px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-              <div>
-                <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--dax-coral)', marginBottom: '4px' }}>Plan actual</p>
-                <p style={{ fontSize: '26px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{planDisplay}</p>
-                <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', marginTop: '4px' }}>${planPrice}/mes</p>
-              </div>
-              <span className="dax-badge dax-badge-success">Activo</span>
-            </div>
-          </div>
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-secondary)', marginBottom: '12px' }}>Incluido en tu plan</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(planFeatures[planName] ?? planFeatures.starter).map((feat, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: feat.included ? 'var(--dax-success-bg)' : 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Check size={10} color={feat.included ? 'var(--dax-success)' : 'var(--dax-text-muted)'} />
-                  </div>
-                  <span style={{ fontSize: '13px', color: feat.included ? 'var(--dax-text-primary)' : 'var(--dax-text-muted)', textDecoration: feat.included ? 'none' : 'line-through' }}>{feat.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          {planName !== 'scale' && (
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-secondary)', marginBottom: '12px' }}>Actualizar plan</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-                {[{ name: 'starter', label: 'Starter', price: 29 }, { name: 'growth', label: 'Growth', price: 69 }, { name: 'scale', label: 'Scale', price: 149 }].filter(p => p.name !== planName).map(plan => (
-                  <div key={plan.name} className="dax-card" style={{ padding: '16px' }}>
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '4px' }}>{plan.label}</p>
-                    <p style={{ fontSize: '20px', fontWeight: 700, color: 'var(--dax-coral)', marginBottom: '12px' }}>${plan.price}<span style={{ fontSize: '12px', color: 'var(--dax-text-muted)', fontWeight: 400 }}>/mes</span></p>
-                    <button className="dax-btn-primary" style={{ width: '100%', fontSize: '12px', padding: '8px' }}>Cambiar</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
-
       {activeSection === 'users' && (
         <div>
           <SectionHeader title="Usuarios y roles" desc="Gestiona quién tiene acceso a DaxCloud" />
