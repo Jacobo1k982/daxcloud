@@ -162,6 +162,7 @@ model Tenant {
   cashRegisterShifts   CashRegisterShift[]
   happyHours           HappyHour[]
   notifications        Notification[]
+  paymentRequests      PaymentRequest[]
 
   @@map("tenants")
 }
