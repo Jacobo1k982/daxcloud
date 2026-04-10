@@ -1502,20 +1502,26 @@ model HappyHourProduct {
   @@map("happy_hour_products")
 }
 
-model Notification {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  type      String
-  title     String
-  message   String
-  icon      String   @default("bell")
-  color     String   @default("#5AAAF0")
-  link      String?
-  meta      Json?
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+model PaymentRequest {
+  id             String   @id @default(uuid())
+  tenantId       String
+  planName       String
+  billingCycle   String   @default("monthly")
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("USD")
+  reference      String   @unique
+  receiptUrl     String?
+  status         String   @default("pending")
+  notes          String?
+  requestedBy    String
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  @@index([tenantId, read])
-  @@index([tenantId, createdAt])
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("payment_requests")
 }

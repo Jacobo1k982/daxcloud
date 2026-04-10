@@ -23,6 +23,7 @@ import { RestaurantModule }    from './modules/restaurant/restaurant.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CashRegisterModule }  from './modules/cash-register/cash-register.module';
 import { SubscriptionGuard }   from './modules/auth/guards/subscription.guard';
+import { PaymentRequestsModule } from './modules/payment-requests/payment-requests.module';
 
 @Module({
   imports: [
@@ -48,6 +49,8 @@ import { SubscriptionGuard }   from './modules/auth/guards/subscription.guard';
     RestaurantModule,
     NotificationsModule,
     CashRegisterModule,  // ← registrado globalmente
+    PaymentRequestsModule,
+    
   ],
   providers: [
     {
