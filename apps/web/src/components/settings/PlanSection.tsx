@@ -1,42 +1,43 @@
 'use client';
 
-import { useState }       from 'react';
-import { createPortal }   from 'react-dom';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api }            from '@/lib/api';
-import { PLANS }          from '@/lib/plans';
+import { api } from '@/lib/api';
+import { PLANS } from '@/lib/plans';
 import {
   Check, X, AlertTriangle, CreditCard,
   Calendar, Receipt, Zap, ArrowRight,
   Shield, Star, Crown, Clock, Loader2,
   RefreshCw, Gift,
 } from 'lucide-react';
+import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 interface Subscription {
-  id?:                  string;
-  plan?:                { name: string; displayName?: string; priceMonthly?: number };
-  status?:              string;
-  currentPeriodStart?:  string;
-  currentPeriodEnd?:    string;
-  cancelAtPeriodEnd?:   boolean;
-  lastFour?:            string;
-  cardBrand?:           string;
-  trialEndsAt?:         string;
+  id?: string;
+  plan?: { name: string; displayName?: string; priceMonthly?: number };
+  status?: string;
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
+  lastFour?: string;
+  cardBrand?: string;
+  trialEndsAt?: string;
 }
 
 // ── Configuración visual ──────────────────────────────────────────────────────
 const STATUS_INFO: Record<string, { label: string; color: string; bg: string }> = {
-  active:    { label: 'Activa',     color: '#3DBF7F', bg: 'rgba(61,191,127,.12)'  },
-  trialing:  { label: 'Trial',      color: '#5AAAF0', bg: 'rgba(90,170,240,.12)'  },
-  past_due:  { label: 'Vencida',    color: '#F0A030', bg: 'rgba(240,160,48,.12)'  },
-  cancelled: { label: 'Cancelada',  color: '#E05050', bg: 'rgba(224,80,80,.12)'   },
+  active: { label: 'Activa', color: '#3DBF7F', bg: 'rgba(61,191,127,.12)' },
+  trialing: { label: 'Trial', color: '#5AAAF0', bg: 'rgba(90,170,240,.12)' },
+  past_due: { label: 'Vencida', color: '#F0A030', bg: 'rgba(240,160,48,.12)' },
+  cancelled: { label: 'Cancelada', color: '#E05050', bg: 'rgba(224,80,80,.12)' },
 };
 
 const PLAN_ICONS: Record<string, any> = {
   starter: Shield,
-  growth:  Star,
-  scale:   Crown,
+  growth: Star,
+  scale: Crown,
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -58,12 +59,13 @@ function trialDaysLeft(trialEndsAt?: string): number | null {
 // ══════════════════════════════════════════════════════════════════════════════
 function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, changingTo }: {
   currentPlanKey: string;
-  onClose:        () => void;
-  onChangePlan:   (name: string) => void;
-  isPending:      boolean;
-  changingTo:     string | null;
+  onClose: () => void;
+  onChangePlan: (name: string) => void;
+  isPending: boolean;
+  changingTo: string | null;
 }) {
   const [annual, setAnnual] = useState(false);
+  const [sinpePlan, setSinpePlan] = useState<typeof PLANS[number] | null>(null);
 
   return createPortal(
     <div
@@ -114,11 +116,11 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
         {/* Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
           {PLANS.map(plan => {
-            const isCurrent  = plan.name === currentPlanKey;
-            const price      = annual ? plan.annualMonthly : plan.monthlyPrice;
+            const isCurrent = plan.name === currentPlanKey;
+            const price = annual ? plan.annualMonthly : plan.monthlyPrice;
             const isChanging = changingTo === plan.name && isPending;
-            const saving     = plan.monthlyPrice * 12 - plan.annualPrice;
-            const Icon       = PLAN_ICONS[plan.name] ?? Shield;
+            const saving = plan.monthlyPrice * 12 - plan.annualPrice;
+            const Icon = PLAN_ICONS[plan.name] ?? Shield;
 
             return (
               <div key={plan.name} style={{
@@ -128,8 +130,8 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                   : plan.popular
                     ? 'linear-gradient(145deg, rgba(255,92,53,.06), rgba(15,25,36,.95))'
                     : 'rgba(22,34,53,.85)',
-                border:    `1.5px solid ${isCurrent ? plan.color : plan.popular ? 'rgba(255,92,53,.3)' : 'rgba(30,58,95,.5)'}`,
-                position:  'relative',
+                border: `1.5px solid ${isCurrent ? plan.color : plan.popular ? 'rgba(255,92,53,.3)' : 'rgba(30,58,95,.5)'}`,
+                position: 'relative',
                 backdropFilter: 'blur(12px)',
                 transition: 'all .2s',
               }}>
@@ -181,11 +183,11 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                   style={{
                     width: '100%', padding: '12px',
                     background: isCurrent ? 'rgba(30,58,95,.3)' : isChanging ? 'rgba(30,58,95,.5)' : plan.popular ? `linear-gradient(135deg, ${plan.color}, #FF3D1F)` : `${plan.color}20`,
-                    border:     `1.5px solid ${isCurrent ? 'rgba(30,58,95,.4)' : plan.color}`,
+                    border: `1.5px solid ${isCurrent ? 'rgba(30,58,95,.4)' : plan.color}`,
                     borderRadius: '12px',
-                    color:  isCurrent ? 'rgba(113,128,150,.6)' : isChanging ? 'rgba(113,128,150,.6)' : plan.popular ? '#fff' : plan.color,
+                    color: isCurrent ? 'rgba(113,128,150,.6)' : isChanging ? 'rgba(113,128,150,.6)' : plan.popular ? '#fff' : plan.color,
                     fontSize: '13px', fontWeight: 700,
-                    cursor:   isCurrent || isPending ? 'default' : 'pointer',
+                    cursor: isCurrent || isPending ? 'default' : 'pointer',
                     transition: 'all .15s',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                   }}
@@ -193,7 +195,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                   {isChanging
                     ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Cambiando...</>
                     : isCurrent ? '✓ Plan actual'
-                    : <>{plan.cta} <ArrowRight size={13} /></>
+                      : <>{plan.cta} <ArrowRight size={13} /></>
                   }
                 </button>
               </div>
@@ -215,9 +217,9 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
 // ══════════════════════════════════════════════════════════════════════════════
 function CancelModal({ subscription, onClose, onConfirm, isPending }: {
   subscription: Subscription;
-  onClose:      () => void;
-  onConfirm:    () => void;
-  isPending:    boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isPending: boolean;
 }) {
   const [confirmText, setConfirmText] = useState('');
 
@@ -289,19 +291,20 @@ export function PlanSection({ showToast }: {
   showToast: (msg: string, type?: 'success' | 'error') => void;
 }) {
   const queryClient = useQueryClient();
-  const [showChangePlan,  setShowChangePlan]  = useState(false);
+  const [showChangePlan, setShowChangePlan] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [changingTo,      setChangingTo]      = useState<string | null>(null);
+  const [changingTo, setChangingTo] = useState<string | null>(null);
+  const [sinpePlan, setSinpePlan] = useState<typeof PLANS[number] | null>(null);
 
   const { data: subscription, isLoading } = useQuery<Subscription>({
     queryKey: ['billing-subscription'],
-    queryFn:  async () => { const { data } = await api.get('/billing/subscription'); return data; },
+    queryFn: async () => { const { data } = await api.get('/billing/subscription'); return data; },
     retry: 1,
   });
 
   const { data: invoices = [] } = useQuery<any[]>({
     queryKey: ['billing-invoices'],
-    queryFn:  async () => { const { data } = await api.get('/billing/invoices'); return data; },
+    queryFn: async () => { const { data } = await api.get('/billing/invoices'); return data; },
   });
 
   const changePlanMutation = useMutation({
@@ -354,15 +357,15 @@ export function PlanSection({ showToast }: {
     </div>
   );
 
-  const planKey    = subscription?.plan?.name    ?? 'starter';
-  const planData   = PLANS.find(p => p.name === planKey) ?? PLANS[0];
+  const planKey = subscription?.plan?.name ?? 'starter';
+  const planData = PLANS.find(p => p.name === planKey) ?? PLANS[0];
   const statusInfo = STATUS_INFO[subscription?.status ?? 'active'] ?? STATUS_INFO.active;
-  const PlanIcon   = PLAN_ICONS[planKey] ?? Shield;
-  const daysLeft   = trialDaysLeft(subscription?.trialEndsAt ?? undefined);
-  const saving     = planData.monthlyPrice * 12 - planData.annualPrice;
-  const savingPct  = Math.round((saving / (planData.monthlyPrice * 12)) * 100);
-  const isTrial    = subscription?.status === 'trialing';
-  const isActive   = subscription?.status === 'active';
+  const PlanIcon = PLAN_ICONS[planKey] ?? Shield;
+  const daysLeft = trialDaysLeft(subscription?.trialEndsAt ?? undefined);
+  const saving = planData.monthlyPrice * 12 - planData.annualPrice;
+  const savingPct = Math.round((saving / (planData.monthlyPrice * 12)) * 100);
+  const isTrial = subscription?.status === 'trialing';
+  const isActive = subscription?.status === 'active';
 
   return (
     <>
@@ -372,8 +375,8 @@ export function PlanSection({ showToast }: {
         {isTrial && daysLeft !== null && (
           <div style={{
             borderRadius: '14px', padding: '18px 20px',
-            background:   daysLeft <= 3 ? 'rgba(224,80,80,.06)' : 'rgba(90,170,240,.06)',
-            border:       `1px solid ${daysLeft <= 3 ? 'rgba(224,80,80,.25)' : 'rgba(90,170,240,.25)'}`,
+            background: daysLeft <= 3 ? 'rgba(224,80,80,.06)' : 'rgba(90,170,240,.06)',
+            border: `1px solid ${daysLeft <= 3 ? 'rgba(224,80,80,.25)' : 'rgba(90,170,240,.25)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -640,9 +643,25 @@ export function PlanSection({ showToast }: {
         <ChangePlanModal
           currentPlanKey={planKey}
           onClose={() => setShowChangePlan(false)}
-          onChangePlan={name => { setChangingTo(name); changePlanMutation.mutate(name); }}
-          isPending={changePlanMutation.isPending}
-          changingTo={changingTo}
+          onChangePlan={name => {
+            const plan = PLANS.find(p => p.name === name);
+            if (plan) {
+              setShowChangePlan(false);
+              setSinpePlan(plan as any);
+            }
+          }}
+          isPending={false}
+          changingTo={null}
+        />
+      )}
+      {sinpePlan && typeof window !== 'undefined' && (
+        <SinpePaymentModal
+          planName={sinpePlan.name}
+          planLabel={sinpePlan.label}
+          planColor={sinpePlan.color}
+          monthlyPrice={sinpePlan.monthlyPrice}
+          annualPrice={sinpePlan.annualPrice}
+          onClose={() => setSinpePlan(null)}
         />
       )}
       {showCancelModal && typeof window !== 'undefined' && (
