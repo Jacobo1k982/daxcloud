@@ -2,27 +2,27 @@ import {
   Injectable, NotFoundException, BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Resend }        from 'resend';
+import { Resend } from 'resend';
 
 const PLAN_PRICES: Record<string, { monthly: number; annual: number }> = {
-  starter: { monthly: 19,  annual: 190 },
-  growth:  { monthly: 40,  annual: 400 },
-  scale:   { monthly: 60,  annual: 600 },
+  starter: { monthly: 19, annual: 190 },
+  growth: { monthly: 40, annual: 400 },
+  scale: { monthly: 60, annual: 600 },
 };
 
 const PLAN_LABELS: Record<string, string> = {
   starter: 'Starter',
-  growth:  'Growth',
-  scale:   'Scale',
+  growth: 'Growth',
+  scale: 'Scale',
 };
 
 const SINPE_NUMBER = '87905876';
-const SINPE_NAME   = 'Jacobo Gutiérrez Rodríguez';
-const ADMIN_EMAIL  = 'ventas@daxcloud.shop';
+const SINPE_NAME = 'Jacobo Gutiérrez Rodríguez';
+const ADMIN_EMAIL = 'ventas@daxcloud.shop';
 
 function generateReference(tenantId: string): string {
   const short = tenantId.replace(/-/g, '').slice(0, 6).toUpperCase();
-  const rand  = Math.floor(Math.random() * 9000 + 1000);
+  const rand = Math.floor(Math.random() * 9000 + 1000);
   return `DAX-${short}-${rand}`;
 }
 
@@ -37,9 +37,9 @@ export class PaymentRequestsService {
   // ── Crear solicitud de pago ───────────────────────────────────────────────
   async createRequest(
     tenantId: string,
-    userId:   string,
+    userId: string,
     dto: {
-      planName:     string;
+      planName: string;
       billingCycle: 'monthly' | 'annual';
     },
   ) {
@@ -75,14 +75,14 @@ export class PaymentRequestsService {
     });
 
     // Notifica al admin
-    await this._notifyAdmin(request, tenantId).catch(() => {});
+    await this._notifyAdmin(request, tenantId).catch(() => { });
 
     return {
       ...request,
       sinpeNumber: SINPE_NUMBER,
-      sinpeName:   SINPE_NAME,
+      sinpeName: SINPE_NAME,
       amount,
-      currency:    'USD',
+      currency: 'USD',
     };
   }
 
@@ -98,11 +98,11 @@ export class PaymentRequestsService {
 
     const updated = await this.prisma.paymentRequest.update({
       where: { id: requestId },
-      data:  { receiptUrl },
+      data: { receiptUrl },
     });
 
     // Notifica al admin que hay comprobante
-    await this._notifyAdminReceipt(updated, tenantId).catch(() => {});
+    await this._notifyAdminReceipt(updated, tenantId).catch(() => { });
 
     return updated;
   }
@@ -110,7 +110,7 @@ export class PaymentRequestsService {
   // ── Ver mis solicitudes ───────────────────────────────────────────────────
   async getMyRequests(tenantId: string) {
     return this.prisma.paymentRequest.findMany({
-      where:   { tenantId },
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -118,7 +118,7 @@ export class PaymentRequestsService {
   // ── [ADMIN] Ver todas las solicitudes ─────────────────────────────────────
   async getAllRequests(filters?: { status?: string }) {
     return this.prisma.paymentRequest.findMany({
-      where:   filters?.status ? { status: filters.status } : {},
+      where: filters?.status ? { status: filters.status } : {},
       include: {
         tenant: {
           select: { name: true, slug: true, email: true },
@@ -131,7 +131,7 @@ export class PaymentRequestsService {
   // ── [ADMIN] Aprobar solicitud ─────────────────────────────────────────────
   async approveRequest(requestId: string, adminUserId: string, notes?: string) {
     const request = await this.prisma.paymentRequest.findUnique({
-      where:   { id: requestId },
+      where: { id: requestId },
       include: { tenant: true },
     });
     if (!request) throw new NotFoundException('Solicitud no encontrada');
@@ -145,7 +145,7 @@ export class PaymentRequestsService {
     });
     if (!plan) throw new NotFoundException('Plan no encontrado');
 
-    const now       = new Date();
+    const now = new Date();
     const periodEnd = new Date(now);
     if (request.billingCycle === 'annual') {
       periodEnd.setFullYear(periodEnd.getFullYear() + 1);
@@ -157,20 +157,20 @@ export class PaymentRequestsService {
     await this.prisma.subscription.upsert({
       where: { tenantId: request.tenantId },
       update: {
-        planId:             plan.id,
-        status:             'active',
+        planId: plan.id,
+        status: 'active',
         currentPeriodStart: now,
-        currentPeriodEnd:   periodEnd,
-        cancelAtPeriodEnd:  false,
-        cancelledAt:        null,
-        trialEndsAt:        null,
+        currentPeriodEnd: periodEnd,
+        cancelAtPeriodEnd: false,
+        cancelledAt: null,
+        trialEndsAt: null,
       },
       create: {
-        tenantId:           request.tenantId,
-        planId:             plan.id,
-        status:             'active',
+        tenantId: request.tenantId,
+        planId: plan.id,
+        status: 'active',
         currentPeriodStart: now,
-        currentPeriodEnd:   periodEnd,
+        currentPeriodEnd: periodEnd,
       },
     });
 
@@ -179,7 +179,7 @@ export class PaymentRequestsService {
     for (const [key, value] of Object.entries(features)) {
       if (typeof value === 'boolean') {
         await this.prisma.featureFlag.upsert({
-          where:  { tenantId_featureKey: { tenantId: request.tenantId, featureKey: key } },
+          where: { tenantId_featureKey: { tenantId: request.tenantId, featureKey: key } },
           update: { enabled: value },
           create: { tenantId: request.tenantId, featureKey: key, enabled: value },
         });
@@ -194,11 +194,11 @@ export class PaymentRequestsService {
       await this.prisma.invoice.create({
         data: {
           subscriptionId: sub.id,
-          amount:         request.amount,
-          currency:       'USD',
-          status:         'paid',
-          description:    `Plan ${PLAN_LABELS[request.planName]} · SINPE #${request.reference}`,
-          paidAt:         now,
+          amount: request.amount,
+          currency: 'USD',
+          status: 'paid',
+          description: `Plan ${PLAN_LABELS[request.planName]} · SINPE #${request.reference}`,
+          paidAt: now,
         },
       });
     }
@@ -207,7 +207,7 @@ export class PaymentRequestsService {
     const updated = await this.prisma.paymentRequest.update({
       where: { id: requestId },
       data: {
-        status:     'approved',
+        status: 'approved',
         notes,
         reviewedBy: adminUserId,
         reviewedAt: now,
@@ -215,7 +215,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al cliente
-    await this._notifyClientApproved(request).catch(() => {});
+    await this._notifyClientApproved(request).catch(() => { });
 
     return updated;
   }
@@ -223,7 +223,7 @@ export class PaymentRequestsService {
   // ── [ADMIN] Rechazar solicitud ────────────────────────────────────────────
   async rejectRequest(requestId: string, adminUserId: string, notes?: string) {
     const request = await this.prisma.paymentRequest.findUnique({
-      where:   { id: requestId },
+      where: { id: requestId },
       include: { tenant: true },
     });
     if (!request) throw new NotFoundException('Solicitud no encontrada');
@@ -234,7 +234,7 @@ export class PaymentRequestsService {
     const updated = await this.prisma.paymentRequest.update({
       where: { id: requestId },
       data: {
-        status:     'rejected',
+        status: 'rejected',
         notes,
         reviewedBy: adminUserId,
         reviewedAt: new Date(),
@@ -242,7 +242,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al cliente
-    await this._notifyClientRejected(request, notes).catch(() => {});
+    await this._notifyClientRejected(request, notes).catch(() => { });
 
     return updated;
   }
@@ -250,13 +250,13 @@ export class PaymentRequestsService {
   // ── Emails ────────────────────────────────────────────────────────────────
   private async _notifyAdmin(request: any, tenantId: string) {
     const tenant = await this.prisma.tenant.findUnique({
-      where:  { id: tenantId },
+      where: { id: tenantId },
       select: { name: true, email: true },
     });
 
     await this.resend.emails.send({
-      from:    'DaxCloud <notificaciones@daxcloud.shop>',
-      to:      ADMIN_EMAIL,
+      from: 'DaxCloud <ventas@daxcloud.shop>',
+      to: ADMIN_EMAIL,
       subject: `💰 Nueva solicitud de pago — ${PLAN_LABELS[request.planName]} · ${tenant?.name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
@@ -277,13 +277,13 @@ export class PaymentRequestsService {
 
   private async _notifyAdminReceipt(request: any, tenantId: string) {
     const tenant = await this.prisma.tenant.findUnique({
-      where:  { id: tenantId },
+      where: { id: tenantId },
       select: { name: true },
     });
 
     await this.resend.emails.send({
-      from:    'DaxCloud <notificaciones@daxcloud.shop>',
-      to:      ADMIN_EMAIL,
+      from: 'DaxCloud <ventas@daxcloud.shop>',
+      to: ADMIN_EMAIL,
       subject: `📎 Comprobante subido — ${tenant?.name} · ${request.reference}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
@@ -302,14 +302,14 @@ export class PaymentRequestsService {
 
   private async _notifyClientApproved(request: any) {
     const tenant = await this.prisma.tenant.findUnique({
-      where:  { id: request.tenantId },
+      where: { id: request.tenantId },
       select: { name: true, email: true },
     });
     if (!tenant?.email) return;
 
     await this.resend.emails.send({
-      from:    'DaxCloud <notificaciones@daxcloud.shop>',
-      to:      tenant.email,
+      from: 'DaxCloud <ventas@daxcloud.shop>',
+      to: tenant.email,
       subject: `✅ Tu plan ${PLAN_LABELS[request.planName]} está activo — DaxCloud`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #0F1924; color: #fff;">
@@ -331,14 +331,14 @@ export class PaymentRequestsService {
 
   private async _notifyClientRejected(request: any, notes?: string) {
     const tenant = await this.prisma.tenant.findUnique({
-      where:  { id: request.tenantId },
+      where: { id: request.tenantId },
       select: { name: true, email: true },
     });
     if (!tenant?.email) return;
 
     await this.resend.emails.send({
-      from:    'DaxCloud <notificaciones@daxcloud.shop>',
-      to:      tenant.email,
+      from: 'DaxCloud <ventas@daxcloud.shop>',
+      to: tenant.email,
       subject: `❌ Problema con tu pago — DaxCloud`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
