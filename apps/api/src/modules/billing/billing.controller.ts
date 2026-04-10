@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Put, Body, UseGuards } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard }   from '../auth/guards/jwt-auth.guard';
+import { RolesGuard }     from '../auth/guards/roles.guard';
+import { Roles }          from '../../common/decorators/roles.decorator';
+import { CurrentUser }    from '../../common/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('billing')
@@ -24,6 +24,12 @@ export class BillingController {
   @Post('change-plan')
   changePlan(@CurrentUser() user: any, @Body() body: { planName: string }) {
     return this.billingService.changePlan(user.tenantId, body.planName);
+  }
+
+  @Roles('admin')
+  @Post('start-trial')
+  startTrial(@CurrentUser() user: any) {
+    return this.billingService.startTrial(user.tenantId);
   }
 
   @Roles('admin')
