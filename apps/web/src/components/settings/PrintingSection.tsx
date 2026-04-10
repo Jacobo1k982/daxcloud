@@ -42,11 +42,11 @@ const Label = ({ children }: { children: React.ReactNode }) => (
 export function PrintingSection({ showToast }: Props) {
   const { tenant, user, formatCurrency } = useAuth();
   const { config, saveConfig, resetConfig } = usePrintConfig();
-  const { print, preview }                  = useReceiptPrinter();
+  const { print, preview } = useReceiptPrinter();
 
   const [printerStatus, setPrinterStatus] = useState<'unknown' | 'available' | 'unavailable'>('unknown');
-  const [detecting, setDetecting]         = useState(false);
-  const [saved, setSaved]                 = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   // Detecta si la API de impresión está disponible
   useEffect(() => {
@@ -73,28 +73,28 @@ export function PrintingSection({ showToast }: Props) {
 
   // Datos de ejemplo para preview
   const sampleReceipt: ReceiptData = {
-    businessName:  tenant?.name ?? 'Mi Negocio',
-    branchName:    'Sucursal Principal',
-    taxId:         tenant?.taxId ?? undefined,
-    phone:         tenant?.phone ?? undefined,
-    address:       tenant?.address ?? undefined,
-    saleId:        'PREVIEW-ABCD1234',
-    cashierName:   `${user?.firstName ?? 'Cajero'} ${user?.lastName ?? ''}`,
-    createdAt:     new Date().toISOString(),
+    businessName: tenant?.name ?? 'Mi Negocio',
+    branchName: 'Sucursal Principal',
+    taxId: (tenant as any)?.taxId ?? undefined,
+    phone: (tenant as any)?.phone ?? undefined,
+    address: (tenant as any)?.address ?? undefined,
+    saleId: 'PREVIEW-ABCD1234',
+    cashierName: `${user?.firstName ?? 'Cajero'} ${user?.lastName ?? ''}`,
+    createdAt: new Date().toISOString(),
     items: [
       { name: 'Pan de queso (x6)', quantity: 2, unitPrice: 1500, subtotal: 3000 },
-      { name: 'Café americano',    quantity: 1, unitPrice: 800,  subtotal: 800  },
-      { name: 'Croissant',         quantity: 3, unitPrice: 600,  subtotal: 1800 },
+      { name: 'Café americano', quantity: 1, unitPrice: 800, subtotal: 800 },
+      { name: 'Croissant', quantity: 3, unitPrice: 600, subtotal: 1800 },
     ],
-    subtotal:      5600,
-    discount:      0,
-    tax:           0,
-    total:         5600,
+    subtotal: 5600,
+    discount: 0,
+    tax: 0,
+    total: 5600,
     paymentMethod: 'mixed',
     mixedPayments: { cash: 3000, card: 2600 },
-    notes:         'Sin azúcar',
-    header:        config.header,
-    footer:        config.footer,
+    notes: 'Sin azúcar',
+    header: config.header,
+    footer: config.footer,
   };
 
   return (
@@ -109,11 +109,10 @@ export function PrintingSection({ showToast }: Props) {
           : printerStatus === 'unavailable'
             ? 'var(--dax-danger-bg)'
             : 'var(--dax-surface-2)',
-        border: `1px solid ${
-          printerStatus === 'available'   ? 'rgba(34,197,94,0.25)' :
+        border: `1px solid ${printerStatus === 'available' ? 'rgba(34,197,94,0.25)' :
           printerStatus === 'unavailable' ? 'rgba(239,68,68,0.25)' :
-          'var(--dax-border)'
-        }`,
+            'var(--dax-border)'
+          }`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
@@ -125,9 +124,9 @@ export function PrintingSection({ showToast }: Props) {
           </div>
           <div>
             <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>
-              {printerStatus === 'available'   ? 'Impresión disponible' :
-               printerStatus === 'unavailable' ? 'Impresión no disponible' :
-               'Verificando impresora...'}
+              {printerStatus === 'available' ? 'Impresión disponible' :
+                printerStatus === 'unavailable' ? 'Impresión no disponible' :
+                  'Verificando impresora...'}
             </p>
             <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>
               {printerStatus === 'available'
@@ -188,10 +187,10 @@ export function PrintingSection({ showToast }: Props) {
               onClick={() => saveConfig({ paperWidth: w })}
               style={{
                 padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-                border:      `1.5px solid ${config.paperWidth === w ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
-                background:  config.paperWidth === w ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
-                color:       config.paperWidth === w ? 'var(--dax-coral)' : 'var(--dax-text-secondary)',
-                fontWeight:  config.paperWidth === w ? 700 : 400, fontSize: '13px',
+                border: `1.5px solid ${config.paperWidth === w ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
+                background: config.paperWidth === w ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
+                color: config.paperWidth === w ? 'var(--dax-coral)' : 'var(--dax-text-secondary)',
+                fontWeight: config.paperWidth === w ? 700 : 400, fontSize: '13px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
               }}
             >
@@ -249,9 +248,9 @@ export function PrintingSection({ showToast }: Props) {
         <Label>Mostrar en el recibo</Label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {[
-            { key: 'showTaxId',   label: 'Cédula / RUC del negocio', desc: 'Número de identificación tributaria' },
-            { key: 'showPhone',   label: 'Teléfono',                  desc: 'Número de contacto del negocio'     },
-            { key: 'showAddress', label: 'Dirección',                 desc: 'Dirección de la sucursal'           },
+            { key: 'showTaxId', label: 'Cédula / RUC del negocio', desc: 'Número de identificación tributaria' },
+            { key: 'showPhone', label: 'Teléfono', desc: 'Número de contacto del negocio' },
+            { key: 'showAddress', label: 'Dirección', desc: 'Dirección de la sucursal' },
           ].map(item => (
             <div key={item.key} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
