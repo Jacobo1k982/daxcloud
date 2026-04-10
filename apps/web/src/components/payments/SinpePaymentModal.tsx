@@ -1,38 +1,39 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createPortal }     from 'react-dom';
-import { useMutation }      from '@tanstack/react-query';
-import { api }              from '@/lib/api';
+import { createPortal } from 'react-dom';
+import { useMutation } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 import {
   X, Copy, Check, Upload, Loader2,
   Smartphone, AlertCircle, CheckCircle,
 } from 'lucide-react';
+import { getImageUrl } from '@/lib/imageUrl';
 
 interface Props {
-  planName:     string;
-  planLabel:    string;
-  planColor:    string;
+  planName: string;
+  planLabel: string;
+  planColor: string;
   monthlyPrice: number;
-  annualPrice:  number;
-  onClose:      () => void;
+  annualPrice: number;
+  onClose: () => void;
 }
 
 const SINPE_NUMBER = '87905876';
-const SINPE_NAME   = 'Jacobo Gutiérrez Rodríguez';
+const SINPE_NAME = 'Jacobo Gutiérrez Rodríguez';
 
 export function SinpePaymentModal({
   planName, planLabel, planColor,
   monthlyPrice, annualPrice, onClose,
 }: Props) {
-  const [cycle,        setCycle]        = useState<'monthly' | 'annual'>('monthly');
-  const [step,         setStep]         = useState<'instructions' | 'upload' | 'done'>('instructions');
-  const [requestId,    setRequestId]    = useState<string | null>(null);
-  const [reference,    setReference]    = useState<string | null>(null);
+  const [cycle, setCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [step, setStep] = useState<'instructions' | 'upload' | 'done'>('instructions');
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
   const [copiedNumber, setCopiedNumber] = useState(false);
-  const [copiedRef,    setCopiedRef]    = useState(false);
+  const [copiedRef, setCopiedRef] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
-  const [receiptUrl,   setReceiptUrl]   = useState<string | null>(null);
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const amount = cycle === 'annual' ? annualPrice : monthlyPrice;
@@ -73,9 +74,8 @@ export function SinpePaymentModal({
       const { data } = await api.post('/uploads/product-image', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const url = `${(process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$/, '')}/api${data.url}`;
-      setReceiptUrl(url);
-      await uploadReceiptMutation.mutateAsync(url);
+      setReceiptUrl(data.url);
+      await uploadReceiptMutation.mutateAsync(getImageUrl(data.url) ?? data.url);
     } catch {
       alert('Error al subir el comprobante');
     } finally {
@@ -144,15 +144,15 @@ export function SinpePaymentModal({
               {/* Selector de ciclo */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
                 {[
-                  { key: 'monthly', label: 'Mensual',  price: `$${monthlyPrice}/mes`,          sub: 'Renovación mensual'          },
-                  { key: 'annual',  label: 'Anual',     price: `$${annualPrice}/año`,            sub: `$${Math.round(annualPrice/12)}/mes · 2 meses gratis` },
+                  { key: 'monthly', label: 'Mensual', price: `$${monthlyPrice}/mes`, sub: 'Renovación mensual' },
+                  { key: 'annual', label: 'Anual', price: `$${annualPrice}/año`, sub: `$${Math.round(annualPrice / 12)}/mes · 2 meses gratis` },
                 ].map(opt => (
                   <button
                     key={opt.key}
                     onClick={() => setCycle(opt.key as any)}
                     style={{
                       padding: '12px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left',
-                      border:     `1.5px solid ${cycle === opt.key ? planColor : 'var(--dax-border)'}`,
+                      border: `1.5px solid ${cycle === opt.key ? planColor : 'var(--dax-border)'}`,
                       background: cycle === opt.key ? `${planColor}10` : 'var(--dax-surface-2)',
                       transition: 'all .15s',
                     }}

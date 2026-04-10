@@ -75,7 +75,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al admin
-    await this._notifyAdmin(request, tenantId).catch(() => { });
+    await this._notifyAdmin(request, tenantId).catch(() => {});
 
     return {
       ...request,
@@ -102,7 +102,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al admin que hay comprobante
-    await this._notifyAdminReceipt(updated, tenantId).catch(() => { });
+    await this._notifyAdminReceipt(updated, tenantId).catch(() => {});
 
     return updated;
   }
@@ -175,14 +175,16 @@ export class PaymentRequestsService {
     });
 
     // Actualiza feature flags
-    const features = plan.features as Record<string, any>;
-    for (const [key, value] of Object.entries(features)) {
-      if (typeof value === 'boolean') {
-        await this.prisma.featureFlag.upsert({
-          where: { tenantId_featureKey: { tenantId: request.tenantId, featureKey: key } },
-          update: { enabled: value },
-          create: { tenantId: request.tenantId, featureKey: key, enabled: value },
-        });
+    const features = plan.features;
+    if (features && typeof features === 'object' && !Array.isArray(features)) {
+      for (const [key, value] of Object.entries(features as Record<string, unknown>)) {
+        if (typeof value === 'boolean') {
+          await this.prisma.featureFlag.upsert({
+            where: { tenantId_featureKey: { tenantId: request.tenantId, featureKey: key } },
+            update: { enabled: value },
+            create: { tenantId: request.tenantId, featureKey: key, enabled: value },
+          });
+        }
       }
     }
 
@@ -215,7 +217,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al cliente
-    await this._notifyClientApproved(request).catch(() => { });
+    await this._notifyClientApproved(request).catch(() => {});
 
     return updated;
   }
@@ -242,7 +244,7 @@ export class PaymentRequestsService {
     });
 
     // Notifica al cliente
-    await this._notifyClientRejected(request, notes).catch(() => { });
+    await this._notifyClientRejected(request, notes).catch(() => {});
 
     return updated;
   }
