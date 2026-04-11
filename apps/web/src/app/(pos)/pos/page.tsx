@@ -1,54 +1,41 @@
 'use client';
-
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
-import { CashRegisterGate } from '@/components/pos/CashRegisterGate';
+import { useAuth }             from '@/hooks/useAuth';
+import { api }                 from '@/lib/api';
+import { CashRegisterGate }    from '@/components/pos/CashRegisterGate';
+import { useHeldOrders }       from '@/hooks/useHeldOrders';
+import type { HeldOrder }      from '@/hooks/useHeldOrders';
 import {
   Search, X, Plus, Minus, ShoppingCart,
   ChefHat, Scissors, Shirt, Leaf, Pill,
   Package, Barcode, Tag, Trash2, AlertCircle,
+  PauseCircle, PlayCircle, Clock, ArrowLeft,
 } from 'lucide-react';
-import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getImageUrl } from '@/lib/imageUrl';
-import { useReceiptPrinter } from '@/hooks/useReceiptPrinter';
-import { usePrintConfig } from '@/hooks/usePrintConfig';
-import type { ReceiptData } from '@/hooks/useReceiptPrinter';
+import { getImageUrl }         from '@/lib/imageUrl';
+import { useReceiptPrinter }   from '@/hooks/useReceiptPrinter';
+import { usePrintConfig }      from '@/hooks/usePrintConfig';
+import type { ReceiptData }    from '@/hooks/useReceiptPrinter';
 
 interface CartItem {
-  id: string;
-  productId: string;
-  variantId?: string;
-  name: string;
-  price: number;
-  quantity: number;
-  unit?: string;
-  weight?: number;
-  notes?: string;
+  id: string; productId: string; variantId?: string;
+  name: string; price: number; quantity: number;
+  unit?: string; weight?: number; notes?: string;
   modifiers?: { optionId: string; name: string; extraPrice: number }[];
-  size?: string;
-  color?: string;
-  serviceId?: string;
-  employeeId?: string;
+  size?: string; color?: string; serviceId?: string; employeeId?: string;
 }
-
-interface MixedPayments {
-  cash: string;
-  card: string;
-  transfer: string;
-}
+interface MixedPayments { cash: string; card: string; transfer: string; }
 
 const INDUSTRY_CONFIG: Record<string, { label: string; color: string; icon: any; description: string }> = {
-  restaurant:  { label: 'Restaurante',  color: '#F97316', icon: ChefHat,      description: 'Mesas y comandas'   },
-  bakery:      { label: 'Panadería',    color: '#FF5C35', icon: Package,      description: 'Presentaciones'     },
-  pharmacy:    { label: 'Farmacia',     color: '#5AAAF0', icon: Pill,         description: 'Medicamentos'       },
-  salon:       { label: 'Peluquería',   color: '#A78BFA', icon: Scissors,     description: 'Servicios'          },
-  clothing:    { label: 'Ropa',         color: '#EAB308', icon: Shirt,        description: 'Tallas y colores'   },
-  produce:     { label: 'Verdulería',   color: '#22C55E', icon: Leaf,         description: 'Por peso'           },
-  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode,      description: 'Código de barras'   },
-  general:     { label: 'General',      color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar'    },
+  restaurant:  { label: 'Restaurante',  color: '#F97316', icon: ChefHat,      description: 'Mesas y comandas'  },
+  bakery:      { label: 'Panadería',    color: '#FF5C35', icon: Package,      description: 'Presentaciones'    },
+  pharmacy:    { label: 'Farmacia',     color: '#5AAAF0', icon: Pill,         description: 'Medicamentos'      },
+  salon:       { label: 'Peluquería',   color: '#A78BFA', icon: Scissors,     description: 'Servicios'         },
+  clothing:    { label: 'Ropa',         color: '#EAB308', icon: Shirt,        description: 'Tallas y colores'  },
+  produce:     { label: 'Verdulería',   color: '#22C55E', icon: Leaf,         description: 'Por peso'          },
+  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode,      description: 'Código de barras'  },
+  general:     { label: 'General',      color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar'   },
 };
 
 const PAYMENT_METHODS = [
@@ -57,27 +44,33 @@ const PAYMENT_METHODS = [
   { value: 'transfer', label: 'SINPE',    icon: '📱' },
   { value: 'mixed',    label: 'Mixto',    icon: '🔀' },
 ];
-
 const MIXED_METHODS = [
   { key: 'cash',     label: 'Efectivo', icon: '💵' },
   { key: 'card',     label: 'Tarjeta',  icon: '💳' },
   { key: 'transfer', label: 'SINPE',    icon: '📱' },
 ];
 
-export default function POSPage() {
+function timeAgo(iso: string) {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1)  return 'ahora';
+  if (mins < 60) return `${mins}m`;
+  return `${Math.floor(mins / 60)}h`;
+}
 
-  const router        = useRouter();
+export default function POSPage() {
+  const router      = useRouter();
   const { formatCurrency, industry } = useAuth();
-  const queryClient   = useQueryClient();
-  const searchRef     = useRef<HTMLInputElement>(null);
-  const { print }      = useReceiptPrinter();
+  const queryClient = useQueryClient();
+  const searchRef   = useRef<HTMLInputElement>(null);
+  const { print }         = useReceiptPrinter();
   const { config: printConfig } = usePrintConfig();
+  const { orders: heldOrders, holdOrder, removeOrder } = useHeldOrders();
 
   const cfg  = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
   const Icon = cfg.icon;
   const C    = cfg.color;
 
-  const [search,            setSearch]           = useState('');
+  // ── Estado del carrito ────────────────────────────────────────────────────
   const [cart,              setCart]             = useState<CartItem[]>([]);
   const [paymentMethod,     setPaymentMethod]    = useState('cash');
   const [mixedPayments,     setMixedPayments]    = useState<MixedPayments>({ cash: '', card: '', transfer: '' });
@@ -91,9 +84,14 @@ export default function POSPage() {
   const [showVariantModal,  setShowVariantModal] = useState<any>(null);
   const [showModifierModal, setShowModifierModal]= useState<any>(null);
   const [selectedModifiers, setSelectedModifiers]= useState<any[]>([]);
+  const [search,            setSearch]           = useState('');
 
-  // ── Queries ────────────────────────────────────────────────────────────────
+  // ── Estado ventas en espera ───────────────────────────────────────────────
+  const [showHeld,      setShowHeld]      = useState(false);
+  const [holdLabel,     setHoldLabel]     = useState('');
+  const [showHoldInput, setShowHoldInput] = useState(false);
 
+  // ── Queries ───────────────────────────────────────────────────────────────
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products', search, selectedCategory],
     queryFn: async () => {
@@ -158,8 +156,7 @@ export default function POSPage() {
     refetchInterval: 60000,
   });
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
+  // ── Helpers ───────────────────────────────────────────────────────────────
   const getPrice = (product: any) => {
     if (industry !== 'restaurant' || !(activeHappyHour as any[]).length) return Number(product.price);
     const hh = (activeHappyHour as any[]).find((h: any) =>
@@ -182,10 +179,7 @@ export default function POSPage() {
       const ex = prev.find(i => i.id === itemId);
       if (ex && !options?.modifiers?.length)
         return prev.map(i => i.id === itemId ? { ...i, quantity: i.quantity + qty } : i);
-      return [...prev, {
-        id: itemId, productId: product.id, name: product.name,
-        price: finalPrice, quantity: qty, unit: options?.unit ?? 'unidad', ...options,
-      }];
+      return [...prev, { id: itemId, productId: product.id, name: product.name, price: finalPrice, quantity: qty, unit: options?.unit ?? 'unidad', ...options }];
     });
   };
 
@@ -197,31 +191,72 @@ export default function POSPage() {
           .filter(Boolean) as CartItem[],
     );
 
+  const clearCart = useCallback(() => {
+    setCart([]);
+    setDiscount(0);
+    setNote('');
+    setSelectedTable('');
+    setSelectedEmployee('');
+    setMixedPayments({ cash: '', card: '', transfer: '' });
+    setPaymentMethod('cash');
+  }, []);
+
   const subtotal    = cart.reduce((a, i) => a + i.price * i.quantity, 0);
   const discountAmt = discount > 0 ? subtotal * discount / 100 : 0;
   const total       = subtotal - discountAmt;
   const cartCount   = cart.reduce((a, i) => a + i.quantity, 0);
 
-  // Suma de montos mixtos
   const mixedTotal = paymentMethod === 'mixed'
-    ? (parseFloat(mixedPayments.cash     || '0') +
-       parseFloat(mixedPayments.card     || '0') +
-       parseFloat(mixedPayments.transfer || '0'))
+    ? (parseFloat(mixedPayments.cash || '0') + parseFloat(mixedPayments.card || '0') + parseFloat(mixedPayments.transfer || '0'))
     : 0;
   const mixedDiff    = paymentMethod === 'mixed' ? mixedTotal - total : 0;
   const mixedIsValid = paymentMethod === 'mixed' ? Math.abs(mixedDiff) < 1 : true;
 
-  // ── Mutación de venta ──────────────────────────────────────────────────────
+  // ── Pausar orden ──────────────────────────────────────────────────────────
+  const handleHoldOrder = useCallback(() => {
+    if (cart.length === 0) return;
+    const label = holdLabel.trim() || `Orden #${heldOrders.length + 1}`;
+    holdOrder({ label, cart, discount, note, paymentMethod, mixedPayments, selectedTable, selectedEmployee });
+    clearCart();
+    setShowHoldInput(false);
+    setHoldLabel('');
+  }, [cart, discount, note, paymentMethod, mixedPayments, selectedTable, selectedEmployee, holdLabel, heldOrders.length, holdOrder, clearCart]);
 
+  // ── Retomar orden ─────────────────────────────────────────────────────────
+  const handleResumeOrder = useCallback((order: HeldOrder) => {
+    // Si hay algo en el carrito, pausarlo primero
+    if (cart.length > 0) {
+      holdOrder({
+        label:           `Orden #${heldOrders.length + 1}`,
+        cart,
+        discount,
+        note,
+        paymentMethod,
+        mixedPayments,
+        selectedTable,
+        selectedEmployee,
+      });
+    }
+    setCart(order.cart);
+    setDiscount(order.discount);
+    setNote(order.note);
+    setPaymentMethod(order.paymentMethod);
+    setMixedPayments(order.mixedPayments);
+    setSelectedTable(order.selectedTable);
+    setSelectedEmployee(order.selectedEmployee);
+    removeOrder(order.id);
+    setShowHeld(false);
+  }, [cart, discount, note, paymentMethod, mixedPayments, selectedTable, selectedEmployee, heldOrders.length, holdOrder, removeOrder]);
+
+  // ── Mutación de venta ─────────────────────────────────────────────────────
   const saleMutation = useMutation({
     mutationFn: async () => {
       const branchId = (branches as any[])[0]?.id;
-      if (!branchId)         throw new Error('No hay sucursal disponible. Espera a que cargue o recarga la página.');
+      if (!branchId)         throw new Error('No hay sucursal disponible.');
       if (cart.length === 0) throw new Error('El carrito está vacío.');
-
       if (paymentMethod === 'mixed') {
-        if (mixedTotal <= 0)  throw new Error('Ingresa los montos para el pago mixto.');
-        if (!mixedIsValid)    throw new Error(`Los montos no suman el total. Diferencia: ${formatCurrency(Math.abs(mixedDiff))}`);
+        if (mixedTotal <= 0) throw new Error('Ingresa los montos para el pago mixto.');
+        if (!mixedIsValid)   throw new Error(`Los montos no suman el total. Diferencia: ${formatCurrency(Math.abs(mixedDiff))}`);
       }
 
       if (industry === 'restaurant') {
@@ -247,11 +282,8 @@ export default function POSPage() {
       }
 
       const { data } = await api.post('/sales', {
-        branchId,
-        paymentMethod,
-        discount: discountAmt,
-        subtotal,
-        total,
+        branchId, paymentMethod,
+        discount: discountAmt, subtotal, total,
         notes: note || undefined,
         ...(paymentMethod === 'mixed' && {
           mixedPayments: {
@@ -271,9 +303,7 @@ export default function POSPage() {
     },
 
     onSuccess: (saleData: any) => {
-      // Impresión automática si está habilitada
       if (printConfig.autoPrint && saleData?.id) {
-        const branchId = (branches as any[])[0]?.id;
         const receiptData: ReceiptData = {
           businessName:  (branches as any[])[0]?.tenant?.name ?? 'Mi Negocio',
           branchName:    (branches as any[])[0]?.name,
@@ -281,32 +311,20 @@ export default function POSPage() {
           cashierName:   `${saleData.user?.firstName ?? ''} ${saleData.user?.lastName ?? ''}`.trim(),
           createdAt:     saleData.createdAt ?? new Date().toISOString(),
           items:         (saleData.items ?? []).map((i: any) => ({
-            name:      i.product?.name ?? 'Producto',
-            quantity:  i.quantity,
-            unitPrice: Number(i.unitPrice),
-            subtotal:  Number(i.subtotal),
-            discount:  Number(i.discount ?? 0),
+            name: i.product?.name ?? 'Producto', quantity: i.quantity,
+            unitPrice: Number(i.unitPrice), subtotal: Number(i.subtotal), discount: Number(i.discount ?? 0),
           })),
-          subtotal:      Number(saleData.subtotal),
-          discount:      Number(saleData.discount ?? 0),
-          tax:           Number(saleData.tax ?? 0),
-          total:         Number(saleData.total),
+          subtotal: Number(saleData.subtotal), discount: Number(saleData.discount ?? 0),
+          tax: Number(saleData.tax ?? 0), total: Number(saleData.total),
           paymentMethod: saleData.paymentMethod,
           mixedPayments: saleData.mixedPayments ?? null,
-          notes:         saleData.notes ?? undefined,
-          header:        printConfig.header,
-          footer:        printConfig.footer,
+          notes: saleData.notes ?? undefined,
+          header: printConfig.header, footer: printConfig.footer,
         };
         print(receiptData, printConfig);
       }
-
-      setCart([]);
-      setDiscount(0);
-      setNote('');
-      setSelectedTable('');
-      setSelectedEmployee('');
+      clearCart();
       setShowCart(false);
-      setMixedPayments({ cash: '', card: '', transfer: '' });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['pos-products'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant-tables'] });
@@ -328,15 +346,8 @@ export default function POSPage() {
   const branchId   = (branches as any[])[0]?.id;
   const branchName = (branches as any[])[0]?.name ?? 'Sucursal';
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
-    <CashRegisterGate
-      branchId={branchId}
-      branchName={branchName}
-      accentColor={C}
-      formatCurrency={formatCurrency}
-    >
+    <CashRegisterGate branchId={branchId} branchName={branchName} accentColor={C} formatCurrency={formatCurrency}>
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden', background: 'var(--dax-bg)', fontFamily: 'var(--font-outfit, sans-serif)' }}>
 
         {/* ══ PANEL IZQUIERDO ══ */}
@@ -344,7 +355,7 @@ export default function POSPage() {
 
           {/* Topbar */}
           <div style={{ height: '52px', padding: '0 16px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-            <button onClick={() => router.push('/dashboard')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', flexShrink: 0 }} title="Volver al dashboard">
+            <button onClick={() => router.push('/dashboard')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', flexShrink: 0 }}>
               <ArrowLeft size={14} />
             </button>
             <div style={{ width: '1px', height: '20px', background: 'var(--dax-border)', flexShrink: 0 }} />
@@ -376,7 +387,30 @@ export default function POSPage() {
               <span style={{ fontSize: '10px', fontWeight: 700, color: C, background: `${C}15`, padding: '3px 8px', borderRadius: '6px' }}>⚡ Happy Hour</span>
             )}
 
-            <button onClick={() => setShowCart(true)} className="pos-cart-btn-mobile" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '10px', background: C, color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>
+            {/* Botón órdenes en espera */}
+            <button
+              onClick={() => setShowHeld(true)}
+              style={{
+                marginLeft: 'auto',
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: '6px 12px', borderRadius: '9px',
+                border: `1px solid ${heldOrders.length > 0 ? 'rgba(240,160,48,.4)' : 'var(--dax-border)'}`,
+                background: heldOrders.length > 0 ? 'rgba(240,160,48,.1)' : 'var(--dax-surface-2)',
+                color: heldOrders.length > 0 ? '#F0A030' : 'var(--dax-text-muted)',
+                cursor: 'pointer', fontSize: '12px', fontWeight: 600,
+                position: 'relative',
+              }}
+            >
+              <Clock size={13} />
+              En espera
+              {heldOrders.length > 0 && (
+                <span style={{ background: '#F0A030', color: '#fff', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 800 }}>
+                  {heldOrders.length}
+                </span>
+              )}
+            </button>
+
+            <button onClick={() => setShowCart(true)} className="pos-cart-btn-mobile" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '10px', background: C, color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}>
               <ShoppingCart size={13} />
               {cartCount > 0 && <span style={{ background: 'rgba(255,255,255,0.25)', borderRadius: '6px', padding: '1px 6px', fontSize: '11px', fontWeight: 800 }}>{cartCount}</span>}
               {cartCount > 0 && <span style={{ fontSize: '12px', fontWeight: 800 }}>{formatCurrency(total)}</span>}
@@ -407,7 +441,6 @@ export default function POSPage() {
 
           {/* Productos */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
-
             {industry === 'salon' && (services as any[]).length > 0 && !search && (
               <div style={{ marginBottom: '16px' }}>
                 <p style={{ fontSize: '10px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: '8px' }}>Servicios</p>
@@ -420,7 +453,6 @@ export default function POSPage() {
                     </button>
                   ))}
                 </div>
-                {(products as any[]).length > 0 && <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', letterSpacing: '.1em', textTransform: 'uppercase', marginTop: '16px', marginBottom: '8px' }}>Productos</p>}
               </div>
             )}
 
@@ -450,18 +482,18 @@ export default function POSPage() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
                 {filtered.map((product: any) => {
-                  const price     = getPrice(product);
-                  const hasOffer  = price < Number(product.price);
-                  const inCart    = cart.find(i => i.productId === product.id);
+                  const price    = getPrice(product);
+                  const hasOffer = price < Number(product.price);
+                  const inCart   = cart.find(i => i.productId === product.id);
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   return (
                     <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }} style={{ padding: '10px', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '10px', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', position: 'relative', boxShadow: inCart ? `0 0 0 1px ${C}30` : 'none' }}>
                       {getImageUrl(product.imageUrl) && <img src={getImageUrl(product.imageUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
                       {inCart   && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
-                      {hasOffer && <div style={{ position: 'absolute', top: '7px', left:  '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
+                      {hasOffer && <div style={{ position: 'absolute', top: '7px', left: '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
                       <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '3px', lineHeight: 1.3 }}>{product.name}</p>
-                      {product.sku  && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
-                      {hasOffer     && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
+                      {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
+                      {hasOffer  && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
                       <p style={{ fontSize: '13px', fontWeight: 800, color: hasOffer ? '#F97316' : C, lineHeight: 1 }}>{formatCurrency(price)}</p>
                       {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 600 }}>{pvariants.length} variantes</p>}
                     </button>
@@ -483,6 +515,8 @@ export default function POSPage() {
             updateQty={updateQty} removeFromCart={removeFromCart}
             onSell={() => saleMutation.mutate()} isSelling={saleMutation.isPending}
             C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
+            onHold={() => cart.length > 0 && setShowHoldInput(true)}
+            heldCount={heldOrders.length}
           />
         </div>
 
@@ -504,7 +538,124 @@ export default function POSPage() {
                   updateQty={updateQty} removeFromCart={removeFromCart}
                   onSell={() => { saleMutation.mutate(); setShowCart(false); }} isSelling={saleMutation.isPending}
                   C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
+                  onHold={() => { cart.length > 0 && setShowHoldInput(true); setShowCart(false); }}
+                  heldCount={heldOrders.length}
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ MODAL: ÓRDENES EN ESPERA ══ */}
+        {showHeld && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: 'var(--dax-surface)', borderRadius: '16px', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--dax-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(240,160,48,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock size={15} color="#F0A030" />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>Órdenes en espera</p>
+                    <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{heldOrders.length} orden{heldOrders.length !== 1 ? 'es' : ''} pausada{heldOrders.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowHeld(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex' }}><X size={18} /></button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
+                {heldOrders.length === 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '10px' }}>
+                    <PauseCircle size={36} color="var(--dax-text-muted)" style={{ opacity: .2 }} />
+                    <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', textAlign: 'center' }}>
+                      No hay órdenes en espera. Usa el botón "Pausar" para guardar una orden activa.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {heldOrders.map(order => (
+                      <div key={order.id} style={{ background: 'var(--dax-surface-2)', borderRadius: '12px', padding: '14px 16px', border: '1px solid var(--dax-border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                          <div>
+                            <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{order.label}</p>
+                            <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
+                              {order.cart.length} ítem{order.cart.length !== 1 ? 's' : ''} · Pausada hace {timeAgo(order.createdAt)}
+                            </p>
+                          </div>
+                          <p style={{ fontSize: '15px', fontWeight: 800, color: C }}>
+                            {formatCurrency(order.cart.reduce((s, i) => s + i.price * i.quantity, 0) * (1 - order.discount / 100))}
+                          </p>
+                        </div>
+
+                        {/* Items de la orden */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '10px' }}>
+                          {order.cart.slice(0, 3).map((item, i) => (
+                            <p key={i} style={{ fontSize: '11px', color: 'var(--dax-text-secondary)' }}>
+                              × {item.quantity} {item.name}
+                            </p>
+                          ))}
+                          {order.cart.length > 3 && (
+                            <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>+{order.cart.length - 3} más...</p>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => handleResumeOrder(order)}
+                            style={{ flex: 1, padding: '9px', borderRadius: '9px', border: 'none', background: C, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: `0 2px 8px ${C}30` }}
+                          >
+                            <PlayCircle size={13} /> Retomar
+                          </button>
+                          <button
+                            onClick={() => removeOrder(order.id)}
+                            style={{ padding: '9px 12px', borderRadius: '9px', border: '1px solid rgba(224,80,80,.3)', background: 'rgba(224,80,80,.06)', color: 'var(--dax-danger)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            <Trash2 size={12} /> Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ MODAL: NOMBRE DE LA PAUSA ══ */}
+        {showHoldInput && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: 'var(--dax-surface)', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '360px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(240,160,48,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <PauseCircle size={18} color="#F0A030" />
+                </div>
+                <div>
+                  <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.1 }}>Pausar orden</p>
+                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{cart.length} ítems · {formatCurrency(total)}</p>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '8px' }}>
+                Nombre o referencia (opcional)
+              </p>
+              <input
+                className="dax-input"
+                placeholder={`Mesa 3, Cliente Juan, Orden #${heldOrders.length + 1}...`}
+                value={holdLabel}
+                onChange={e => setHoldLabel(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleHoldOrder()}
+                autoFocus
+                style={{ margin: '0 0 16px' }}
+              />
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => { setShowHoldInput(false); setHoldLabel(''); }} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                  Cancelar
+                </button>
+                <button onClick={handleHoldOrder} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#F0A030', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 2px 10px rgba(240,160,48,.3)' }}>
+                  <PauseCircle size={14} /> Pausar
+                </button>
               </div>
             </div>
           </div>
@@ -568,8 +719,7 @@ export default function POSPage() {
   );
 }
 
-// ══ CARRITO LATERAL ═══════════════════════════════════════════════════════════
-
+// ══ CARRITO LATERAL ════════════════════════════════════════════════════════════
 function CartSide({
   cart, subtotal, discountAmt, total,
   discount, setDiscount, note, setNote,
@@ -579,8 +729,10 @@ function CartSide({
   updateQty, removeFromCart,
   onSell, isSelling,
   C, fmt, industry, selectedTable,
+  onHold, heldCount,
 }: any) {
-  const count = cart.reduce((a: number, i: any) => a + i.quantity, 0);
+  const count   = cart.reduce((a: number, i: any) => a + i.quantity, 0);
+  const canSell = paymentMethod !== 'mixed' || (mixedIsValid && mixedTotal > 0);
 
   const handleSetPaymentMethod = (val: string) => {
     setPaymentMethod(val);
@@ -588,7 +740,6 @@ function CartSide({
   };
 
   const remaining = total - mixedTotal;
-  const canSell   = paymentMethod !== 'mixed' || (mixedIsValid && mixedTotal > 0);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -597,7 +748,19 @@ function CartSide({
       <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Orden actual</p>
-          {count > 0 && <span style={{ fontSize: '10px', color: C, fontWeight: 600 }}>{count} item{count !== 1 ? 's' : ''}</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {count > 0 && <span style={{ fontSize: '10px', color: C, fontWeight: 600 }}>{count} ítem{count !== 1 ? 's' : ''}</span>}
+            {/* Botón pausar */}
+            {cart.length > 0 && (
+              <button
+                onClick={onHold}
+                title="Pausar orden"
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', borderRadius: '7px', border: '1px solid rgba(240,160,48,.35)', background: 'rgba(240,160,48,.08)', color: '#F0A030', cursor: 'pointer', fontSize: '11px', fontWeight: 700 }}
+              >
+                <PauseCircle size={11} /> Pausar
+              </button>
+            )}
+          </div>
         </div>
         {industry === 'restaurant' && selectedTable && <p style={{ fontSize: '10px', color: C, marginTop: '2px', fontWeight: 600 }}>🍽️ Mesa asignada</p>}
       </div>
@@ -608,7 +771,11 @@ function CartSide({
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '8px', color: 'var(--dax-text-muted)' }}>
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${C}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ShoppingCart size={20} color={C} style={{ opacity: .4 }} /></div>
             <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>Carrito vacío</p>
-            <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', textAlign: 'center', lineHeight: 1.5 }}>Selecciona productos del catálogo</p>
+            {heldCount > 0 && (
+              <p style={{ fontSize: '11px', color: '#F0A030', fontWeight: 600, textAlign: 'center' }}>
+                📋 {heldCount} orden{heldCount !== 1 ? 'es' : ''} en espera
+              </p>
+            )}
           </div>
         ) : cart.map((item: CartItem) => (
           <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '1px solid var(--dax-border-soft)' }}>
@@ -634,7 +801,6 @@ function CartSide({
       {/* Checkout */}
       {cart.length > 0 && (
         <div style={{ padding: '10px 12px', borderTop: '1px solid var(--dax-border)', flexShrink: 0 }}>
-
           {/* Descuento */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
             <Tag size={11} color="var(--dax-text-muted)" />
@@ -648,10 +814,8 @@ function CartSide({
             </div>
           </div>
 
-          {/* Nota */}
           <input value={note} onChange={e => setNote(e.target.value)} placeholder="Nota..." style={{ width: '100%', padding: '6px 9px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', marginBottom: '8px', boxSizing: 'border-box' }} />
 
-          {/* Total box */}
           <div style={{ background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '8px 10px', marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
               <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Subtotal</span>
@@ -669,7 +833,6 @@ function CartSide({
             </div>
           </div>
 
-          {/* Método de pago */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '8px' }}>
             {PAYMENT_METHODS.map(m => (
               <button key={m.value} onClick={() => handleSetPaymentMethod(m.value)} style={{ padding: '7px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 600, border: `1.5px solid ${paymentMethod === m.value ? C : 'var(--dax-border)'}`, background: paymentMethod === m.value ? `${C}10` : 'transparent', color: paymentMethod === m.value ? C : 'var(--dax-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
@@ -678,41 +841,16 @@ function CartSide({
             ))}
           </div>
 
-          {/* ── Panel pago mixto ── */}
           {paymentMethod === 'mixed' && (
             <div style={{ background: `${C}08`, border: `1px solid ${C}25`, borderRadius: '10px', padding: '10px', marginBottom: '8px' }}>
-              <p style={{ fontSize: '10px', fontWeight: 700, color: C, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>
-                🔀 Desglose del pago
-              </p>
-
+              <p style={{ fontSize: '10px', fontWeight: 700, color: C, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>🔀 Desglose del pago</p>
               {MIXED_METHODS.map(({ key, label, icon }) => (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '13px', flexShrink: 0 }}>{icon}</span>
                   <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', width: '58px', flexShrink: 0 }}>{label}</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="100"
-                    placeholder="0"
-                    value={(mixedPayments as any)[key]}
-                    onChange={e => setMixedPayments((p: any) => ({ ...p, [key]: e.target.value }))}
-                    style={{
-                      flex: 1,
-                      padding: '5px 8px',
-                      borderRadius: '7px',
-                      border: `1px solid ${(mixedPayments as any)[key] ? C : 'var(--dax-border)'}`,
-                      background: 'var(--dax-surface)',
-                      color: 'var(--dax-text-primary)',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      boxSizing: 'border-box' as const,
-                      minWidth: 0,
-                    }}
-                  />
+                  <input type="number" min="0" step="100" placeholder="0" value={(mixedPayments as any)[key]} onChange={e => setMixedPayments((p: any) => ({ ...p, [key]: e.target.value }))} style={{ flex: 1, padding: '5px 8px', borderRadius: '7px', border: `1px solid ${(mixedPayments as any)[key] ? C : 'var(--dax-border)'}`, background: 'var(--dax-surface)', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 600, boxSizing: 'border-box' as const, minWidth: 0 }} />
                 </div>
               ))}
-
-              {/* Resumen */}
               <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: `1px solid ${C}20` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                   <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Ingresado</span>
@@ -726,61 +864,24 @@ function CartSide({
                     {mixedDiff > 0 ? '+' : ''}{fmt(mixedDiff)}
                   </span>
                 </div>
-
-                {/* Botón completar restante */}
                 {remaining > 0.5 && mixedTotal < total && (
-                  <button
-                    onClick={() => {
-                      const empty = MIXED_METHODS.find(m => !parseFloat((mixedPayments as any)[m.key] || '0'));
-                      const last  = [...MIXED_METHODS].reverse().find(m => parseFloat((mixedPayments as any)[m.key] || '0') > 0);
-                      const target = empty ?? last;
-                      if (target) {
-                        const current = parseFloat((mixedPayments as any)[target.key] || '0');
-                        setMixedPayments((p: any) => ({ ...p, [target.key]: String(Math.round(current + remaining)) }));
-                      }
-                    }}
-                    style={{ width: '100%', marginTop: '6px', padding: '5px', borderRadius: '7px', border: `1px dashed ${C}40`, background: 'transparent', color: C, fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                  >
+                  <button onClick={() => { const empty = MIXED_METHODS.find(m => !parseFloat((mixedPayments as any)[m.key] || '0')); const last = [...MIXED_METHODS].reverse().find(m => parseFloat((mixedPayments as any)[m.key] || '0') > 0); const target = empty ?? last; if (target) { const current = parseFloat((mixedPayments as any)[target.key] || '0'); setMixedPayments((p: any) => ({ ...p, [target.key]: String(Math.round(current + remaining)) })); } }} style={{ width: '100%', marginTop: '6px', padding: '5px', borderRadius: '7px', border: `1px dashed ${C}40`, background: 'transparent', color: C, fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
                     + Completar {fmt(remaining)} restante
                   </button>
                 )}
-
                 {mixedTotal > 0 && !mixedIsValid && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px' }}>
                     <AlertCircle size={11} color="var(--dax-danger)" />
-                    <span style={{ fontSize: '10px', color: 'var(--dax-danger)', fontWeight: 600 }}>
-                      Los montos deben sumar {fmt(total)}
-                    </span>
+                    <span style={{ fontSize: '10px', color: 'var(--dax-danger)', fontWeight: 600 }}>Los montos deben sumar {fmt(total)}</span>
                   </div>
                 )}
-
-                {mixedIsValid && mixedTotal > 0 && (
-                  <p style={{ fontSize: '10px', color: '#22C55E', fontWeight: 700, marginTop: '6px' }}>✓ Montos correctos</p>
-                )}
+                {mixedIsValid && mixedTotal > 0 && <p style={{ fontSize: '10px', color: '#22C55E', fontWeight: 700, marginTop: '6px' }}>✓ Montos correctos</p>}
               </div>
             </div>
           )}
 
-          {/* Botón cobrar */}
-          <button
-            onClick={onSell}
-            disabled={isSelling || !canSell}
-            style={{
-              width: '100%', padding: '12px',
-              background: isSelling || !canSell ? 'var(--dax-surface-2)' : C,
-              color:      isSelling || !canSell ? 'var(--dax-text-muted)' : '#fff',
-              border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800,
-              cursor: isSelling || !canSell ? 'not-allowed' : 'pointer',
-              boxShadow: isSelling || !canSell ? 'none' : `0 3px 12px ${C}35`,
-              transition: 'all .15s',
-            }}
-          >
-            {isSelling
-              ? '⏳ Procesando...'
-              : industry === 'restaurant' && selectedTable
-                ? `🍽️ Cocina · ${fmt(total)}`
-                : `💳 Cobrar · ${fmt(total)}`
-            }
+          <button onClick={onSell} disabled={isSelling || !canSell} style={{ width: '100%', padding: '12px', background: isSelling || !canSell ? 'var(--dax-surface-2)' : C, color: isSelling || !canSell ? 'var(--dax-text-muted)' : '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800, cursor: isSelling || !canSell ? 'not-allowed' : 'pointer', boxShadow: isSelling || !canSell ? 'none' : `0 3px 12px ${C}35`, transition: 'all .15s' }}>
+            {isSelling ? '⏳ Procesando...' : industry === 'restaurant' && selectedTable ? `🍽️ Cocina · ${fmt(total)}` : `💳 Cobrar · ${fmt(total)}`}
           </button>
         </div>
       )}
@@ -788,8 +889,7 @@ function CartSide({
   );
 }
 
-// ══ MODAL VARIANTES ═══════════════════════════════════════════════════════════
-
+// ══ MODAL VARIANTES ════════════════════════════════════════════════════════════
 function VariantModal({ data, setData, C, fmt, addToCart }: any) {
   const [selSize,  setSelSize]  = useState('');
   const [selColor, setSelColor] = useState('');
