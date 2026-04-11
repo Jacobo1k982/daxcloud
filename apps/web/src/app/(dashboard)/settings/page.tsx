@@ -14,6 +14,7 @@ import { BusinessSection } from '@/components/settings/BusinessSection';
 import { PlanSection } from '@/components/settings/PlanSection';
 import { UsersSection } from '@/components/settings/UsersSection';
 import { LocaleSection } from '@/components/settings/LocaleSection';
+import { RolesSection } from '@/components/settings/RolesSection';
 
 const SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
@@ -26,6 +27,7 @@ const SECTIONS = [
   { id: 'printing', label: 'Impresión', icon: Printer, desc: 'Recibos y tickets' },
   { id: 'appearance', label: 'Apariencia', icon: Palette, desc: 'Tema y visualización' },
   { id: 'data', label: 'Datos y backups', icon: Database, desc: 'Exportar y respaldar' },
+  { id: 'roles', label: 'Roles', icon: Shield, desc: 'Roles y permisos personalizados' },
 ];
 
 const Label = ({ children }: { children: React.ReactNode }) => (
@@ -277,6 +279,13 @@ export default function SettingsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {activeSection === 'roles' && (
+        <div>
+          <SectionHeader title="Roles y permisos" desc="Crea roles personalizados para tu equipo" />
+          <RolesSection showToast={showToast} />
         </div>
       )}
 
