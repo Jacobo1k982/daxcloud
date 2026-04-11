@@ -22,13 +22,15 @@ export class ClientsController {
   @Get()
   findAll(
     @CurrentUser() user: any,
-    @Query('search') search?: string,
-    @Query('active') active?: string,
-    @Query('page')   page?:   string,
-    @Query('limit')  limit?:  string,
+    @Query('search')  search?:  string,
+    @Query('active')  active?:  string,
+    @Query('loyalty') loyalty?: string,
+    @Query('page')    page?:    string,
+    @Query('limit')   limit?:   string,
   ) {
     return this.service.findAll(user.tenantId, {
       search,
+      loyalty,
       active: active !== undefined ? active === 'true' : undefined,
       page:   page  ? parseInt(page)  : 1,
       limit:  limit ? parseInt(limit) : 30,
@@ -38,6 +40,11 @@ export class ClientsController {
   @Get('search-phone')
   findByPhone(@CurrentUser() user: any, @Query('phone') phone: string) {
     return this.service.findByPhone(user.tenantId, phone);
+  }
+
+  @Get('search-code')
+  findByCode(@CurrentUser() user: any, @Query('code') code: string) {
+    return this.service.findByCode(user.tenantId, code);
   }
 
   @Get(':id')
@@ -51,24 +58,12 @@ export class ClientsController {
   }
 
   @Post()
-  create(@CurrentUser() user: any, @Body() body: {
-    firstName:  string;
-    lastName?:  string;
-    phone?:     string;
-    email?:     string;
-    idNumber?:  string;
-    birthDate?: string;
-    notes?:     string;
-  }) {
+  create(@CurrentUser() user: any, @Body() body: any) {
     return this.service.create(user.tenantId, body);
   }
 
   @Put(':id')
-  update(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-    @Body() body: any,
-  ) {
+  update(@CurrentUser() user: any, @Param('id') id: string, @Body() body: any) {
     return this.service.update(user.tenantId, id, body);
   }
 
@@ -80,21 +75,25 @@ export class ClientsController {
 
   @Post(':id/credit')
   @Roles('admin', 'manager')
-  addCredit(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-    @Body() body: { amount: number; notes?: string },
-  ) {
-    return this.service.addCredit(user.tenantId, id, body.amount, body.notes);
+  addCredit(@CurrentUser() user: any, @Param('id') id: string, @Body() body: { amount: number }) {
+    return this.service.addCredit(user.tenantId, id, body.amount);
   }
 
   @Post(':id/pay-credit')
   @Roles('admin', 'manager')
-  payCredit(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-    @Body() body: { amount: number },
-  ) {
+  payCredit(@CurrentUser() user: any, @Param('id') id: string, @Body() body: { amount: number }) {
     return this.service.payCredit(user.tenantId, id, body.amount);
+  }
+
+  @Post(':id/points/add')
+  @Roles('admin', 'manager')
+  addPoints(@CurrentUser() user: any, @Param('id') id: string, @Body() body: { points: number; notes?: string }) {
+    return this.service.addPoints(user.tenantId, id, body.points, body.notes);
+  }
+
+  @Post(':id/points/redeem')
+  @Roles('admin', 'manager')
+  redeemPoints(@CurrentUser() user: any, @Param('id') id: string, @Body() body: { points: number }) {
+    return this.service.redeemPoints(user.tenantId, id, body.points);
   }
 }

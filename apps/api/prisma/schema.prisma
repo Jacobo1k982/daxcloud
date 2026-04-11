@@ -509,28 +509,36 @@ model IndustryConfig {
 // ─────────────────────────────────────────
 
 model Client {
-  id        String    @id @default(uuid())
-  tenantId  String
-  firstName String
-  lastName  String?
-  phone     String?
-  email     String?
-  idNumber  String?
-  birthDate DateTime?
-  notes     String?
-  points    Int       @default(0)
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
+  id            String    @id @default(uuid())
+  tenantId      String
+  code          String?
+  firstName     String
+  lastName      String?
+  isCompany     Boolean   @default(false)
+  companyName   String?
+  phone         String?
+  email         String?
+  idNumber      String?
+  birthDate     DateTime?
+  address       String?
+  notes         String?
+  points        Int       @default(0)
+  pointsExpiry  DateTime?
+  loyaltyLevel  String    @default("bronze")
+  totalSpent    Decimal   @default(0) @db.Decimal(10, 2)
+  creditBalance Decimal   @default(0) @db.Decimal(10, 2)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   appointments  Appointment[]
   prescriptions Prescription[]
   encargos      Encargo[]
   reservations  Reservation[]
+  sales         Sale[]
 
-  creditBalance  Decimal  @default(0) @db.Decimal(10, 2)
-  sales          Sale[]
-
+  @@unique([tenantId, code])
+  @@index([tenantId])
   @@map("clients")
 }
 
