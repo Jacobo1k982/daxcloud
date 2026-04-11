@@ -1,165 +1,324 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth }      from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
+import { api }          from '@/lib/api';
+import { Save, Loader2, Check, Globe, Clock, Calendar, Info } from 'lucide-react';
 
+// ── Datos ──────────────────────────────────────────────────────────────────────
 const CURRENCIES = [
-  { code: 'CRC', symbol: '₡',   country: 'CR', name: 'Colón costarricense',     region: 'América Central' },
-  { code: 'GTQ', symbol: 'Q',   country: 'GT', name: 'Quetzal guatemalteco',     region: 'América Central' },
-  { code: 'HNL', symbol: 'L',   country: 'HN', name: 'Lempira hondureño',        region: 'América Central' },
-  { code: 'NIO', symbol: 'C$',  country: 'NI', name: 'Córdoba nicaragüense',     region: 'América Central' },
-  { code: 'PAB', symbol: 'B/',  country: 'PA', name: 'Balboa panameño',          region: 'América Central' },
-  { code: 'DOP', symbol: 'RD$', country: 'DO', name: 'Peso dominicano',          region: 'El Caribe' },
-  { code: 'MXN', symbol: '$',   country: 'MX', name: 'Peso mexicano',            region: 'América del Norte' },
-  { code: 'USD', symbol: '$',   country: 'US', name: 'Dólar estadounidense',     region: 'América del Norte' },
-  { code: 'CAD', symbol: '$',   country: 'CA', name: 'Dólar canadiense',         region: 'América del Norte' },
-  { code: 'COP', symbol: '$',   country: 'CO', name: 'Peso colombiano',          region: 'América del Sur' },
-  { code: 'VES', symbol: 'Bs',  country: 'VE', name: 'Bolívar venezolano',       region: 'América del Sur' },
-  { code: 'PEN', symbol: 'S/',  country: 'PE', name: 'Sol peruano',              region: 'América del Sur' },
-  { code: 'CLP', symbol: '$',   country: 'CL', name: 'Peso chileno',             region: 'América del Sur' },
-  { code: 'ARS', symbol: '$',   country: 'AR', name: 'Peso argentino',           region: 'América del Sur' },
-  { code: 'BOB', symbol: 'Bs',  country: 'BO', name: 'Boliviano',                region: 'América del Sur' },
-  { code: 'PYG', symbol: '₲',   country: 'PY', name: 'Guaraní paraguayo',        region: 'América del Sur' },
-  { code: 'UYU', symbol: '$',   country: 'UY', name: 'Peso uruguayo',            region: 'América del Sur' },
-  { code: 'BRL', symbol: 'R$',  country: 'BR', name: 'Real brasileño',           region: 'América del Sur' },
-  { code: 'EUR', symbol: '€',   country: 'ES', name: 'Euro',                     region: 'Europa' },
-  { code: 'GBP', symbol: '£',   country: 'GB', name: 'Libra esterlina',          region: 'Europa' },
-  { code: 'CHF', symbol: 'Fr',  country: 'CH', name: 'Franco suizo',             region: 'Europa' },
-  { code: 'SEK', symbol: 'kr',  country: 'SE', name: 'Corona sueca',             region: 'Europa' },
-  { code: 'NOK', symbol: 'kr',  country: 'NO', name: 'Corona noruega',           region: 'Europa' },
-  { code: 'DKK', symbol: 'kr',  country: 'DK', name: 'Corona danesa',            region: 'Europa' },
+  { code: 'CRC', symbol: '₡',   name: 'Colón costarricense',      region: 'América Central' },
+  { code: 'GTQ', symbol: 'Q',   name: 'Quetzal guatemalteco',      region: 'América Central' },
+  { code: 'HNL', symbol: 'L',   name: 'Lempira hondureño',         region: 'América Central' },
+  { code: 'NIO', symbol: 'C$',  name: 'Córdoba nicaragüense',      region: 'América Central' },
+  { code: 'PAB', symbol: 'B/',  name: 'Balboa panameño',           region: 'América Central' },
+  { code: 'DOP', symbol: 'RD$', name: 'Peso dominicano',           region: 'El Caribe'       },
+  { code: 'MXN', symbol: '$',   name: 'Peso mexicano',             region: 'América del Norte' },
+  { code: 'USD', symbol: '$',   name: 'Dólar estadounidense',      region: 'América del Norte' },
+  { code: 'CAD', symbol: '$',   name: 'Dólar canadiense',          region: 'América del Norte' },
+  { code: 'COP', symbol: '$',   name: 'Peso colombiano',           region: 'América del Sur' },
+  { code: 'VES', symbol: 'Bs',  name: 'Bolívar venezolano',        region: 'América del Sur' },
+  { code: 'PEN', symbol: 'S/',  name: 'Sol peruano',               region: 'América del Sur' },
+  { code: 'CLP', symbol: '$',   name: 'Peso chileno',              region: 'América del Sur' },
+  { code: 'ARS', symbol: '$',   name: 'Peso argentino',            region: 'América del Sur' },
+  { code: 'BOB', symbol: 'Bs',  name: 'Boliviano',                 region: 'América del Sur' },
+  { code: 'PYG', symbol: '₲',   name: 'Guaraní paraguayo',         region: 'América del Sur' },
+  { code: 'UYU', symbol: '$',   name: 'Peso uruguayo',             region: 'América del Sur' },
+  { code: 'BRL', symbol: 'R$',  name: 'Real brasileño',            region: 'América del Sur' },
+  { code: 'EUR', symbol: '€',   name: 'Euro',                      region: 'Europa'          },
+  { code: 'GBP', symbol: '£',   name: 'Libra esterlina',           region: 'Europa'          },
+  { code: 'CHF', symbol: 'Fr',  name: 'Franco suizo',              region: 'Europa'          },
+  { code: 'SEK', symbol: 'kr',  name: 'Corona sueca',              region: 'Europa'          },
+  { code: 'NOK', symbol: 'kr',  name: 'Corona noruega',            region: 'Europa'          },
+  { code: 'DKK', symbol: 'kr',  name: 'Corona danesa',             region: 'Europa'          },
 ];
 
 const TIMEZONES = [
-  { value: 'America/Costa_Rica',    label: 'Costa Rica (GMT-6)',       region: 'América Central' },
-  { value: 'America/Guatemala',     label: 'Guatemala (GMT-6)',        region: 'América Central' },
-  { value: 'America/Tegucigalpa',   label: 'Honduras (GMT-6)',         region: 'América Central' },
-  { value: 'America/Managua',       label: 'Nicaragua (GMT-6)',        region: 'América Central' },
-  { value: 'America/Panama',        label: 'Panamá (GMT-5)',           region: 'América Central' },
-  { value: 'America/El_Salvador',   label: 'El Salvador (GMT-6)',      region: 'América Central' },
-  { value: 'America/Santo_Domingo', label: 'Rep. Dominicana (GMT-4)',  region: 'El Caribe' },
-  { value: 'America/Mexico_City',   label: 'Ciudad de México (GMT-6)', region: 'América del Norte' },
-  { value: 'America/New_York',      label: 'Nueva York (GMT-5)',       region: 'América del Norte' },
-  { value: 'America/Chicago',       label: 'Chicago (GMT-6)',          region: 'América del Norte' },
-  { value: 'America/Denver',        label: 'Denver (GMT-7)',           region: 'América del Norte' },
-  { value: 'America/Los_Angeles',   label: 'Los Ángeles (GMT-8)',      region: 'América del Norte' },
-  { value: 'America/Toronto',       label: 'Toronto (GMT-5)',          region: 'América del Norte' },
-  { value: 'America/Bogota',        label: 'Colombia (GMT-5)',         region: 'América del Sur' },
-  { value: 'America/Caracas',       label: 'Venezuela (GMT-4)',        region: 'América del Sur' },
-  { value: 'America/Lima',          label: 'Perú (GMT-5)',             region: 'América del Sur' },
-  { value: 'America/Santiago',      label: 'Chile (GMT-4)',            region: 'América del Sur' },
-  { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (GMT-3)', region: 'América del Sur' },
-  { value: 'America/La_Paz',        label: 'Bolivia (GMT-4)',          region: 'América del Sur' },
-  { value: 'America/Asuncion',      label: 'Paraguay (GMT-4)',         region: 'América del Sur' },
-  { value: 'America/Montevideo',    label: 'Uruguay (GMT-3)',          region: 'América del Sur' },
-  { value: 'America/Sao_Paulo',     label: 'Brasil (GMT-3)',           region: 'América del Sur' },
-  { value: 'Europe/Madrid',         label: 'España (GMT+1)',           region: 'Europa' },
-  { value: 'Europe/London',         label: 'Reino Unido (GMT+0)',      region: 'Europa' },
-  { value: 'Europe/Paris',          label: 'Francia (GMT+1)',          region: 'Europa' },
-  { value: 'Europe/Berlin',         label: 'Alemania (GMT+1)',         region: 'Europa' },
-  { value: 'Europe/Rome',           label: 'Italia (GMT+1)',           region: 'Europa' },
-  { value: 'Europe/Zurich',         label: 'Suiza (GMT+1)',            region: 'Europa' },
-  { value: 'Europe/Stockholm',      label: 'Suecia (GMT+1)',           region: 'Europa' },
+  { value: 'America/Costa_Rica',             label: 'Costa Rica (GMT-6)',        region: 'América Central'   },
+  { value: 'America/Guatemala',              label: 'Guatemala (GMT-6)',         region: 'América Central'   },
+  { value: 'America/Tegucigalpa',            label: 'Honduras (GMT-6)',          region: 'América Central'   },
+  { value: 'America/Managua',               label: 'Nicaragua (GMT-6)',         region: 'América Central'   },
+  { value: 'America/Panama',                label: 'Panamá (GMT-5)',            region: 'América Central'   },
+  { value: 'America/El_Salvador',           label: 'El Salvador (GMT-6)',       region: 'América Central'   },
+  { value: 'America/Santo_Domingo',         label: 'Rep. Dominicana (GMT-4)',   region: 'El Caribe'         },
+  { value: 'America/Mexico_City',           label: 'Ciudad de México (GMT-6)',  region: 'América del Norte' },
+  { value: 'America/New_York',              label: 'Nueva York (GMT-5)',        region: 'América del Norte' },
+  { value: 'America/Chicago',              label: 'Chicago (GMT-6)',           region: 'América del Norte' },
+  { value: 'America/Los_Angeles',           label: 'Los Ángeles (GMT-8)',       region: 'América del Norte' },
+  { value: 'America/Toronto',              label: 'Toronto (GMT-5)',           region: 'América del Norte' },
+  { value: 'America/Bogota',               label: 'Colombia (GMT-5)',          region: 'América del Sur'   },
+  { value: 'America/Caracas',              label: 'Venezuela (GMT-4)',         region: 'América del Sur'   },
+  { value: 'America/Lima',                 label: 'Perú (GMT-5)',              region: 'América del Sur'   },
+  { value: 'America/Santiago',             label: 'Chile (GMT-4)',             region: 'América del Sur'   },
+  { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (GMT-3)',       region: 'América del Sur'   },
+  { value: 'America/La_Paz',               label: 'Bolivia (GMT-4)',           region: 'América del Sur'   },
+  { value: 'America/Asuncion',             label: 'Paraguay (GMT-4)',          region: 'América del Sur'   },
+  { value: 'America/Montevideo',           label: 'Uruguay (GMT-3)',           region: 'América del Sur'   },
+  { value: 'America/Sao_Paulo',            label: 'Brasil (GMT-3)',            region: 'América del Sur'   },
+  { value: 'Europe/Madrid',               label: 'España (GMT+1)',             region: 'Europa'            },
+  { value: 'Europe/London',               label: 'Reino Unido (GMT+0)',        region: 'Europa'            },
+  { value: 'Europe/Paris',                label: 'Francia (GMT+1)',            region: 'Europa'            },
+  { value: 'Europe/Berlin',               label: 'Alemania (GMT+1)',           region: 'Europa'            },
+  { value: 'Europe/Rome',                 label: 'Italia (GMT+1)',             region: 'Europa'            },
+  { value: 'Europe/Zurich',               label: 'Suiza (GMT+1)',              region: 'Europa'            },
 ];
 
 const DATE_FORMATS = [
-  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY', example: '31/03/2026' },
-  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY', example: '03/31/2026' },
-  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD', example: '2026-03-31' },
-  { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY', example: '31-03-2026' },
+  { value: 'DD/MM/YYYY', example: '11/04/2026' },
+  { value: 'MM/DD/YYYY', example: '04/11/2026' },
+  { value: 'YYYY-MM-DD', example: '2026-04-11' },
+  { value: 'DD-MM-YYYY', example: '11-04-2026' },
 ];
 
 const LANGUAGES = [
-  { value: 'es', label: 'Español', flag: '🇪🇸' },
-  { value: 'en', label: 'English', flag: '🇺🇸' },
+  { value: 'es', label: 'Español',   flag: '🇪🇸' },
+  { value: 'en', label: 'English',   flag: '🇺🇸' },
   { value: 'pt', label: 'Português', flag: '🇧🇷' },
-  { value: 'fr', label: 'Français', flag: '🇫🇷' },
 ];
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', marginBottom: '8px' }}>
+  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: 'var(--dax-text-muted)', marginBottom: '8px' }}>
     {children}
   </label>
 );
 
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ borderTop: '1px solid var(--dax-border)', paddingTop: '20px', marginTop: '8px', marginBottom: '16px' }}>
-    <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--dax-coral)' }}>
+const SectionTitle = ({ icon: Icon, children }: { icon: any; children: React.ReactNode }) => (
+  <div style={{ borderTop: '1px solid var(--dax-border)', paddingTop: '20px', marginTop: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <Icon size={13} color="var(--dax-coral)" />
+    <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'var(--dax-coral)' }}>
       {children}
     </p>
   </div>
 );
 
-const groupBy = <T,>(arr: T[], key: keyof T): Record<string, T[]> =>
-  arr.reduce((acc, item) => {
-    const group = String(item[key]);
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(item);
+function groupBy<T>(arr: T[], key: keyof T): Record<string, T[]> {
+  return arr.reduce((acc, item) => {
+    const g = String(item[key]);
+    if (!acc[g]) acc[g] = [];
+    acc[g].push(item);
     return acc;
   }, {} as Record<string, T[]>);
+}
 
+// ── Componente principal ──────────────────────────────────────────────────────
 export function LocaleSection({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) {
-  const { tenant } = useAuth();
+  const { tenant }  = useAuth();
+  const queryClient = useQueryClient();
 
-  const [form, setForm] = useState({
-    dateFormat: 'DD/MM/YYYY',
-    timezone: tenant?.locale === 'es-CR' ? 'America/Costa_Rica' : 'America/New_York',
-    language: 'es',
+  const { data: profile } = useQuery({
+    queryKey: ['user-me'],
+    queryFn:  async () => { const { data } = await api.get('/users/me'); return data; },
   });
 
-  const groupedCurrencies = groupBy(CURRENCIES, 'region');
-  const groupedTimezones = groupBy(TIMEZONES, 'region');
+  const [form, setForm] = useState({
+    language:   'es',
+    timezone:   'America/Costa_Rica',
+    dateFormat: 'DD/MM/YYYY',
+  });
 
-  const currentCurrency = CURRENCIES.find(c => c.code === tenant?.currency);
-  const preview = currentCurrency
-    ? new Intl.NumberFormat(tenant?.locale ?? 'es-CR', { style: 'currency', currency: currentCurrency.code }).format(12500)
-    : '₡12,500.00';
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        language:   profile.language   ?? 'es',
+        timezone:   profile.timezone   ?? 'America/Costa_Rica',
+        dateFormat: 'DD/MM/YYYY', // guardado en localStorage
+      });
+    }
+    // Leer formato de fecha de localStorage
+    try {
+      const saved = localStorage.getItem('daxcloud_date_format');
+      if (saved) setForm(p => ({ ...p, dateFormat: saved }));
+    } catch {}
+  }, [profile]);
 
   const f = (field: string, value: string) => setForm(p => ({ ...p, [field]: value }));
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+  // ── Guardar preferencias del usuario ─────────────────────────────────────
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      // Guarda idioma y zona horaria en el perfil
+      await api.put('/users/me', {
+        language: form.language,
+        timezone: form.timezone,
+      });
+      // Guarda formato de fecha en localStorage
+      try { localStorage.setItem('daxcloud_date_format', form.dateFormat); } catch {}
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-me'] });
+      showToast('Preferencias de región guardadas');
+    },
+    onError: (err: any) => showToast(err.response?.data?.message ?? 'Error al guardar', 'error'),
+  });
 
-      {/* Moneda actual */}
-      <div style={{ background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-lg)', padding: '20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', marginBottom: '6px' }}>
-            Moneda activa
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--dax-coral)' }}>{currentCurrency?.symbol}</span>
-            <div>
-              <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>
-                {currentCurrency?.code} — {currentCurrency?.name}
-              </p>
-              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
-                Ejemplo: {preview}
-              </p>
-            </div>
+  const groupedCurrencies = groupBy(CURRENCIES, 'region');
+  const groupedTimezones  = groupBy(TIMEZONES,  'region');
+
+  const currentCurrency = CURRENCIES.find(c => c.code === tenant?.currency);
+
+  // Preview del formato de moneda
+  const preview = (() => {
+    try {
+      return new Intl.NumberFormat(tenant?.locale ?? 'es-CR', {
+        style:    'currency',
+        currency: tenant?.currency ?? 'CRC',
+        maximumFractionDigits: 0,
+      }).format(12500);
+    } catch {
+      return `${currentCurrency?.symbol}12,500`;
+    }
+  })();
+
+  // Preview del formato de fecha
+  const today       = new Date();
+  const dd          = String(today.getDate()).padStart(2, '0');
+  const mm          = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy        = today.getFullYear();
+  const datePreview = form.dateFormat
+    .replace('DD', dd).replace('MM', mm).replace('YYYY', String(yyyy));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '600px' }}>
+
+      {/* ── Moneda activa ── */}
+      <div style={{ background: 'var(--dax-surface-2)', borderRadius: '14px', padding: '18px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', border: '1px solid var(--dax-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--dax-coral-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--dax-coral)' }}>{currentCurrency?.symbol}</span>
+          </div>
+          <div>
+            <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>
+              {currentCurrency?.code} — {currentCurrency?.name}
+            </p>
+            <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
+              Ejemplo: <strong style={{ color: 'var(--dax-coral)' }}>{preview}</strong>
+            </p>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '4px' }}>País: <strong>{tenant?.country}</strong></p>
-          <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Locale: <strong>{tenant?.locale}</strong></p>
+          <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginBottom: '3px' }}>País: <strong style={{ color: 'var(--dax-text-secondary)' }}>{tenant?.country}</strong></p>
+          <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Locale: <strong style={{ color: 'var(--dax-text-secondary)' }}>{tenant?.locale}</strong></p>
         </div>
       </div>
 
-      <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '20px', padding: '12px 16px', background: 'var(--dax-info-bg)', borderRadius: 'var(--dax-radius-md)', borderLeft: '3px solid var(--dax-info)' }}>
-        Para cambiar la moneda o el país contacta a soporte en{' '}
-        <a href="https://jacana-dev.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--dax-coral)', textDecoration: 'none', fontWeight: 600 }}>
-          jacana-dev.com
-        </a>
-        {' '}— Este cambio afecta toda la facturación del sistema.
-      </p>
+      {/* Nota de moneda */}
+      <div style={{ display: 'flex', gap: '10px', padding: '12px 14px', background: 'rgba(90,170,240,.08)', borderRadius: '10px', border: '1px solid rgba(90,170,240,.2)', marginBottom: '8px' }}>
+        <Info size={14} color="#5AAAF0" style={{ flexShrink: 0, marginTop: '1px' }} />
+        <p style={{ fontSize: '12px', color: 'var(--dax-text-secondary)', lineHeight: 1.5 }}>
+          Para cambiar la moneda o el país escríbenos a{' '}
+          <a href="mailto:ventas@daxcloud.shop" style={{ color: 'var(--dax-coral)', textDecoration: 'none', fontWeight: 600 }}>ventas@daxcloud.shop</a>
+          {' '}— Este cambio afecta toda la facturación del sistema.
+        </p>
+      </div>
 
-      {/* Referencia de monedas */}
-      <SectionTitle>Monedas soportadas</SectionTitle>
+      {/* ── Preferencias personales ── */}
+      <SectionTitle icon={Globe}>Preferencias personales</SectionTitle>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '8px' }}>
+      {/* Idioma */}
+      <div style={{ marginBottom: '18px' }}>
+        <Label>Idioma de la interfaz</Label>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {LANGUAGES.map(lang => {
+            const sel = form.language === lang.value;
+            return (
+              <button
+                key={lang.value}
+                type="button"
+                onClick={() => f('language', lang.value)}
+                style={{
+                  padding: '10px 16px', borderRadius: '10px', cursor: 'pointer',
+                  border:     `1.5px solid ${sel ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
+                  background: sel ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
+                  display: 'flex', alignItems: 'center', gap: '8px', transition: 'all .15s',
+                }}
+              >
+                <span style={{ fontSize: '18px' }}>{lang.flag}</span>
+                <span style={{ fontSize: '13px', fontWeight: sel ? 700 : 400, color: sel ? 'var(--dax-coral)' : 'var(--dax-text-secondary)' }}>
+                  {lang.label}
+                </span>
+                {sel && <Check size={13} color="var(--dax-coral)" />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Zona horaria */}
+      <div style={{ marginBottom: '18px' }}>
+        <Label>Zona horaria</Label>
+        <select
+          className="dax-input"
+          value={form.timezone}
+          onChange={e => f('timezone', e.target.value)}
+          style={{ margin: 0 }}
+        >
+          {Object.entries(groupedTimezones).map(([region, tzs]) => (
+            <optgroup key={region} label={region}>
+              {tzs.map(tz => (
+                <option key={tz.value} value={tz.value}>{tz.label}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '5px' }}>
+          Afecta cómo se muestran las fechas y horas en tu sesión
+        </p>
+      </div>
+
+      {/* Formato de fecha */}
+      <div style={{ marginBottom: '20px' }}>
+        <Label>Formato de fecha</Label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
+          {DATE_FORMATS.map(fmt => {
+            const sel = form.dateFormat === fmt.value;
+            return (
+              <button
+                key={fmt.value}
+                type="button"
+                onClick={() => f('dateFormat', fmt.value)}
+                style={{
+                  padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
+                  border:     `1.5px solid ${sel ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
+                  background: sel ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
+                  transition: 'all .15s',
+                }}
+              >
+                <p style={{ fontSize: '12px', fontWeight: 700, color: sel ? 'var(--dax-coral)' : 'var(--dax-text-primary)', marginBottom: '2px' }}>{fmt.value}</p>
+                <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{fmt.example}</p>
+              </button>
+            );
+          })}
+        </div>
+        <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '6px' }}>
+          Hoy: <strong style={{ color: 'var(--dax-text-secondary)' }}>{datePreview}</strong>
+        </p>
+      </div>
+
+      {/* Botón guardar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+        <button
+          onClick={() => saveMutation.mutate()}
+          disabled={saveMutation.isPending}
+          className="dax-btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          {saveMutation.isPending
+            ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Guardando...</>
+            : <><Save size={13} /> Guardar preferencias</>
+          }
+        </button>
+      </div>
+
+      {/* ── Referencia de monedas ── */}
+      <SectionTitle icon={Globe}>Monedas soportadas</SectionTitle>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {Object.entries(groupedCurrencies).map(([region, currencies]) => (
           <div key={region}>
-            <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '8px' }}>{region}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '6px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-muted)', letterSpacing: '.06em', textTransform: 'uppercase' as const, marginBottom: '8px' }}>{region}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '6px' }}>
               {currencies.map(currency => {
                 const isCurrent = currency.code === tenant?.currency;
                 return (
@@ -167,24 +326,24 @@ export function LocaleSection({ showToast }: { showToast: (msg: string, type?: '
                     key={currency.code}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '10px 12px', borderRadius: 'var(--dax-radius-md)',
+                      padding: '10px 12px', borderRadius: '10px',
                       background: isCurrent ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
-                      border: `1px solid ${isCurrent ? 'var(--dax-coral-border)' : 'transparent'}`,
+                      border:     `1px solid ${isCurrent ? 'var(--dax-coral-border)' : 'transparent'}`,
                     }}
                   >
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: isCurrent ? 'var(--dax-coral)' : 'var(--dax-text-tertiary)', minWidth: '24px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 700, color: isCurrent ? 'var(--dax-coral)' : 'var(--dax-text-muted)', minWidth: '24px', textAlign: 'center' }}>
                       {currency.symbol}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: '12px', fontWeight: 600, color: isCurrent ? 'var(--dax-coral)' : 'var(--dax-text-primary)', marginBottom: '1px' }}>
                         {currency.code}
                       </p>
-                      <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {currency.name}
                       </p>
                     </div>
                     {isCurrent && (
-                      <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--dax-coral)', background: 'var(--dax-coral-soft)', padding: '1px 5px', borderRadius: '6px', flexShrink: 0 }}>
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: 'var(--dax-coral)', background: 'var(--dax-coral-soft)', padding: '1px 6px', borderRadius: '6px', flexShrink: 0 }}>
                         ACTIVA
                       </span>
                     )}
@@ -196,86 +355,7 @@ export function LocaleSection({ showToast }: { showToast: (msg: string, type?: '
         ))}
       </div>
 
-      {/* Formato de fecha */}
-      <SectionTitle>Formato y zona horaria</SectionTitle>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '520px' }}>
-        <div>
-          <Label>Idioma de la interfaz</Label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-            {LANGUAGES.map(lang => {
-              const selected = form.language === lang.value;
-              return (
-                <button
-                  key={lang.value}
-                  type="button"
-                  onClick={() => f('language', lang.value)}
-                  style={{
-                    padding: '10px', borderRadius: 'var(--dax-radius-md)',
-                    border: `1px solid ${selected ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
-                    background: selected ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', gap: '8px', transition: 'all 0.15s ease',
-                  }}
-                >
-                  <span style={{ fontSize: '18px' }}>{lang.flag}</span>
-                  <span style={{ fontSize: '12px', fontWeight: selected ? 700 : 400, color: selected ? 'var(--dax-coral)' : 'var(--dax-text-secondary)' }}>
-                    {lang.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <Label>Formato de fecha</Label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px' }}>
-            {DATE_FORMATS.map(fmt => {
-              const selected = form.dateFormat === fmt.value;
-              return (
-                <button
-                  key={fmt.value}
-                  type="button"
-                  onClick={() => f('dateFormat', fmt.value)}
-                  style={{
-                    padding: '10px 12px', borderRadius: 'var(--dax-radius-md)',
-                    border: `1px solid ${selected ? 'var(--dax-coral)' : 'var(--dax-border)'}`,
-                    background: selected ? 'var(--dax-coral-soft)' : 'var(--dax-surface-2)',
-                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s ease',
-                  }}
-                >
-                  <p style={{ fontSize: '12px', fontWeight: 700, color: selected ? 'var(--dax-coral)' : 'var(--dax-text-primary)', marginBottom: '2px' }}>{fmt.label}</p>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{fmt.example}</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <Label>Zona horaria</Label>
-          <select
-            className="dax-input"
-            value={form.timezone}
-            onChange={e => f('timezone', e.target.value)}
-          >
-            {Object.entries(groupedTimezones).map(([region, tzs]) => (
-              <optgroup key={region} label={region}>
-                {tzs.map(tz => (
-                  <option key={tz.value} value={tz.value}>{tz.label}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-          <button onClick={() => showToast('Preferencias de región guardadas')} className="dax-btn-primary">
-            Guardar preferencias
-          </button>
-        </div>
-      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

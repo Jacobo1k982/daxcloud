@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import {
@@ -10,13 +10,13 @@ import {
 } from 'lucide-react';
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string }> = {
-  low_stock:    { icon: Package,       color: '#F0A030' },
-  new_sale:     { icon: ShoppingCart,  color: '#3DBF7F' },
-  new_user:     { icon: Users,         color: '#5AAAF0' },
-  system:       { icon: AlertTriangle, color: '#E05050' },
-  daily_goal:   { icon: Target,        color: '#A78BFA' },
-  reminder:     { icon: Clock,         color: '#FF5C35' },
-  achievement:  { icon: Zap,           color: '#F0A030' },
+  low_stock:   { icon: Package,       color: '#F0A030' },
+  new_sale:    { icon: ShoppingCart,  color: '#3DBF7F' },
+  new_user:    { icon: Users,         color: '#5AAAF0' },
+  system:      { icon: AlertTriangle, color: '#E05050' },
+  daily_goal:  { icon: Target,        color: '#A78BFA' },
+  reminder:    { icon: Clock,         color: '#FF5C35' },
+  achievement: { icon: Zap,           color: '#F0A030' },
 };
 
 function timeAgo(dateStr: string) {
@@ -30,7 +30,7 @@ function timeAgo(dateStr: string) {
 }
 
 function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: string) => void }) {
-  const cfg = TYPE_CONFIG[notif.type] ?? { icon: Bell, color: '#5AAAF0' };
+  const cfg  = TYPE_CONFIG[notif.type] ?? { icon: Bell, color: '#5AAAF0' };
   const Icon = cfg.icon;
 
   return (
@@ -42,17 +42,14 @@ function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: string
         background: notif.read ? 'transparent' : `${cfg.color}06`,
         borderLeft: `3px solid ${notif.read ? 'transparent' : cfg.color}`,
         transition: 'all .15s',
-        position: 'relative',
       }}
       onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${cfg.color}08`}
       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = notif.read ? 'transparent' : `${cfg.color}06`}
     >
-      {/* Ícono */}
       <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: `${cfg.color}15`, border: `1px solid ${cfg.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <Icon size={15} color={cfg.color} strokeWidth={1.8} />
       </div>
 
-      {/* Contenido */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '2px' }}>
           <p style={{ fontSize: '12px', fontWeight: notif.read ? 500 : 700, color: notif.read ? 'var(--dax-text-secondary)' : 'var(--dax-text-primary)', lineHeight: 1.3 }}>
@@ -73,7 +70,6 @@ function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: string
         )}
       </div>
 
-      {/* Dot no leído */}
       {!notif.read && (
         <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: cfg.color, flexShrink: 0, marginTop: '4px', boxShadow: `0 0 5px ${cfg.color}60` }} />
       )}
@@ -82,12 +78,12 @@ function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: string
 }
 
 interface NotificationPanelProps {
-  open: boolean;
-  onClose: () => void;
+  open:          boolean;
+  onClose:       () => void;
   notifications: Notification[];
-  unreadCount: number;
-  onRead: (id: string) => void;
-  onReadAll: () => void;
+  unreadCount:   number;
+  onRead:        (id: string) => void;
+  onReadAll:     () => void;
 }
 
 export function NotificationPanel({ open, onClose, notifications, unreadCount, onRead, onReadAll }: NotificationPanelProps) {
@@ -103,33 +99,25 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
 
   const grouped = {
     unread: notifications.filter(n => !n.read),
-    read:   notifications.filter(n => n.read).slice(0, 10),
+    read:   notifications.filter(n =>  n.read).slice(0, 10),
   };
 
   return createPortal(
     <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}
-      />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }} />
 
-      {/* Panel */}
-      <div
-        ref={panelRef}
-        style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0,
-          width: 'min(380px, 100vw)',
-          background: 'rgba(15,25,36,0.98)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(30,58,95,0.7)',
-          borderRight: 'none',
-          zIndex: 9999,
-          display: 'flex', flexDirection: 'column',
-          boxShadow: '-8px 0 40px rgba(0,0,0,.5)',
-          animation: 'slideInRight .25s cubic-bezier(.22,1,.36,1)',
-        }}
-      >
+      <div ref={panelRef} style={{
+        position: 'fixed', top: 0, right: 0, bottom: 0,
+        width: 'min(380px, 100vw)',
+        background: 'rgba(15,25,36,0.98)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(30,58,95,0.7)',
+        borderRight: 'none',
+        zIndex: 9999,
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '-8px 0 40px rgba(0,0,0,.5)',
+        animation: 'slideInRight .25s cubic-bezier(.22,1,.36,1)',
+      }}>
         {/* Header */}
         <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid rgba(30,58,95,0.5)', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -151,7 +139,6 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
             </button>
           </div>
 
-          {/* Acciones */}
           {unreadCount > 0 && (
             <button onClick={onReadAll} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', color: '#FF5C35', fontSize: '11px', fontWeight: 700, padding: '4px 0', fontFamily: 'var(--font-primary)', transition: 'opacity .15s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.7')}
@@ -175,27 +162,20 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
             </div>
           ) : (
             <>
-              {/* No leídas */}
               {grouped.unread.length > 0 && (
                 <div>
                   <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', padding: '12px 16px 6px' }}>
                     Sin leer · {grouped.unread.length}
                   </p>
-                  {grouped.unread.map(n => (
-                    <NotifItem key={n.id} notif={n} onRead={onRead} />
-                  ))}
+                  {grouped.unread.map(n => <NotifItem key={n.id} notif={n} onRead={onRead} />)}
                 </div>
               )}
-
-              {/* Leídas */}
               {grouped.read.length > 0 && (
                 <div>
                   <p style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', padding: '12px 16px 6px' }}>
                     Anteriores
                   </p>
-                  {grouped.read.map(n => (
-                    <NotifItem key={n.id} notif={n} onRead={onRead} />
-                  ))}
+                  {grouped.read.map(n => <NotifItem key={n.id} notif={n} onRead={onRead} />)}
                 </div>
               )}
             </>
@@ -213,7 +193,7 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
       <style>{`
         @keyframes slideInRight {
           from { transform: translateX(100%); opacity: 0; }
-          to   { transform: translateX(0);   opacity: 1; }
+          to   { transform: translateX(0);    opacity: 1; }
         }
       `}</style>
     </>,
@@ -221,11 +201,11 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
   );
 }
 
-// ── Campana con badge para el topbar ──────────────────
+// ── Campana con badge ─────────────────────────────────────────────────────────
 export function NotificationBell() {
-  const [open, setOpen] = useState(false);
-  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
+  const [open,    setOpen]    = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
 
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
@@ -238,7 +218,7 @@ export function NotificationBell() {
           position: 'relative', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: '36px', height: '36px', borderRadius: '10px',
-          color: open ? '#FF5C35' : 'var(--dax-text-muted)',
+          color:      open ? '#FF5C35' : 'var(--dax-text-muted)',
           background: open ? 'rgba(255,92,53,.1)' : 'transparent',
           transition: 'all .15s',
         }}
@@ -254,7 +234,7 @@ export function NotificationBell() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '9px', fontWeight: 800, color: '#fff',
             padding: '0 3px', lineHeight: 1,
-            animation: unreadCount > 0 ? 'badgePop .3s cubic-bezier(.22,1,.36,1)' : 'none',
+            animation: 'badgePop .3s cubic-bezier(.22,1,.36,1)',
           }}>
             {unreadCount > 99 ? '99+' : unreadCount}
           </div>
@@ -276,6 +256,3 @@ export function NotificationBell() {
     </>
   );
 }
-
-// necesario para useState en el export de campana
-import { useState } from 'react';

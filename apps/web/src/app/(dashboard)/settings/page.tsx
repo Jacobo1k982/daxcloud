@@ -15,6 +15,7 @@ import { PlanSection } from '@/components/settings/PlanSection';
 import { UsersSection } from '@/components/settings/UsersSection';
 import { LocaleSection } from '@/components/settings/LocaleSection';
 import { RolesSection } from '@/components/settings/RolesSection';
+import { NotificationsSection } from '@/components/settings/NotificationsSection';
 
 const SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
@@ -332,25 +333,7 @@ export default function SettingsPage() {
       {activeSection === 'notifications' && (
         <div>
           <SectionHeader title="Notificaciones" desc="Configura qué alertas quieres recibir" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '480px' }}>
-            {[
-              { key: 'lowStock', label: 'Alerta de stock bajo', desc: 'Cuando un producto baja del mínimo' },
-              { key: 'dailySummary', label: 'Resumen diario', desc: 'Resumen de ventas cada día' },
-              { key: 'newSale', label: 'Nueva venta', desc: 'Cada vez que se procesa una venta' },
-              { key: 'systemAlerts', label: 'Alertas del sistema', desc: 'Avisos importantes de DaxCloud' },
-            ].map(item => (
-              <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)', gap: '16px' }}>
-                <div>
-                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{item.label}</p>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{item.desc}</p>
-                </div>
-                <Toggle value={notifForm[item.key as keyof typeof notifForm] as boolean} onChange={() => setNotifForm(p => ({ ...p, [item.key]: !p[item.key as keyof typeof p] }))} />
-              </div>
-            ))}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-              <button onClick={() => showToast('Preferencias de notificaciones guardadas')} className="dax-btn-primary">Guardar cambios</button>
-            </div>
-          </div>
+          <NotificationsSection showToast={showToast} />
         </div>
       )}
 
