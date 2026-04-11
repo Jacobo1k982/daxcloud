@@ -60,7 +60,7 @@ function ParticleField() {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const d  = Math.sqrt(dx * dx + dy * dy);
+          const d = Math.sqrt(dx * dx + dy * dy);
           if (d < 75) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
@@ -96,32 +96,26 @@ function useReveal() {
 
 // ── Datos ──────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Zap,        color: '#FF5C35', title: 'POS adaptativo',          desc: 'El sistema detecta tu industria y adapta la interfaz automáticamente. Restaurante, farmacia, peluquería — cada negocio tiene su flujo.' },
-  { icon: BarChart2,  color: '#5AAAF0', title: 'Analytics en tiempo real', desc: 'Ventas, inventario y métricas clave actualizados al instante. Toma decisiones basadas en datos, no en suposiciones.' },
-  { icon: Globe,      color: '#3DBF7F', title: 'Multi-moneda',             desc: 'Soporte nativo para 20+ países de América Latina y Europa. CRC, USD, MXN, COP y más, con formatos locales correctos.' },
-  { icon: Shield,     color: '#F0A030', title: 'Multi-tenant seguro',      desc: 'Cada negocio tiene su propio espacio aislado. Roles, permisos y sucursales completamente independientes.' },
-  { icon: Smartphone, color: '#A78BFA', title: 'Responsive total',         desc: 'Funciona igual en desktop, tablet y móvil. El POS, el dashboard y los reportes adaptados a cualquier pantalla.' },
-  { icon: Package,    color: '#FF5C35', title: 'Inventario inteligente',   desc: 'Control de stock, movimientos, lotes y vencimientos. Alertas automáticas cuando el inventario baja del mínimo.' },
+  { icon: Zap, color: '#FF5C35', title: 'POS adaptativo', desc: 'El sistema detecta tu industria y adapta la interfaz automáticamente. Restaurante, farmacia, peluquería — cada negocio tiene su flujo.' },
+  { icon: BarChart2, color: '#5AAAF0', title: 'Analytics en tiempo real', desc: 'Ventas, inventario y métricas clave actualizados al instante. Toma decisiones basadas en datos, no en suposiciones.' },
+  { icon: Globe, color: '#3DBF7F', title: 'Multi-moneda', desc: 'Soporte nativo para 20+ países de América Latina y Europa. CRC, USD, MXN, COP y más, con formatos locales correctos.' },
+  { icon: Shield, color: '#F0A030', title: 'Multi-tenant seguro', desc: 'Cada negocio tiene su propio espacio aislado. Roles, permisos y sucursales completamente independientes.' },
+  { icon: Smartphone, color: '#A78BFA', title: 'Responsive total', desc: 'Funciona igual en desktop, tablet y móvil. El POS, el dashboard y los reportes adaptados a cualquier pantalla.' },
+  { icon: Package, color: '#FF5C35', title: 'Inventario inteligente', desc: 'Control de stock, movimientos, lotes y vencimientos. Alertas automáticas cuando el inventario baja del mínimo.' },
 ];
 
 const INDUSTRIES = [
-  { icon: Utensils,     label: 'Restaurante',  color: '#F97316' },
-  { icon: ChefHat,      label: 'Panadería',     color: '#FF5C35' },
-  { icon: Pill,         label: 'Farmacia',      color: '#5AAAF0' },
-  { icon: Scissors,     label: 'Peluquería',    color: '#A78BFA' },
-  { icon: Shirt,        label: 'Ropa',          color: '#EAB308' },
-  { icon: Leaf,         label: 'Verdulería',    color: '#22C55E' },
-  { icon: ShoppingCart, label: 'Supermercado',  color: '#5AAAF0' },
-  { icon: Package,      label: 'Tienda',        color: '#FF5C35' },
+  { icon: Utensils, label: 'Restaurante', color: '#F97316' },
+  { icon: ChefHat, label: 'Panadería', color: '#FF5C35' },
+  { icon: Pill, label: 'Farmacia', color: '#5AAAF0' },
+  { icon: Scissors, label: 'Peluquería', color: '#A78BFA' },
+  { icon: Shirt, label: 'Ropa', color: '#EAB308' },
+  { icon: Leaf, label: 'Verdulería', color: '#22C55E' },
+  { icon: ShoppingCart, label: 'Supermercado', color: '#5AAAF0' },
+  { icon: Package, label: 'Tienda', color: '#FF5C35' },
 ];
 
 const PLAN_ICONS: Record<string, any> = { starter: Shield, growth: Star, scale: Crown };
-
-const TESTIMONIALS = [
-  { name: 'María González', role: 'Dueña · Panadería El Trigo', text: 'DaxCloud transformó cómo manejo mi negocio. El POS es rapidísimo y los reportes me ayudan a tomar mejores decisiones.', avatar: 'MG' },
-  { name: 'Carlos Rodríguez', role: 'Gerente · Farmacia San José', text: 'El control de lotes y vencimientos es exactamente lo que necesitábamos. Muy fácil de usar para todo el equipo.', avatar: 'CR' },
-  { name: 'Ana Pérez', role: 'Administradora · Restaurante El Patio', text: 'Las comandas digitales y el cierre de caja por turno nos ahorraron mucho tiempo. 100% recomendado.', avatar: 'AP' },
-];
 
 function FeatureCard({ icon: Icon, color, title, desc, delay }: any) {
   const { ref, visible } = useReveal();
@@ -146,13 +140,12 @@ function FeatureCard({ icon: Icon, color, title, desc, delay }: any) {
 
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [mounted,      setMounted]      = useState(false);
-  const [annual,       setAnnual]       = useState(false);
-  const [sinpePlan,    setSinpePlan]    = useState<typeof PLANS[number] | null>(null);
-  const featuresReveal    = useReveal();
-  const industriesReveal  = useReveal();
-  const testimonialsReveal = useReveal();
-  const ctaReveal         = useReveal();
+  const [mounted, setMounted] = useState(false);
+  const [annual, setAnnual] = useState(false);
+  const [sinpePlan, setSinpePlan] = useState<typeof PLANS[number] | null>(null);
+  const featuresReveal = useReveal();
+  const industriesReveal = useReveal();
+  const ctaReveal = useReveal();
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
@@ -271,31 +264,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* TESTIMONIOS */}
-      <section style={{ padding: 'clamp(60px,8vh,100px) clamp(20px,5vw,80px)', borderTop: '1px solid #1E3A5F' }}>
-        <div ref={testimonialsReveal.ref} style={{ maxWidth: '1100px', margin: '0 auto', opacity: testimonialsReveal.visible ? 1 : 0, transform: testimonialsReveal.visible ? 'none' : 'translateY(20px)', transition: 'all .7s cubic-bezier(.22,1,.36,1)' }}>
-          <p style={{ textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#FF5C35', marginBottom: '14px' }}>Testimonios</p>
-          <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px,3vw,36px)', fontWeight: 700, color: '#fff', marginBottom: '48px', letterSpacing: '-.01em' }}>Lo que dicen nuestros clientes</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} style={{ padding: '24px', background: 'rgba(22,34,53,.85)', border: '1px solid rgba(30,58,95,.5)', borderRadius: '16px', backdropFilter: 'blur(12px)' }}>
-                <div style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
-                  {[...Array(5)].map((_, j) => <span key={j} style={{ color: '#F0A030', fontSize: '14px' }}>★</span>)}
-                </div>
-                <p style={{ fontSize: '13px', color: 'rgba(176,208,240,.8)', lineHeight: 1.7, marginBottom: '16px', fontStyle: 'italic' }}>"{t.text}"</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,92,53,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#FF5C35', flexShrink: 0 }}>{t.avatar}</div>
-                  <div>
-                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#F0F4FF', lineHeight: 1 }}>{t.name}</p>
-                    <p style={{ fontSize: '11px', color: 'rgba(176,208,240,.4)', marginTop: '2px' }}>{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* PRECIOS */}
       <section id="precios" style={{ padding: 'clamp(60px,8vh,100px) clamp(20px,5vw,80px)', borderTop: '1px solid #1E3A5F' }}>
         <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
@@ -319,7 +287,7 @@ export default function LandingPage() {
           {/* Cards de planes */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             {PLANS.map(plan => {
-              const Icon  = PLAN_ICONS[plan.name] ?? Shield;
+              const Icon = PLAN_ICONS[plan.name] ?? Shield;
               const price = annual ? plan.annualMonthly : plan.monthlyPrice;
               const saving = plan.monthlyPrice * 12 - plan.annualPrice;
 
