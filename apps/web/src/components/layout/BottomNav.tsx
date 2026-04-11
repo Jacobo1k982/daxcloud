@@ -7,27 +7,28 @@ import {
   ShoppingCart, Package, Warehouse, LayoutDashboard,
   BarChart2, GitBranch, Settings, LogOut, X,
   MoreHorizontal, ChefHat, Pill, Scissors,
-  Shirt, Leaf, Utensils, TrendingUp, Barcode,
+  Shirt, Leaf, Utensils, TrendingUp, Barcode, Users,
 } from 'lucide-react';
 
 // ── Módulo por industria (solo el del tenant) ─────────
 const INDUSTRY_MODULE: Record<string, { href: string; label: string; icon: React.ElementType }> = {
-  bakery:      { href: '/bakery',     label: 'Panadería',    icon: ChefHat   },
-  pharmacy:    { href: '/pharmacy',   label: 'Farmacia',     icon: Pill      },
-  salon:       { href: '/salon',      label: 'Peluquería',   icon: Scissors  },
-  clothing:    { href: '/clothing',   label: 'Ropa',         icon: Shirt     },
-  produce:     { href: '/produce',    label: 'Verdulería',   icon: Leaf      },
-  restaurant:  { href: '/restaurant', label: 'Restaurante',  icon: Utensils  },
-  supermarket: { href: '/products',   label: 'Catálogo',     icon: Barcode   },
-  general:     { href: '/sales',      label: 'Ventas',       icon: TrendingUp },
+  bakery: { href: '/bakery', label: 'Panadería', icon: ChefHat },
+  pharmacy: { href: '/pharmacy', label: 'Farmacia', icon: Pill },
+  salon: { href: '/salon', label: 'Peluquería', icon: Scissors },
+  clothing: { href: '/clothing', label: 'Ropa', icon: Shirt },
+  produce: { href: '/produce', label: 'Verdulería', icon: Leaf },
+  restaurant: { href: '/restaurant', label: 'Restaurante', icon: Utensils },
+  supermarket: { href: '/products', label: 'Catálogo', icon: Barcode },
+  general: { href: '/sales', label: 'Ventas', icon: TrendingUp },
 };
 
 const BASE_MORE: { href: string; label: string; icon: React.ElementType }[] = [
-  { href: '/dashboard', label: 'Dashboard',     icon: LayoutDashboard },
-  { href: '/sales',     label: 'Ventas',        icon: TrendingUp      },
-  { href: '/analytics', label: 'Analytics',     icon: BarChart2       },
-  { href: '/branches',  label: 'Sucursales',    icon: GitBranch       },
-  { href: '/settings',  label: 'Configuración', icon: Settings        },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/sales', label: 'Ventas', icon: TrendingUp },
+  { href: '/clients', label: 'Clientes', icon: Users },
+  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/branches', label: 'Sucursales', icon: GitBranch },
+  { href: '/settings', label: 'Configuración', icon: Settings },
 ];
 
 export function BottomNav() {
@@ -44,9 +45,9 @@ export function BottomNav() {
     : BASE_MORE;
 
   const mainItems = [
-    { href: '/pos',       label: 'POS',        icon: ShoppingCart as React.ElementType },
-    { href: '/products',  label: 'Productos',  icon: Package      as React.ElementType },
-    { href: '/inventory', label: 'Inventario', icon: Warehouse    as React.ElementType },
+    { href: '/pos', label: 'POS', icon: ShoppingCart as React.ElementType },
+    { href: '/products', label: 'Productos', icon: Package as React.ElementType },
+    { href: '/inventory', label: 'Inventario', icon: Warehouse as React.ElementType },
   ];
 
   return (

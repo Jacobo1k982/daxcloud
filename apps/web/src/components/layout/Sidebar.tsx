@@ -9,13 +9,14 @@ import {
   LayoutDashboard, ShoppingCart, BarChart2,
   Package, Warehouse, GitBranch, Settings, LogOut,
   ChefHat, Pill, Scissors, Shirt, Leaf, Utensils,
-  TrendingUp, Barcode,
+  TrendingUp, Barcode, Users,
 } from 'lucide-react';
 
 const NAV_BASE = [
   { href: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
   { href: '/pos',       label: 'POS',        icon: ShoppingCart },
   { href: '/sales',     label: 'Ventas',     icon: TrendingUp },
+  { href: '/clients',   label: 'Clientes',   icon: Users },
   { href: '/products',  label: 'Productos',  icon: Package },
   { href: '/inventory', label: 'Inventario', icon: Warehouse },
   { href: '/analytics', label: 'Analytics',  icon: BarChart2 },
