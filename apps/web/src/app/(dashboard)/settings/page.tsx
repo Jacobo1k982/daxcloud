@@ -16,6 +16,7 @@ import { UsersSection } from '@/components/settings/UsersSection';
 import { LocaleSection } from '@/components/settings/LocaleSection';
 import { RolesSection } from '@/components/settings/RolesSection';
 import { NotificationsSection } from '@/components/settings/NotificationsSection';
+import { SecuritySection } from '@/components/settings/SecuritySection';
 
 const SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
@@ -110,7 +111,6 @@ export default function SettingsPage() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [notifForm, setNotifForm] = useState({ lowStock: true, dailySummary: true, newSale: false, systemAlerts: true });
   const [printForm, setPrintForm] = useState({ receiptHeader: tenant?.name ?? '', receiptFooter: 'Gracias por su compra', printCopies: '1', autoPrint: false });
   const [inviteForm, setInviteForm] = useState({ email: '', firstName: '', lastName: '', role: 'cashier' });
@@ -125,16 +125,6 @@ export default function SettingsPage() {
     queryKey: ['users-list'],
     queryFn: async () => { const { data } = await api.get('/users'); return data; },
     enabled: activeSection === 'users',
-  });
-
-  const passwordMutation = useMutation({
-    mutationFn: async () => {
-      if (passwordForm.newPassword !== passwordForm.confirm) throw new Error('Las contraseñas no coinciden');
-      if (passwordForm.newPassword.length < 8) throw new Error('Mínimo 8 caracteres');
-      return api.put('/users/me/password', { currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword });
-    },
-    onSuccess: () => { showToast('Contraseña actualizada correctamente'); setPasswordForm({ currentPassword: '', newPassword: '', confirm: '' }); },
-    onError: (err: any) => showToast(err.message ?? err.response?.data?.message ?? 'Error', 'error'),
   });
 
   const inviteMutation = useMutation({
@@ -339,39 +329,8 @@ export default function SettingsPage() {
 
       {activeSection === 'security' && (
         <div>
-          <SectionHeader title="Seguridad" desc="Cambia tu contraseña y configura el acceso" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '480px' }}>
-            <div>
-              <Label>Contraseña actual</Label>
-              <input className="dax-input" type="password" placeholder="••••••••" value={passwordForm.currentPassword} onChange={e => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Nueva contraseña</Label>
-              <input className="dax-input" type="password" placeholder="Mínimo 8 caracteres" value={passwordForm.newPassword} onChange={e => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Confirmar nueva contraseña</Label>
-              <input className="dax-input" type="password" placeholder="••••••••" value={passwordForm.confirm} onChange={e => setPasswordForm(p => ({ ...p, confirm: e.target.value }))} />
-            </div>
-            {passwordForm.newPassword && passwordForm.confirm && passwordForm.newPassword !== passwordForm.confirm && (
-              <p style={{ fontSize: '12px', color: 'var(--dax-danger)' }}>Las contraseñas no coinciden</p>
-            )}
-            <div style={{ borderTop: '1px solid var(--dax-border)', paddingTop: '20px' }}>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-secondary)', marginBottom: '12px' }}>Sesión actual</p>
-              <div style={{ padding: '14px 16px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)' }}>Navegador web</p>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Activa ahora</p>
-                </div>
-                <span className="dax-badge dax-badge-success">Activa</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-              <button onClick={() => passwordMutation.mutate()} disabled={passwordMutation.isPending || !passwordForm.currentPassword || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirm} className="dax-btn-primary">
-                {passwordMutation.isPending ? 'Actualizando...' : 'Cambiar contraseña'}
-              </button>
-            </div>
-          </div>
+          <SectionHeader title="Seguridad" desc="Contraseña y acceso a tu cuenta" />
+          <SecuritySection showToast={showToast} />
         </div>
       )}
 
