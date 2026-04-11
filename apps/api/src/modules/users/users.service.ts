@@ -8,18 +8,11 @@ export class UsersService {
 
   async findAll(tenantId: string) {
     return this.prisma.user.findMany({
-      where: { tenantId },
+      where:   { tenantId },
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        phone: true,
-        jobTitle: true,
-        avatarUrl: true,
-        active: true,
-        createdAt: true,
+        id: true, email: true, firstName: true, lastName: true,
+        role: true, phone: true, jobTitle: true, avatarUrl: true,
+        active: true, createdAt: true, language: true, timezone: true,
       },
       orderBy: { firstName: 'asc' },
     });
@@ -27,21 +20,25 @@ export class UsersService {
 
   async findMe(userId: string) {
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where:  { id: userId },
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        phone: true,
-        jobTitle: true,
-        avatarUrl: true,
-        language: true,
-        timezone: true,
-        signature: true,
-        active: true,
-        createdAt: true,
+        id: true, email: true, firstName: true, lastName: true,
+        role: true, phone: true, jobTitle: true, avatarUrl: true,
+        language: true, timezone: true, signature: true,
+        active: true, createdAt: true,
+      },
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
+  }
+
+  async findOne(tenantId: string, userId: string) {
+    const user = await this.prisma.user.findFirst({
+      where:  { id: userId, tenantId },
+      select: {
+        id: true, email: true, firstName: true, lastName: true,
+        role: true, phone: true, jobTitle: true, avatarUrl: true,
+        active: true, createdAt: true, language: true, timezone: true,
       },
     });
     if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -49,15 +46,9 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, tenantId: string, data: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    jobTitle?: string;
-    avatarUrl?: string;
-    language?: string;
-    timezone?: string;
-    signature?: string;
+    firstName?: string; lastName?: string; email?: string;
+    phone?: string; jobTitle?: string; avatarUrl?: string;
+    language?: string; timezone?: string; signature?: string;
   }) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.tenantId !== tenantId) throw new NotFoundException('Usuario no encontrado');
@@ -72,15 +63,15 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: {
-        ...(data.firstName !== undefined && { firstName: data.firstName }),
-        ...(data.lastName !== undefined && { lastName: data.lastName }),
-        ...(data.email !== undefined && { email: data.email }),
-        ...(data.phone !== undefined && { phone: data.phone }),
-        ...(data.jobTitle !== undefined && { jobTitle: data.jobTitle }),
-        ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
-        ...(data.language !== undefined && { language: data.language }),
-        ...(data.timezone !== undefined && { timezone: data.timezone }),
-        ...(data.signature !== undefined && { signature: data.signature }),
+        ...(data.firstName  !== undefined && { firstName:  data.firstName  }),
+        ...(data.lastName   !== undefined && { lastName:   data.lastName   }),
+        ...(data.email      !== undefined && { email:      data.email      }),
+        ...(data.phone      !== undefined && { phone:      data.phone      }),
+        ...(data.jobTitle   !== undefined && { jobTitle:   data.jobTitle   }),
+        ...(data.avatarUrl  !== undefined && { avatarUrl:  data.avatarUrl  }),
+        ...(data.language   !== undefined && { language:   data.language   }),
+        ...(data.timezone   !== undefined && { timezone:   data.timezone   }),
+        ...(data.signature  !== undefined && { signature:  data.signature  }),
       },
       select: {
         id: true, email: true, firstName: true, lastName: true,
@@ -100,8 +91,7 @@ export class UsersService {
   }
 
   async changePassword(userId: string, tenantId: string, data: {
-    currentPassword: string;
-    newPassword: string;
+    currentPassword: string; newPassword: string;
   }) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.tenantId !== tenantId) throw new NotFoundException('Usuario no encontrado');
@@ -114,21 +104,25 @@ export class UsersService {
   }
 
   async invite(tenantId: string, data: {
-    email: string;
-    firstName: string;
-    lastName: string;
+    email: string; firstName: string; lastName: string;
     role: 'admin' | 'manager' | 'cashier';
   }) {
     const existing = await this.prisma.user.findUnique({
       where: { tenantId_email: { tenantId, email: data.email } },
     });
     if (existing) throw new BadRequestException('El correo ya está registrado');
+
     const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
     const passwordHash = await bcrypt.hash(tempPassword, 10);
+
     const user = await this.prisma.user.create({
-      data: { tenantId, email: data.email, firstName: data.firstName, lastName: data.lastName, role: data.role, passwordHash },
+      data: {
+        tenantId, email: data.email, firstName: data.firstName,
+        lastName: data.lastName, role: data.role, passwordHash,
+      },
       select: { id: true, email: true, firstName: true, lastName: true, role: true },
     });
+
     return { user, tempPassword, message: 'Usuario creado exitosamente.' };
   }
 
@@ -137,8 +131,44 @@ export class UsersService {
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return this.prisma.user.update({
       where: { id: userId },
-      data: { active: !user.active },
+      data:  { active: !user.active },
       select: { id: true, active: true },
     });
+  }
+
+  async updateRole(tenantId: string, userId: string, role: 'admin' | 'manager' | 'cashier') {
+    const user = await this.prisma.user.findFirst({ where: { id: userId, tenantId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return this.prisma.user.update({
+      where:  { id: userId },
+      data:   { role },
+      select: { id: true, role: true, firstName: true, lastName: true },
+    });
+  }
+
+  async resetPassword(tenantId: string, userId: string) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId, tenantId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data:  { passwordHash },
+    });
+
+    return { tempPassword, message: 'Contraseña reseteada correctamente.' };
+  }
+
+  async remove(tenantId: string, userId: string, requestingUserId: string) {
+    if (userId === requestingUserId) {
+      throw new BadRequestException('No puedes eliminar tu propia cuenta');
+    }
+    const user = await this.prisma.user.findFirst({ where: { id: userId, tenantId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    await this.prisma.user.delete({ where: { id: userId } });
+    return { message: 'Usuario eliminado correctamente' };
   }
 }
