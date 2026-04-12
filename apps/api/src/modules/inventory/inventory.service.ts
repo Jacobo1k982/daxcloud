@@ -1,25 +1,25 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService }        from '../../prisma/prisma.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
-import { Prisma } from '@prisma/client';
+import { Prisma }               from '@prisma/client';
 
 interface AddStockInput {
-  productId:      string;
-  branchId:       string;
-  quantity:       number;
-  type?:          'in' | 'out' | 'adjustment';
-  reason?:        string;
+  productId:       string;
+  branchId:        string;
+  quantity:        number;
+  type?:           'in' | 'out' | 'adjustment';
+  reason?:         string;
   documentNumber?: string;
-  supplier?:      string;
-  unitCost?:      number;
-  location?:      string;
-  lotNumber?:     string;
+  supplier?:       string;
+  unitCost?:       number;
+  location?:       string;
+  lotNumber?:      string;
   expirationDate?: string;
-  serialNumber?:  string;
-  lotBarcode?:    string;
-  notes?:         string;
-  minStock?:      number;
-  maxStock?:      number;
+  serialNumber?:   string;
+  lotBarcode?:     string;
+  notes?:          string;
+  minStock?:       number;
+  maxStock?:       number;
 }
 
 const LOW_STOCK_THRESHOLD = 5;
@@ -27,23 +27,112 @@ const LOW_STOCK_THRESHOLD = 5;
 @Injectable()
 export class InventoryService {
   constructor(
-    private prisma: PrismaService,
+    private prisma:               PrismaService,
     private notificationsGateway: NotificationsGateway,
   ) {}
 
-  async findByBranch(tenantId: string, branchId: string) {
+  // ── Listar inventario por sucursal ────────────────────────────────────────
+  async findByBranch(tenantId: string, branchId: string, filters?: {
+    search?:   string;
+    status?:   string;
+    category?: string;
+  }) {
     const branch = await this.prisma.branch.findFirst({
       where: { id: branchId, tenantId },
     });
     if (!branch) throw new NotFoundException('Sucursal no encontrada');
 
-    return this.prisma.inventory.findMany({
-      where:   { branchId },
+    const where: any = { branchId };
+
+    if (filters?.search) {
+      where.product = {
+        OR: [
+          { name:     { contains: filters.search, mode: 'insensitive' } },
+          { sku:      { contains: filters.search, mode: 'insensitive' } },
+          { barcode:  { contains: filters.search } },
+          { category: { contains: filters.search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
+    if (filters?.category) {
+      where.product = { ...where.product, category: filters.category };
+    }
+
+    const items = await this.prisma.inventory.findMany({
+      where,
       include: { product: true },
       orderBy: { product: { name: 'asc' } },
     });
+
+    // Filtrar por status después de traer los datos
+    if (filters?.status) {
+      return items.filter(item => {
+        const qty = item.quantity;
+        const min = item.minStock ?? LOW_STOCK_THRESHOLD;
+        const max = item.maxStock;
+        switch (filters.status) {
+          case 'ok':        return qty > min && (!max || qty <= max);
+          case 'low':       return qty > 0 && qty <= min;
+          case 'empty':     return qty === 0;
+          case 'overstock': return max !== null && qty > max;
+          default:          return true;
+        }
+      });
+    }
+
+    return items;
   }
 
+  // ── Stats de inventario ───────────────────────────────────────────────────
+  async getStats(tenantId: string, branchId: string) {
+    const items = await this.prisma.inventory.findMany({
+      where:   { branchId, branch: { tenantId } },
+      include: { product: true },
+    });
+
+    const total     = items.length;
+    const empty     = items.filter(i => i.quantity === 0).length;
+    const low       = items.filter(i => i.quantity > 0 && i.quantity <= (i.minStock ?? LOW_STOCK_THRESHOLD)).length;
+    const ok        = items.filter(i => i.quantity > (i.minStock ?? LOW_STOCK_THRESHOLD)).length;
+    const overstock = items.filter(i => i.maxStock !== null && i.quantity > i.maxStock).length;
+
+    const totalValue = items.reduce((sum, i) => {
+      return sum + (Number(i.product.cost ?? 0) * i.quantity);
+    }, 0);
+
+    return { total, empty, low, ok, overstock, totalValue };
+  }
+
+  // ── Stock bajo global ─────────────────────────────────────────────────────
+  async getLowStock(tenantId: string) {
+    const allInventory = await this.prisma.inventory.findMany({
+      where:   { branch: { tenantId } },
+      include: { product: true, branch: { select: { name: true } } },
+    });
+
+    return allInventory.filter(item =>
+      item.quantity <= (item.minStock ?? LOW_STOCK_THRESHOLD)
+    );
+  }
+
+  // ── Historial de movimientos ──────────────────────────────────────────────
+  async getMovements(tenantId: string, productId: string, branchId: string) {
+    return this.prisma.inventoryMovement.findMany({
+      where: {
+        productId,
+        branchId,
+        branch: { tenantId },
+      },
+      orderBy: { createdAt: 'desc' },
+      take:    100,
+      include: {
+        user: { select: { firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  // ── Agregar / mover stock ─────────────────────────────────────────────────
   async addStock(tenantId: string, data: AddStockInput) {
     const product = await this.prisma.product.findFirst({
       where: { id: data.productId, tenantId, active: true },
@@ -61,7 +150,7 @@ export class InventoryService {
       const inventoryData: Prisma.InventoryUpdateInput = {
         ...(data.minStock !== undefined && { minStock: data.minStock }),
         ...(data.maxStock !== undefined && { maxStock: data.maxStock }),
-        ...(data.location  &&             { location: data.location  }),
+        ...(data.location &&              { location: data.location  }),
       };
 
       const quantityChange = movementType === 'out'
@@ -70,131 +159,100 @@ export class InventoryService {
         ? undefined
         : { increment: data.quantity };
 
-      if (quantityChange) {
-        inventoryData.quantity = quantityChange;
-      }
+      if (quantityChange) inventoryData.quantity = quantityChange;
 
       const inv = await tx.inventory.upsert({
-        where: {
-          productId_branchId: {
-            productId: data.productId,
-            branchId:  data.branchId,
-          },
-        },
+        where:  { productId_branchId: { productId: data.productId, branchId: data.branchId } },
         update: inventoryData,
         create: {
           productId: data.productId,
           branchId:  data.branchId,
-          quantity:  movementType === 'out' ? 0 : data.quantity,
-          minStock:  data.minStock ?? 5,
+          quantity:  movementType === 'in' ? data.quantity : 0,
+          minStock:  data.minStock ?? LOW_STOCK_THRESHOLD,
           maxStock:  data.maxStock ?? null,
           location:  data.location ?? null,
         },
       });
 
-      // Para ajuste, setear cantidad directamente
-      if (movementType === 'adjustment') {
-        await tx.inventory.update({
-          where: { id: inv.id },
-          data:  { quantity: data.quantity },
-        });
-      }
-
-      await tx.movement.create({
+      // Registrar movimiento
+      await tx.inventoryMovement.create({
         data: {
-          inventoryId:    inv.id,
+          productId:      data.productId,
+          branchId:       data.branchId,
           type:           movementType,
           quantity:       data.quantity,
-          reason:         data.reason         ?? null,
-          documentNumber: data.documentNumber ?? null,
-          supplier:       data.supplier       ?? null,
-          unitCost:       data.unitCost       ?? null,
-          location:       data.location       ?? null,
-          lotNumber:      data.lotNumber      ?? null,
-          expirationDate: data.expirationDate ? new Date(data.expirationDate) : null,
-          serialNumber:   data.serialNumber   ?? null,
-          lotBarcode:     data.lotBarcode     ?? null,
-          notes:          data.notes          ?? null,
+          reason:         data.reason,
+          documentNumber: data.documentNumber,
+          supplier:       data.supplier,
+          unitCost:       data.unitCost,
+          location:       data.location,
+          lotNumber:      data.lotNumber,
+          expirationDate: data.expirationDate ? new Date(data.expirationDate) : undefined,
+          serialNumber:   data.serialNumber,
+          notes:          data.notes,
         },
       });
 
       return inv;
     });
 
-    // ── Notificación: stock bajo ───────────────────────
-    // Lee el stock final (post-transacción) para tener el valor real
-    const finalInventory = await this.prisma.inventory.findUnique({
-      where: { productId_branchId: { productId: data.productId, branchId: data.branchId } },
-    });
-
-    if (finalInventory) {
-      const finalQty  = finalInventory.quantity;
-      const minStock  = finalInventory.minStock ?? LOW_STOCK_THRESHOLD;
-
-      if (movementType !== 'in' && finalQty <= minStock && finalQty >= 0) {
-        this.notificationsGateway.pushToTenant(tenantId, {
-          type:    'low_stock',
-          title:   'Stock bajo',
-          message: `${product.name} tiene solo ${finalQty} unidad${finalQty !== 1 ? 'es' : ''} en ${branch.name}`,
-          color:   '#F0A030',
-          link:    `/inventory`,
-        }).catch(() => {});
-      }
-
-      // ── Notificación: sin stock ──────────────────────
-      if (finalQty === 0) {
-        this.notificationsGateway.pushToTenant(tenantId, {
-          type:    'system',
-          title:   '¡Sin stock!',
-          message: `${product.name} se quedó sin existencias en ${branch.name}. Reabastece pronto.`,
-          color:   '#E05050',
-          link:    `/inventory`,
-        }).catch(() => {});
-      }
+    // Notificación de stock bajo
+    const threshold = data.minStock ?? LOW_STOCK_THRESHOLD;
+    if (inventory.quantity <= threshold && inventory.quantity > 0) {
+      await this.notificationsGateway.sendToTenant(tenantId, {
+        type:    'low_stock',
+        title:   'Stock bajo',
+        message: `${product.name} tiene solo ${inventory.quantity} unidades`,
+        icon:    'package',
+        color:   '#F0A030',
+        link:    '/inventory',
+      }).catch(() => {});
     }
 
-    // ── Notificación: reabastecimiento recibido ────────
-    if (movementType === 'in') {
-      this.notificationsGateway.pushToTenant(tenantId, {
-        type:    'reminder',
-        title:   'Stock actualizado',
-        message: `+${data.quantity} unidad${data.quantity !== 1 ? 'es' : ''} de ${product.name} en ${branch.name}${data.supplier ? ` · ${data.supplier}` : ''}`,
-        color:   '#5AAAF0',
-        link:    `/inventory`,
+    if (inventory.quantity === 0) {
+      await this.notificationsGateway.sendToTenant(tenantId, {
+        type:    'low_stock',
+        title:   'Producto agotado',
+        message: `${product.name} se ha agotado`,
+        icon:    'alert-triangle',
+        color:   '#E05050',
+        link:    '/inventory',
       }).catch(() => {});
     }
 
     return inventory;
   }
 
-  async getLowStock(tenantId: string) {
-    const branches = await this.prisma.branch.findMany({
-      where:  { tenantId, active: true },
-      select: { id: true },
+  // ── Ajuste directo de cantidad ────────────────────────────────────────────
+  async adjustStock(tenantId: string, productId: string, branchId: string, data: {
+    quantity: number;
+    reason?:  string;
+    notes?:   string;
+  }) {
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, tenantId },
+    });
+    if (!product) throw new NotFoundException('Producto no encontrado');
+
+    if (data.quantity < 0) throw new BadRequestException('La cantidad no puede ser negativa');
+
+    const inv = await this.prisma.inventory.upsert({
+      where:  { productId_branchId: { productId, branchId } },
+      update: { quantity: data.quantity },
+      create: { productId, branchId, quantity: data.quantity, minStock: LOW_STOCK_THRESHOLD },
     });
 
-    const branchIds = branches.map(b => b.id);
-
-    // Trae todos y filtra en memoria — Prisma no soporta
-    // comparar dos campos del mismo modelo en el where
-    const all = await this.prisma.inventory.findMany({
-      where:   { branchId: { in: branchIds } },
-      include: { product: true, branch: true },
+    await this.prisma.inventoryMovement.create({
+      data: {
+        productId,
+        branchId,
+        type:     'adjustment',
+        quantity: data.quantity,
+        reason:   data.reason ?? 'Ajuste manual',
+        notes:    data.notes,
+      },
     });
 
-    return all.filter(inv => inv.quantity <= (inv.minStock ?? LOW_STOCK_THRESHOLD));
-  }
-
-  async getMovements(tenantId: string, productId: string, branchId: string) {
-    const inventory = await this.prisma.inventory.findUnique({
-      where: { productId_branchId: { productId, branchId } },
-    });
-    if (!inventory) throw new NotFoundException('Inventario no encontrado');
-
-    return this.prisma.movement.findMany({
-      where:   { inventoryId: inventory.id },
-      orderBy: { createdAt: 'desc' },
-      take:    100,
-    });
+    return inv;
   }
 }
