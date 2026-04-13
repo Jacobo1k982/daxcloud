@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useCallback } from 'react';
 import { useAuth }      from '@/hooks/useAuth';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -8,10 +7,11 @@ import {
   Users, AlertTriangle, ArrowRight, BarChart2,
   Zap, Clock, RefreshCw, Target, CreditCard,
   Wallet, Smartphone, ArrowUpRight, Award,
-  ChevronRight,
+  ChevronRight, DollarSign, Activity, Star,
+  Store, Settings, Layers, GitBranch,
 } from 'lucide-react';
 
-// ── Utilidades ────────────────────────────────────────────────────────────────
+// ── Utilidades ─────────────────────────────────────────────────────────────
 function timeAgo(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
   if (mins < 1)  return 'ahora';
@@ -30,31 +30,19 @@ const PERIOD_LABELS: Record<string, string> = {
 };
 
 const PAYMENT_COLORS: Record<string, string> = {
-  cash:     '#3DBF7F',
-  card:     '#5AAAF0',
-  transfer: '#A78BFA',
-  mixed:    '#F0A030',
+  cash: '#3DBF7F', card: '#5AAAF0', transfer: '#A78BFA', mixed: '#F0A030',
 };
-
 const PAYMENT_LABELS: Record<string, string> = {
-  cash:     'Efectivo',
-  card:     'Tarjeta',
-  transfer: 'SINPE',
-  mixed:    'Mixto',
+  cash: 'Efectivo', card: 'Tarjeta', transfer: 'SINPE', mixed: 'Mixto',
 };
-
 const PAYMENT_ICONS: Record<string, any> = {
-  cash:     Wallet,
-  card:     CreditCard,
-  transfer: Smartphone,
-  mixed:    ArrowUpRight,
+  cash: Wallet, card: CreditCard, transfer: Smartphone, mixed: ArrowUpRight,
 };
 
-// ── Sparkline SVG ─────────────────────────────────────────────────────────────
+// ── Sparkline SVG ───────────────────────────────────────────────────────────
 function Sparkline({ data, color, height = 44 }: { data: number[]; color: string; height?: number }) {
   if (!data || data.length < 2) return null;
-  const max   = Math.max(...data);
-  const min   = Math.min(...data);
+  const max = Math.max(...data); const min = Math.min(...data);
   const range = max - min || 1;
   const W = 120, H = height;
   const pts = data.map((v, i) => {
@@ -67,8 +55,8 @@ function Sparkline({ data, color, height = 44 }: { data: number[]; color: string
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
       <defs>
         <linearGradient id={`sg-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0"   />
+          <stop offset="0%"   stopColor={color} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={color} stopOpacity="0"    />
         </linearGradient>
       </defs>
       <polygon points={`0,${H} ${pts.join(' ')} ${W},${H}`} fill={`url(#sg-${color.replace('#','')})`} />
@@ -78,12 +66,10 @@ function Sparkline({ data, color, height = 44 }: { data: number[]; color: string
   );
 }
 
-// ── Bar chart ventas ──────────────────────────────────────────────────────────
+// ── Bar chart ventas ────────────────────────────────────────────────────────
 function SalesBarChart({ data, color }: { data: { label: string; value: number }[]; color: string }) {
   if (!data?.length) return (
-    <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-      Sin datos para este período
-    </div>
+    <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin datos para este período</div>
   );
   const max = Math.max(...data.map(d => d.value), 1);
   return (
@@ -92,12 +78,9 @@ function SalesBarChart({ data, color }: { data: { label: string; value: number }
         const isLast = i === data.length - 1;
         const pct    = Math.max((d.value / max) * 78, 3);
         return (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', height: '100%', justifyContent: 'flex-end' }}
-            title={`${d.label}: ${d.value}`}>
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', height: '100%', justifyContent: 'flex-end' }} title={`${d.label}: ${d.value}`}>
             <div style={{ width: '100%', borderRadius: '3px 3px 0 0', background: isLast ? color : `${color}45`, height: `${pct}px`, transition: 'height .4s ease', minHeight: '3px' }} />
-            <span style={{ fontSize: '8px', color: isLast ? color : 'var(--dax-text-muted)', fontWeight: isLast ? 700 : 400, whiteSpace: 'nowrap' }}>
-              {d.label}
-            </span>
+            <span style={{ fontSize: '8px', color: isLast ? color : 'var(--dax-text-muted)', fontWeight: isLast ? 700 : 400, whiteSpace: 'nowrap' }}>{d.label}</span>
           </div>
         );
       })}
@@ -105,14 +88,12 @@ function SalesBarChart({ data, color }: { data: { label: string; value: number }
   );
 }
 
-// ── Horas pico heatmap ────────────────────────────────────────────────────────
+// ── Horas pico heatmap ──────────────────────────────────────────────────────
 function PeakHoursChart({ data }: { data: { hour: number; count: number }[] }) {
   if (!data?.length) return (
-    <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-      Sin datos
-    </div>
+    <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin datos</div>
   );
-  const max = Math.max(...data.map(d => d.count), 1);
+  const max   = Math.max(...data.map(d => d.count), 1);
   const hours = Array.from({ length: 24 }, (_, h) => {
     const found = data.find(d => d.hour === h);
     return { hour: h, count: found?.count ?? 0 };
@@ -123,18 +104,7 @@ function PeakHoursChart({ data }: { data: { hour: number; count: number }[] }) {
         {hours.map(h => {
           const intensity = h.count / max;
           return (
-            <div
-              key={h.hour}
-              title={`${h.hour}:00 — ${h.count} ventas`}
-              style={{
-                flex: 1, height: '28px', borderRadius: '3px',
-                background: intensity > 0
-                  ? `rgba(255,92,53,${0.1 + intensity * 0.85})`
-                  : 'var(--dax-surface-3)',
-                transition: 'background .3s',
-                cursor: 'default',
-              }}
-            />
+            <div key={h.hour} title={`${h.hour}:00 — ${h.count} ventas`} style={{ flex: 1, height: '28px', borderRadius: '3px', background: intensity > 0 ? `rgba(255,92,53,${0.1 + intensity * 0.85})` : 'var(--dax-surface-3)', transition: 'background .3s', cursor: 'default' }} />
           );
         })}
       </div>
@@ -147,17 +117,14 @@ function PeakHoursChart({ data }: { data: { hour: number; count: number }[] }) {
   );
 }
 
-// ── Donut de métodos de pago ──────────────────────────────────────────────────
+// ── Donut de métodos de pago ────────────────────────────────────────────────
 function PaymentDonut({ data }: { data: { method: string; count: number; total: number }[] }) {
   if (!data?.length) return (
-    <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-      Sin ventas
-    </div>
+    <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin ventas</div>
   );
   const total = data.reduce((s, d) => s + d.count, 0);
   let offset  = 0;
   const R = 28, C = 2 * Math.PI * R;
-
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
       <svg width="72" height="72" viewBox="0 0 72 72" style={{ flexShrink: 0 }}>
@@ -167,24 +134,16 @@ function PaymentDonut({ data }: { data: { method: string; count: number; total: 
           const dash = pct * C;
           const gap  = C - dash;
           const seg  = (
-            <circle
-              key={i}
-              cx="36" cy="36" r={R}
-              fill="none"
-              stroke={PAYMENT_COLORS[d.method] ?? '#888'}
-              strokeWidth="8"
-              strokeDasharray={`${dash} ${gap}`}
-              strokeDashoffset={-offset}
-              transform="rotate(-90 36 36)"
-              style={{ transition: 'stroke-dasharray .5s ease' }}
+            <circle key={i} cx="36" cy="36" r={R} fill="none"
+              stroke={PAYMENT_COLORS[d.method] ?? '#888'} strokeWidth="8"
+              strokeDasharray={`${dash} ${gap}`} strokeDashoffset={-offset}
+              transform="rotate(-90 36 36)" style={{ transition: 'stroke-dasharray .5s ease' }}
             />
           );
           offset += dash;
           return seg;
         })}
-        <text x="36" y="40" textAnchor="middle" style={{ fontSize: '13px', fontWeight: 800, fill: 'var(--dax-text-primary)', fontFamily: 'sans-serif' }}>
-          {total}
-        </text>
+        <text x="36" y="40" textAnchor="middle" style={{ fontSize: '13px', fontWeight: 800, fill: 'var(--dax-text-primary)', fontFamily: 'sans-serif' }}>{total}</text>
       </svg>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 }}>
         {data.map(d => {
@@ -194,9 +153,7 @@ function PaymentDonut({ data }: { data: { method: string; count: number; total: 
             <div key={d.method} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PAYMENT_COLORS[d.method] ?? '#888', flexShrink: 0 }} />
               <Icon size={10} color={PAYMENT_COLORS[d.method] ?? '#888'} style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', flex: 1 }}>
-                {PAYMENT_LABELS[d.method] ?? d.method}
-              </span>
+              <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', flex: 1 }}>{PAYMENT_LABELS[d.method] ?? d.method}</span>
               <span style={{ fontSize: '11px', fontWeight: 700, color: PAYMENT_COLORS[d.method] ?? '#888' }}>{pct}%</span>
             </div>
           );
@@ -206,7 +163,7 @@ function PaymentDonut({ data }: { data: { method: string; count: number; total: 
   );
 }
 
-// ── KPI Card ──────────────────────────────────────────────────────────────────
+// ── KPI Card ────────────────────────────────────────────────────────────────
 function KPICard({ label, value, sub, color, icon: Icon, trend, trendValue, sparkData, loading }: {
   label: string; value: string | number; sub?: string;
   color: string; icon: any;
@@ -215,11 +172,10 @@ function KPICard({ label, value, sub, color, icon: Icon, trend, trendValue, spar
 }) {
   return (
     <div className="dax-card" style={{ padding: '20px 22px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '88px', height: '88px', borderRadius: '50%', background: `${color}10`, pointerEvents: 'none' }} />
-
+      <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '88px', height: '88px', borderRadius: '50%', background: `${color}08`, pointerEvents: 'none' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={16} color={color} strokeWidth={1.8} />
+        <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${color}20` }}>
+          <Icon size={17} color={color} strokeWidth={1.8} />
         </div>
         {trend && trendValue && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '3px 8px', borderRadius: '8px', background: trend === 'up' ? 'var(--dax-success-bg)' : trend === 'down' ? 'var(--dax-danger-bg)' : 'var(--dax-surface-2)' }}>
@@ -231,13 +187,11 @@ function KPICard({ label, value, sub, color, icon: Icon, trend, trendValue, spar
           </div>
         )}
       </div>
-
       <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', marginBottom: '5px' }}>{label}</p>
       <p style={{ fontSize: '27px', fontWeight: 800, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '3px' }}>
         {loading ? <span style={{ color: 'var(--dax-border)', fontSize: '20px' }}>—</span> : value}
       </p>
       {sub && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{sub}</p>}
-
       {sparkData && sparkData.length > 1 && (
         <div style={{ marginTop: '12px' }}>
           <Sparkline data={sparkData} color={color} />
@@ -247,7 +201,7 @@ function KPICard({ label, value, sub, color, icon: Icon, trend, trendValue, spar
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
+// ── Página principal ────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user, tenant, formatCurrency } = useAuth();
   const [period, setPeriod] = useState('today');
@@ -277,12 +231,10 @@ export default function DashboardPage() {
   const revChange   = summary?.revenueChange ?? 0;
   const salesChange = summary?.salesChange ?? 0;
 
-  // Sparkline de ventas por período
   const sparkData = Array.isArray(salesByPeriod)
     ? salesByPeriod.map((d: any) => Number(d.total ?? d.revenue ?? 0))
     : [];
 
-  // Ventas para bar chart
   const barData = Array.isArray(salesByPeriod)
     ? salesByPeriod.map((d: any) => ({
         label: d.label ?? d.date?.slice(5) ?? '',
@@ -290,13 +242,24 @@ export default function DashboardPage() {
       }))
     : [];
 
+  const QUICK_LINKS = [
+    { href: '/pos',       label: 'POS',          icon: Zap,      primary: true  },
+    { href: '/products',  label: 'Productos',     icon: Package,  primary: false },
+    { href: '/inventory', label: 'Inventario',    icon: Layers,   primary: false },
+    { href: '/clients',   label: 'Clientes',      icon: Users,    primary: false },
+    { href: '/sales',     label: 'Ventas',        icon: BarChart2,primary: false },
+    { href: '/analytics', label: 'Reportes',      icon: Activity, primary: false },
+    { href: '/branches',  label: 'Sucursales',    icon: GitBranch,primary: false },
+    { href: '/settings',  label: 'Configuración', icon: Settings, primary: false },
+  ];
+
   return (
-    <div style={{ padding: 'clamp(20px, 4vw, 40px)', maxWidth: '1280px' }}>
+    <div style={{ padding: 'clamp(16px, 4vw, 40px)', maxWidth: '1280px' }}>
 
       {/* ── Header ── */}
       <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: 'clamp(20px, 3vw, 26px)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h1 style={{ fontSize: 'clamp(18px, 3vw, 24px)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             {greeting}, {user.firstName} 👋
           </h1>
           <p style={{ color: 'var(--dax-text-muted)', fontSize: '13px' }}>
@@ -305,34 +268,17 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Selector de período */}
-          <div style={{ display: 'flex', background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '3px', border: '1px solid var(--dax-border)' }}>
+          <div style={{ display: 'flex', background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '3px', border: '1px solid var(--dax-border)', overflowX: 'auto' }}>
             {Object.entries(PERIOD_LABELS).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setPeriod(key)}
-                style={{
-                  padding: '6px 12px', borderRadius: '7px', border: 'none', cursor: 'pointer',
-                  background:  period === key ? 'var(--dax-surface)' : 'transparent',
-                  color:       period === key ? 'var(--dax-text-primary)' : 'var(--dax-text-muted)',
-                  fontSize:    '12px', fontWeight: period === key ? 700 : 400,
-                  transition:  'all .15s',
-                  boxShadow:   period === key ? '0 1px 4px rgba(0,0,0,.12)' : 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <button key={key} onClick={() => setPeriod(key)} style={{ padding: '6px 10px', borderRadius: '7px', border: 'none', cursor: 'pointer', background: period === key ? 'var(--dax-surface)' : 'transparent', color: period === key ? 'var(--dax-text-primary)' : 'var(--dax-text-muted)', fontSize: '12px', fontWeight: period === key ? 700 : 400, transition: 'all .15s', boxShadow: period === key ? '0 1px 4px rgba(0,0,0,.12)' : 'none', whiteSpace: 'nowrap' }}>
                 {label}
               </button>
             ))}
           </div>
-
-          <button
-            onClick={handleRefresh}
-            style={{ width: '36px', height: '36px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
+          <button onClick={handleRefresh} style={{ width: '36px', height: '36px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <RefreshCw size={14} style={{ animation: refreshing ? 'spin .7s linear infinite' : 'none' }} />
           </button>
-
-          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', transition: 'all .18s', whiteSpace: 'nowrap' }}>
+          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', whiteSpace: 'nowrap' }}>
             <Zap size={14} /> Abrir POS
           </a>
         </div>
@@ -351,14 +297,14 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── KPIs ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+      {/* ── KPIs — GRID FIJO para evitar duplicados ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '20px' }}>
         <KPICard
           label="Ingresos"
           value={formatCurrency(revenue)}
-          sub={`${PERIOD_LABELS[period]} · cambio vs anterior`}
+          sub={`${PERIOD_LABELS[period]} · vs anterior`}
           color="#FF5C35"
-          icon={TrendingUp}
+          icon={DollarSign}
           trend={revChange > 0 ? 'up' : revChange < 0 ? 'down' : 'neutral'}
           trendValue={`${revChange > 0 ? '+' : ''}${revChange.toFixed(1)}%`}
           sparkData={sparkData}
@@ -385,28 +331,29 @@ export default function DashboardPage() {
         <KPICard
           label="Productos activos"
           value={tenantStats?.totalProducts ?? 0}
-          sub={`${tenantStats?.totalUsers ?? 0} usuarios en el sistema`}
+          sub={`${tenantStats?.totalUsers ?? 0} usuarios activos`}
           color="#3DBF7F"
           icon={Package}
           loading={isLoading}
         />
       </div>
 
-      {/* ── Fila 2: gráficas principales ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+      {/* ── Fila 2: gráficas principales — GRID FIJO ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '20px' }}>
 
         {/* Ventas por período */}
         <div className="dax-card" style={{ padding: '20px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>
-                Ventas · {PERIOD_LABELS[period]}
-              </p>
-              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
-                Total: {formatCurrency(barData.reduce((s, d) => s + d.value, 0))}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '2px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,92,53,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BarChart2 size={13} color="#FF5C35" />
+                </div>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Ventas · {PERIOD_LABELS[period]}</p>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Total: {formatCurrency(barData.reduce((s, d) => s + d.value, 0))}</p>
             </div>
-            <a href="/analytics" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <a href="/analytics" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
               Analytics <ArrowRight size={11} />
             </a>
           </div>
@@ -415,12 +362,13 @@ export default function DashboardPage() {
 
         {/* Métodos de pago */}
         <div className="dax-card" style={{ padding: '20px 22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Métodos de pago</p>
-              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{PERIOD_LABELS[period]}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '4px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(90,170,240,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CreditCard size={13} color="#5AAAF0" />
             </div>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Métodos de pago</p>
           </div>
+          <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginBottom: '14px' }}>{PERIOD_LABELS[period]}</p>
           <PaymentDonut data={paymentMethods as any[]} />
           {(paymentMethods as any[]).length > 0 && (
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)' }}>
@@ -433,85 +381,88 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-
-        {/* Ventas recientes */}
-        <div className="dax-card" style={{ padding: '20px 22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Ventas recientes</p>
-              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Últimas transacciones</p>
-            </div>
-            <a href="/sales" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              Ver todas <ArrowRight size={11} />
-            </a>
-          </div>
-          {!(recentSales as any)?.data?.length ? (
-            <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-              Sin ventas recientes
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              {(recentSales as any).data.slice(0, 6).map((sale: any) => {
-                const color = PAYMENT_COLORS[sale.paymentMethod] ?? '#FF5C35';
-                return (
-                  <div key={sale.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '7px 0', borderBottom: '1px solid var(--dax-border-soft)' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <ShoppingCart size={12} color={color} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1.2 }}>
-                        {sale.items?.length ?? 0} ítem{sale.items?.length !== 1 ? 's' : ''}
-                      </p>
-                      <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
-                        {PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod} · {timeAgo(sale.createdAt)}
-                      </p>
-                    </div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', flexShrink: 0 }}>
-                      {formatCurrency(Number(sale.total))}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* ── Fila 3: top productos, cajeros, horas pico ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+      {/* ── Ventas recientes — ancho completo ── */}
+      <div className="dax-card" style={{ padding: '20px 22px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(61,191,127,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Activity size={13} color="#3DBF7F" />
+            </div>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '2px' }}>Ventas recientes</p>
+              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Últimas transacciones</p>
+            </div>
+          </div>
+          <a href="/sales" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            Ver todas <ArrowRight size={11} />
+          </a>
+        </div>
+        {!(recentSales as any)?.data?.length ? (
+          <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin ventas recientes</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '8px' }}>
+            {(recentSales as any).data.slice(0, 6).map((sale: any) => {
+              const color = PAYMENT_COLORS[sale.paymentMethod] ?? '#FF5C35';
+              const Icon  = PAYMENT_ICONS[sale.paymentMethod] ?? ShoppingCart;
+              return (
+                <div key={sale.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--dax-surface-2)', borderRadius: '10px', border: '1px solid var(--dax-border)' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${color}20` }}>
+                    <Icon size={14} color={color} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1.2 }}>
+                      {sale.items?.length ?? 0} ítem{sale.items?.length !== 1 ? 's' : ''}
+                    </p>
+                    <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
+                      {PAYMENT_LABELS[sale.paymentMethod] ?? sale.paymentMethod} · {timeAgo(sale.createdAt)}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', flexShrink: 0 }}>
+                    {formatCurrency(Number(sale.total))}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Fila 3: top productos, cajeros, horas pico — GRID FIJO ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '20px' }}>
 
         {/* Top productos */}
         <div className="dax-card" style={{ padding: '20px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Top productos</p>
-              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Más vendidos · {PERIOD_LABELS[period]}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(167,139,250,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Star size={13} color="#A78BFA" />
+              </div>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '2px' }}>Top productos</p>
+                <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Más vendidos · {PERIOD_LABELS[period]}</p>
+              </div>
             </div>
-            <a href="/sales" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <a href="/analytics" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
               Ver más <ArrowRight size={11} />
             </a>
           </div>
           {!(topProducts as any[]).length ? (
-            <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-              Sin ventas en este período
-            </div>
+            <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin ventas en este período</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {(topProducts as any[]).slice(0, 6).map((p: any, i: number) => {
                 const max = (topProducts as any[])[0]?.quantity ?? 1;
                 const pct = (p.quantity / max) * 100;
-                const colors = ['#FF5C35', '#5AAAF0', '#3DBF7F', '#A78BFA', '#F0A030', '#EC4899'];
+                const colors = ['#FF5C35','#5AAAF0','#3DBF7F','#A78BFA','#F0A030','#EC4899'];
                 const c = colors[i % colors.length];
                 return (
                   <div key={p.productId ?? i}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <span style={{ width: '18px', height: '18px', borderRadius: '6px', background: `${c}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800, color: c, flexShrink: 0 }}>
-                          {i + 1}
-                        </span>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
-                          {p.name}
-                        </span>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '6px', background: `${c}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800, color: c, flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>{p.name}</span>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <span style={{ fontSize: '11px', fontWeight: 700, color: c }}>×{p.quantity}</span>
@@ -530,14 +481,18 @@ export default function DashboardPage() {
 
         {/* Top cajeros */}
         <div className="dax-card" style={{ padding: '20px 22px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Top cajeros</p>
-            <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Rendimiento · {PERIOD_LABELS[period]}</p>
-          </div>
-          {!(topCashiers as any[]).length ? (
-            <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>
-              Sin datos
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '4px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(240,160,48,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Users size={13} color="#F0A030" />
             </div>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '2px' }}>Top cajeros</p>
+              <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Rendimiento · {PERIOD_LABELS[period]}</p>
+            </div>
+          </div>
+          <div style={{ marginBottom: '14px' }} />
+          {!(topCashiers as any[]).length ? (
+            <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin datos</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {(topCashiers as any[]).slice(0, 5).map((c: any, i: number) => (
@@ -547,44 +502,49 @@ export default function DashboardPage() {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {c.firstName} {c.lastName}
+                      {c.name ?? `${c.firstName} ${c.lastName}`}
                     </p>
                     <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{c.salesCount} ventas</p>
                   </div>
                   <span style={{ fontSize: '12px', fontWeight: 700, color: i === 0 ? '#FF5C35' : 'var(--dax-text-secondary)', flexShrink: 0 }}>
-                    {formatCurrency(Number(c.total ?? 0))}
+                    {formatCurrency(Number(c.revenue ?? c.total ?? 0))}
                   </span>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
 
-        {/* Horas pico */}
-        <div className="dax-card" style={{ padding: '20px 22px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Horas pico</p>
+      {/* ── Horas pico — ancho completo ── */}
+      <div className="dax-card" style={{ padding: '20px 22px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '4px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,92,53,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Clock size={13} color="#FF5C35" />
+          </div>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '2px' }}>Horas pico</p>
             <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Actividad por hora del día</p>
           </div>
-          <PeakHoursChart data={peakHours as any[]} />
-          {(peakHours as any[]).length > 0 && (() => {
-            const top = [...(peakHours as any[])].sort((a, b) => b.count - a.count).slice(0, 3);
-            return (
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)' }}>
-                <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '6px' }}>
-                  Horarios más activos
-                </p>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {top.map((h: any) => (
-                    <div key={h.hour} style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(255,92,53,.1)', border: '1px solid rgba(255,92,53,.2)' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#FF5C35' }}>{h.hour}:00</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
         </div>
+        <div style={{ marginBottom: '14px' }} />
+        <PeakHoursChart data={peakHours as any[]} />
+        {(peakHours as any[]).length > 0 && (() => {
+          const top = [...(peakHours as any[])].sort((a, b) => b.count - a.count).slice(0, 3).filter(h => h.count > 0);
+          if (!top.length) return null;
+          return (
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--dax-border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Más activos:</p>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {top.map((h: any) => (
+                  <div key={h.hour} style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(255,92,53,.1)', border: '1px solid rgba(255,92,53,.2)' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#FF5C35' }}>{h.hour}:00</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── Accesos rápidos ── */}
@@ -592,27 +552,16 @@ export default function DashboardPage() {
         <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--dax-text-muted)', marginBottom: '12px' }}>
           Accesos rápidos
         </p>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {[
-            { href: '/pos',       label: '⚡ POS',         primary: true  },
-            { href: '/products',  label: 'Productos',      primary: false },
-            { href: '/inventory', label: 'Inventario',     primary: false },
-            { href: '/sales',     label: 'Ventas',         primary: false },
-            { href: '/analytics', label: 'Analytics',      primary: false },
-            { href: '/branches',  label: 'Sucursales',     primary: false },
-            { href: '/settings',  label: 'Configuración',  primary: false },
-          ].map(link => (
-            <a key={link.href} href={link.href} style={{
-              padding: '7px 14px', borderRadius: '8px', fontSize: '12px',
-              fontWeight: link.primary ? 700 : 500, textDecoration: 'none',
-              background: link.primary ? '#FF5C35' : 'var(--dax-surface-2)',
-              color:      link.primary ? '#fff' : 'var(--dax-text-secondary)',
-              border:     link.primary ? 'none' : '1px solid var(--dax-border)',
-              transition: 'all .15s',
-            }}>
-              {link.label}
-            </a>
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px' }}>
+          {QUICK_LINKS.map(link => {
+            const LinkIcon = link.icon;
+            return (
+              <a key={link.href} href={link.href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '12px 8px', borderRadius: '10px', textDecoration: 'none', background: link.primary ? 'linear-gradient(135deg, #FF5C35, #FF3D1F)' : 'var(--dax-surface-2)', border: link.primary ? 'none' : '1px solid var(--dax-border)', transition: 'all .15s' }}>
+                <LinkIcon size={18} color={link.primary ? '#fff' : 'var(--dax-text-muted)'} strokeWidth={1.8} />
+                <span style={{ fontSize: '11px', fontWeight: link.primary ? 700 : 500, color: link.primary ? '#fff' : 'var(--dax-text-secondary)', textAlign: 'center' }}>{link.label}</span>
+              </a>
+            );
+          })}
         </div>
       </div>
 
