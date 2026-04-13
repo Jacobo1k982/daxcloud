@@ -10,13 +10,13 @@
   /* ── Tipografía ── */
   --font-primary: 'Outfit', system-ui, -apple-system, sans-serif;
 
-  /* ── Marca ── */
+  /* ── Marca (se sobreescribe con useTheme) ── */
   --dax-coral:          #FF5C35;
   --dax-coral-hover:    #E8440E;
   --dax-coral-soft:     rgba(255, 92, 53, 0.10);
   --dax-coral-border:   rgba(255, 92, 53, 0.25);
 
-  /* ── Azul profundo (nuevo) ── */
+  /* ── Azul profundo ── */
   --dax-navy-950:       #080F1A;
   --dax-navy-900:       #0F1924;
   --dax-navy-800:       #162235;
@@ -29,7 +29,7 @@
   --dax-navy-100:       #B8D8F0;
   --dax-navy-50:        #E8F4FB;
 
-  /* ── Backgrounds ── */
+  /* ── Backgrounds (tema oscuro por defecto) ── */
   --dax-bg:             #0F1924;
   --dax-surface:        #1A2840;
   --dax-surface-2:      #1E3050;
@@ -67,7 +67,55 @@
   --dax-shadow-coral:   0 4px 16px rgba(255, 92, 53, 0.30);
 }
 
-/* ══ Reset ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   TEMA CLARO — aplicado por next-themes con class="light"
+══════════════════════════════════════════════════════ */
+.light {
+  --dax-bg:             #F0F4F8;
+  --dax-surface:        #FFFFFF;
+  --dax-surface-2:      #F4F6FA;
+  --dax-surface-3:      #E8EDF5;
+
+  --dax-border:         #D1D9E6;
+  --dax-border-soft:    rgba(209, 217, 230, 0.6);
+
+  --dax-text-primary:   #0F1924;
+  --dax-text-secondary: #2A4A6A;
+  --dax-text-muted:     #6A8AAA;
+
+  --dax-navy-900:       #FFFFFF;
+  --dax-navy-800:       #F4F6FA;
+  --dax-navy-700:       #E8EDF5;
+  --dax-navy-600:       #D1D9E6;
+  --dax-navy-500:       #A0B4C8;
+  --dax-navy-400:       #6A8AAA;
+  --dax-navy-300:       #4A7FAF;
+
+  --dax-shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.08);
+  --dax-shadow-md:      0 4px 12px rgba(0, 0, 0, 0.10);
+  --dax-shadow-lg:      0 8px 28px rgba(0, 0, 0, 0.14);
+
+  --dax-success-bg:     rgba(61, 191, 127, 0.12);
+  --dax-warning-bg:     rgba(240, 160, 48, 0.12);
+  --dax-danger-bg:      rgba(224, 80, 80, 0.12);
+  --dax-info-bg:        rgba(90, 170, 240, 0.12);
+}
+
+/* tema claro — ajustes específicos de componentes */
+.light .dax-table tbody tr:hover td {
+  background: rgba(209, 217, 230, 0.4);
+}
+.light select.dax-input option {
+  background: #F4F6FA;
+  color: #0F1924;
+}
+.light .dax-input {
+  background: #FFFFFF;
+}
+.light ::-webkit-scrollbar-track { background: #E8EDF5; }
+.light ::-webkit-scrollbar-thumb { background: #A0B4C8; }
+
+/* ══ Reset ════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -95,13 +143,13 @@ h1, h2, h3, h4, h5, h6 {
 a { color: var(--dax-coral); text-decoration: none; }
 a:hover { color: var(--dax-coral-hover); }
 
-/* ══ Scrollbar ══════════════════════════════════════ */
+/* ══ Scrollbar ════════════════════════════════════════ */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--dax-navy-800); }
 ::-webkit-scrollbar-thumb { background: var(--dax-navy-600); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--dax-navy-400); }
 
-/* ══ Componentes base ═══════════════════════════════ */
+/* ══ Componentes base ══════════════════════════════════ */
 
 /* Cards */
 .dax-card {
@@ -132,7 +180,6 @@ a:hover { color: var(--dax-coral-hover); }
   box-shadow: 0 0 0 3px var(--dax-coral-soft);
 }
 .dax-input:hover:not(:focus) { border-color: var(--dax-navy-400); }
-
 select.dax-input { cursor: pointer; }
 select.dax-input option {
   background: var(--dax-navy-700);
@@ -223,18 +270,16 @@ select.dax-input option {
 .dax-badge-info     { background: var(--dax-info-bg);     color: var(--dax-info);     }
 .dax-badge-coral    { background: var(--dax-coral-soft);  color: var(--dax-coral);    }
 .dax-badge-default  { background: var(--dax-surface-2);   color: var(--dax-text-muted); }
+.dax-badge-muted    { background: var(--dax-surface-2);   color: var(--dax-text-muted); }
 
 /* Tablas */
 .dax-table-wrap { overflow-x: auto; }
-
 .dax-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
-.dax-table thead tr {
-  border-bottom: 1px solid var(--dax-border);
-}
+.dax-table thead tr { border-bottom: 1px solid var(--dax-border); }
 .dax-table th {
   padding: 10px 14px;
   text-align: left;
@@ -259,7 +304,6 @@ select.dax-input option {
   background: var(--dax-navy-900);
   border-right: 1px solid var(--dax-border);
 }
-
 .dax-nav-item {
   display: flex;
   align-items: center;
@@ -274,52 +318,22 @@ select.dax-input option {
   text-decoration: none;
   white-space: nowrap;
 }
-.dax-nav-item:hover {
-  background: var(--dax-surface-2);
-  color: var(--dax-text-secondary);
-}
-.dax-nav-item.active {
-  background: var(--dax-coral-soft);
-  color: var(--dax-coral);
-  font-weight: 700;
-}
+.dax-nav-item:hover { background: var(--dax-surface-2); color: var(--dax-text-secondary); }
+.dax-nav-item.active { background: var(--dax-coral-soft); color: var(--dax-coral); font-weight: 700; }
 .dax-nav-item.active svg { color: var(--dax-coral); }
 
 /* ══ Animaciones globales ════════════════════════════ */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: .5; }
-}
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn   { from { opacity: 0; transform: translateY(8px);  } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin      { to { transform: rotate(360deg); } }
+@keyframes pulse     { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
 /* ══ Utilidades ══════════════════════════════════════ */
 .spinning { animation: spin 1s linear infinite; }
 
-/* Selection */
-::selection {
-  background: var(--dax-coral-soft);
-  color: var(--dax-coral);
-}
+::selection { background: var(--dax-coral-soft); color: var(--dax-coral); }
 
-/* Autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {

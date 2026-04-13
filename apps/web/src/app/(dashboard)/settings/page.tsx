@@ -17,6 +17,7 @@ import { LocaleSection } from '@/components/settings/LocaleSection';
 import { RolesSection } from '@/components/settings/RolesSection';
 import { NotificationsSection } from '@/components/settings/NotificationsSection';
 import { SecuritySection } from '@/components/settings/SecuritySection';
+import { AppearanceSection } from '@/components/settings/AppearanceSection';
 
 const SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
@@ -371,6 +372,7 @@ export default function SettingsPage() {
       {activeSection === 'appearance' && (
         <div>
           <SectionHeader title="Apariencia" desc="Personaliza la visualización del sistema" />
+          <AppearanceSection showToast={showToast} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '480px' }}>
             <div>
               <Label>Tema</Label>
