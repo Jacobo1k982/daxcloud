@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useQuery }          from '@tanstack/react-query';
-import { useAuth }           from '@/hooks/useAuth';
-import { api }               from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import {
   TrendingUp, TrendingDown, ShoppingCart, DollarSign,
   Package, Users, BarChart2, PieChart, Clock, Star,
@@ -26,25 +26,25 @@ function fmtTime(d: string) {
 }
 
 const PERIOD_OPTS = [
-  { value: 'today',   label: 'Hoy'        },
-  { value: 'week',    label: '7 días'     },
-  { value: 'month',   label: 'Este mes'   },
-  { value: 'quarter', label: 'Trimestre'  },
-  { value: 'year',    label: 'Este año'   },
-  { value: 'custom',  label: 'Rango...'   },
+  { value: 'today', label: 'Hoy' },
+  { value: 'week', label: '7 días' },
+  { value: 'month', label: 'Este mes' },
+  { value: 'quarter', label: 'Trimestre' },
+  { value: 'year', label: 'Este año' },
+  { value: 'custom', label: 'Rango...' },
 ];
 
 const PAYMENT_COLORS: Record<string, string> = {
   cash: '#3DBF7F', card: '#5AAAF0', transfer: '#A78BFA', mixed: '#F0A030',
 };
 
-const CATEGORY_COLORS = ['#FF5C35','#5AAAF0','#3DBF7F','#A78BFA','#F0A030','#EC4899','#14B8A6','#F97316'];
+const CATEGORY_COLORS = ['#FF5C35', '#5AAAF0', '#3DBF7F', '#A78BFA', '#F0A030', '#EC4899', '#14B8A6', '#F97316'];
 
 // ── Mini gráfico de barras SVG ────────────────────────────────────────────────
 function SparkBar({ data, color = '#FF5C35', height = 40 }: { data: number[]; color?: string; height?: number }) {
   if (!data.length) return null;
-  const max  = Math.max(...data, 1);
-  const w    = 100 / data.length;
+  const max = Math.max(...data, 1);
+  const w = 100 / data.length;
   return (
     <svg viewBox={`0 0 100 ${height}`} style={{ width: '100%', height }} preserveAspectRatio="none">
       {data.map((v, i) => {
@@ -62,9 +62,9 @@ function SparkBar({ data, color = '#FF5C35', height = 40 }: { data: number[]; co
 function LineChart({ data, color = '#FF5C35', height = 120 }: { data: { date: string; revenue: number }[]; color?: string; height?: number }) {
   if (!data.length) return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-muted)', fontSize: '12px' }}>Sin datos</div>;
 
-  const max    = Math.max(...data.map(d => d.revenue), 1);
-  const width  = 600;
-  const pad    = 8;
+  const max = Math.max(...data.map(d => d.revenue), 1);
+  const width = 600;
+  const pad = 8;
   const innerW = width - pad * 2;
   const innerH = height - pad * 2;
 
@@ -81,7 +81,7 @@ function LineChart({ data, color = '#FF5C35', height = 120 }: { data: { date: st
     <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height }} preserveAspectRatio="none">
       <defs>
         <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={color} stopOpacity="0.25" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
           <stop offset="100%" stopColor={color} stopOpacity="0.02" />
         </linearGradient>
       </defs>
@@ -109,7 +109,7 @@ function HorizontalBar({ value, max, color, label, secondary }: { value: number;
 }
 
 // ── Heatmap de horas ──────────────────────────────────────────────────────────
-function HoursHeatmap({ data }: { data: { hour: number; count: number; revenue: number }[] }) {
+function HoursHeatmap({ data }: { data: { hour: number; count: number; revenue: number; label: string }[] }) {
   if (!data.length) return null;
   const max = Math.max(...data.map(d => d.count), 1);
 
@@ -117,7 +117,7 @@ function HoursHeatmap({ data }: { data: { hour: number; count: number; revenue: 
     const intensity = count / max;
     if (intensity === 0) return 'var(--dax-surface-2)';
     if (intensity < 0.25) return 'rgba(255,92,53,.15)';
-    if (intensity < 0.5)  return 'rgba(255,92,53,.35)';
+    if (intensity < 0.5) return 'rgba(255,92,53,.35)';
     if (intensity < 0.75) return 'rgba(255,92,53,.6)';
     return '#FF5C35';
   };
@@ -167,16 +167,16 @@ function KPICard({ label, value, change, color, icon: Icon, sparkData }: {
 export default function ReportsPage() {
   const { formatCurrency } = useAuth();
 
-  const [period,      setPeriod]      = useState('month');
+  const [period, setPeriod] = useState('month');
   const [customStart, setCustomStart] = useState('');
-  const [customEnd,   setCustomEnd]   = useState('');
-  const [activeTab,   setActiveTab]   = useState<'overview' | 'sales' | 'products' | 'cashiers' | 'stock'>('overview');
-  const [exporting,   setExporting]   = useState(false);
+  const [customEnd, setCustomEnd] = useState('');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sales' | 'products' | 'cashiers' | 'stock'>('overview');
+  const [exporting, setExporting] = useState(false);
 
   const params = useMemo(() => {
     const p = new URLSearchParams({ period });
     if (period === 'custom' && customStart) p.append('customStart', customStart);
-    if (period === 'custom' && customEnd)   p.append('customEnd',   customEnd);
+    if (period === 'custom' && customEnd) p.append('customEnd', customEnd);
     return p.toString();
   }, [period, customStart, customEnd]);
 
@@ -184,25 +184,25 @@ export default function ReportsPage() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['analytics-full', params],
-    queryFn:  async () => { const { data } = await api.get(`/analytics/dashboard?${params}`); return data; },
+    queryFn: async () => { const { data } = await api.get(`/analytics/dashboard?${params}`); return data; },
     enabled,
   });
 
   const { data: salesReport } = useQuery({
     queryKey: ['sales-report', params],
-    queryFn:  async () => { const { data } = await api.get(`/analytics/sales-report?${params}`); return data; },
-    enabled:  enabled && activeTab === 'sales',
+    queryFn: async () => { const { data } = await api.get(`/analytics/sales-report?${params}`); return data; },
+    enabled: enabled && activeTab === 'sales',
   });
 
-  const summary         = data?.summary;
-  const salesByPeriod   = data?.salesByPeriod   ?? [];
-  const topProducts     = data?.topProducts      ?? [];
-  const salesByCategory = data?.salesByCategory  ?? [];
-  const paymentMethods  = data?.paymentMethods   ?? [];
-  const peakHours       = data?.peakHours        ?? [];
-  const topCashiers     = data?.topCashiers       ?? [];
-  const criticalStock   = data?.criticalStock     ?? [];
-  const branchPerf      = data?.branchPerformance ?? [];
+  const summary = data?.summary;
+  const salesByPeriod = data?.salesByPeriod ?? [];
+  const topProducts = data?.topProducts ?? [];
+  const salesByCategory = data?.salesByCategory ?? [];
+  const paymentMethods = data?.paymentMethods ?? [];
+  const peakHours = data?.peakHours ?? [];
+  const topCashiers = data?.topCashiers ?? [];
+  const criticalStock = data?.criticalStock ?? [];
+  const branchPerf = data?.branchPerformance ?? [];
 
   const sparkData = salesByPeriod.map((d: any) => d.revenue);
   const maxRevenue = Math.max(...topProducts.map((p: any) => p.revenue), 1);
@@ -214,30 +214,30 @@ export default function ReportsPage() {
     try {
       const { data: report } = await api.get(`/analytics/sales-report?${params}`);
       const rows = [
-        ['ID','Fecha','Hora','Sucursal','Cajero','Cliente','Método pago','Subtotal','Descuento','Impuesto','Total'],
+        ['ID', 'Fecha', 'Hora', 'Sucursal', 'Cajero', 'Cliente', 'Método pago', 'Subtotal', 'Descuento', 'Impuesto', 'Total'],
         ...report.map((s: any) => [
           s.id, fmtDateFull(s.date), fmtTime(s.date),
           s.branch, s.cashier, s.client,
           s.paymentMethod, s.subtotal, s.discount, s.tax, s.total,
         ]),
       ];
-      const csv     = rows.map(r => r.map((v: any) => `"${v}"`).join(',')).join('\n');
-      const blob    = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url     = URL.createObjectURL(blob);
-      const a       = document.createElement('a');
-      a.href        = url;
-      a.download    = `reporte-ventas-${period}-${new Date().toISOString().slice(0,10)}.csv`;
+      const csv = rows.map(r => r.map((v: any) => `"${v}"`).join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte-ventas-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch { /* silent */ } finally { setExporting(false); }
   };
 
   const TABS = [
-    { key: 'overview',  label: 'Resumen',    icon: BarChart2  },
-    { key: 'sales',     label: 'Ventas',     icon: TrendingUp },
-    { key: 'products',  label: 'Productos',  icon: Package    },
-    { key: 'cashiers',  label: 'Cajeros',    icon: Users      },
-    { key: 'stock',     label: 'Stock',      icon: AlertTriangle },
+    { key: 'overview', label: 'Resumen', icon: BarChart2 },
+    { key: 'sales', label: 'Ventas', icon: TrendingUp },
+    { key: 'products', label: 'Productos', icon: Package },
+    { key: 'cashiers', label: 'Cajeros', icon: Users },
+    { key: 'stock', label: 'Stock', icon: AlertTriangle },
   ];
 
   return (
@@ -274,7 +274,7 @@ export default function ReportsPage() {
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             <input type="date" className="dax-input" value={customStart} onChange={e => setCustomStart(e.target.value)} style={{ margin: 0, padding: '7px 10px', fontSize: '12px', width: 'auto' }} />
             <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>→</span>
-            <input type="date" className="dax-input" value={customEnd}   onChange={e => setCustomEnd(e.target.value)}   style={{ margin: 0, padding: '7px 10px', fontSize: '12px', width: 'auto' }} />
+            <input type="date" className="dax-input" value={customEnd} onChange={e => setCustomEnd(e.target.value)} style={{ margin: 0, padding: '7px 10px', fontSize: '12px', width: 'auto' }} />
           </div>
         )}
       </div>
@@ -282,7 +282,7 @@ export default function ReportsPage() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '20px', background: 'var(--dax-surface-2)', padding: '3px', borderRadius: '12px', border: '1px solid var(--dax-border)', overflowX: 'auto' }}>
         {TABS.map(t => {
-          const Icon   = t.icon;
+          const Icon = t.icon;
           const active = activeTab === t.key;
           return (
             <button key={t.key} onClick={() => setActiveTab(t.key as any)} style={{ flex: 1, minWidth: '90px', padding: '9px 12px', borderRadius: '9px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: active ? 700 : 400, background: active ? 'var(--dax-surface)' : 'transparent', color: active ? 'var(--dax-coral)' : 'var(--dax-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', transition: 'all .15s', whiteSpace: 'nowrap' }}>
@@ -305,10 +305,10 @@ export default function ReportsPage() {
 
               {/* KPIs */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                <KPICard label="Ingresos totales"  value={formatCurrency(summary?.revenue ?? 0)}     change={summary?.revenueChange}  color="#FF5C35" icon={DollarSign}  sparkData={sparkData} />
-                <KPICard label="Ventas realizadas" value={String(summary?.salesCount ?? 0)}           change={summary?.salesChange}    color="#5AAAF0" icon={ShoppingCart} />
-                <KPICard label="Ticket promedio"   value={formatCurrency(summary?.avgTicket ?? 0)}    color="#3DBF7F" icon={TrendingUp} />
-                <KPICard label="Descuentos dados"  value={formatCurrency(summary?.totalDiscount ?? 0)} color="#F0A030" icon={TrendingDown} />
+                <KPICard label="Ingresos totales" value={formatCurrency(summary?.revenue ?? 0)} change={summary?.revenueChange} color="#FF5C35" icon={DollarSign} sparkData={sparkData} />
+                <KPICard label="Ventas realizadas" value={String(summary?.salesCount ?? 0)} change={summary?.salesChange} color="#5AAAF0" icon={ShoppingCart} />
+                <KPICard label="Ticket promedio" value={formatCurrency(summary?.avgTicket ?? 0)} color="#3DBF7F" icon={TrendingUp} />
+                <KPICard label="Descuentos dados" value={formatCurrency(summary?.totalDiscount ?? 0)} color="#F0A030" icon={TrendingDown} />
               </div>
 
               {/* Gráfico de ventas en el tiempo */}
@@ -336,20 +336,20 @@ export default function ReportsPage() {
                   {paymentMethods.length === 0
                     ? <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', textAlign: 'center', padding: '20px' }}>Sin datos</p>
                     : paymentMethods.map((m: any) => (
-                    <div key={m.method} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS[m.method] ?? '#888', flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>{m.label}</span>
-                          <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{m.count} · {m.percentage}%</span>
+                      <div key={m.method} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: PAYMENT_COLORS[m.method] ?? '#888', flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>{m.label}</span>
+                            <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{m.count} · {m.percentage}%</span>
+                          </div>
+                          <div style={{ height: '4px', background: 'var(--dax-surface-3)', borderRadius: '99px', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${m.percentage}%`, background: PAYMENT_COLORS[m.method] ?? '#888', borderRadius: '99px' }} />
+                          </div>
                         </div>
-                        <div style={{ height: '4px', background: 'var(--dax-surface-3)', borderRadius: '99px', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${m.percentage}%`, background: PAYMENT_COLORS[m.method] ?? '#888', borderRadius: '99px' }} />
-                        </div>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', minWidth: '80px', textAlign: 'right' }}>{formatCurrency(m.revenue)}</span>
                       </div>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', minWidth: '80px', textAlign: 'right' }}>{formatCurrency(m.revenue)}</span>
-                    </div>
-                  ))}
+                    ))}
                 </div>
 
                 {/* Sucursales */}
@@ -358,21 +358,21 @@ export default function ReportsPage() {
                   {branchPerf.length === 0
                     ? <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', textAlign: 'center', padding: '20px' }}>Sin datos</p>
                     : branchPerf.map((b: any, i: number) => (
-                    <div key={b.branchId} style={{ marginBottom: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', background: i === 0 ? '#FF5C35' : 'var(--dax-surface-3)', width: '18px', height: '18px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)' }}>{b.name}</span>
+                      <div key={b.branchId} style={{ marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', background: i === 0 ? '#FF5C35' : 'var(--dax-surface-3)', width: '18px', height: '18px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)' }}>{b.name}</span>
+                          </div>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{formatCurrency(b.revenue)}</span>
                         </div>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{formatCurrency(b.revenue)}</span>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{b.salesCount} ventas</span>
+                          <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Prom: {formatCurrency(b.avgTicket)}</span>
+                          <span style={{ fontSize: '10px', color: '#FF5C35', fontWeight: 600 }}>{b.percentage}%</span>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{b.salesCount} ventas</span>
-                        <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Prom: {formatCurrency(b.avgTicket)}</span>
-                        <span style={{ fontSize: '10px', color: '#FF5C35', fontWeight: 600 }}>{b.percentage}%</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
 
@@ -384,7 +384,7 @@ export default function ReportsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                   <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Sin actividad</span>
                   <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                    {['rgba(255,92,53,.15)','rgba(255,92,53,.35)','rgba(255,92,53,.6)','#FF5C35'].map((c, i) => (
+                    {['rgba(255,92,53,.15)', 'rgba(255,92,53,.35)', 'rgba(255,92,53,.6)', '#FF5C35'].map((c, i) => (
                       <div key={i} style={{ width: '12px', height: '12px', borderRadius: '2px', background: c }} />
                     ))}
                     <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Alta actividad</span>
@@ -513,7 +513,7 @@ export default function ReportsPage() {
                         <tr><td colSpan={8} style={{ textAlign: 'center', padding: '32px', color: 'var(--dax-text-muted)' }}>Sin datos</td></tr>
                       ) : topProducts.map((p: any, i: number) => {
                         const totalRev = topProducts.reduce((s: number, x: any) => s + x.revenue, 0);
-                        const pct      = totalRev > 0 ? ((p.revenue / totalRev) * 100).toFixed(1) : '0';
+                        const pct = totalRev > 0 ? ((p.revenue / totalRev) * 100).toFixed(1) : '0';
                         return (
                           <tr key={p.productId}>
                             <td>
@@ -584,8 +584,8 @@ export default function ReportsPage() {
                       <tr><td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--dax-text-muted)' }}>Sin datos</td></tr>
                     ) : topCashiers.map((c: any, i: number) => {
                       const initials = c.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
-                      const colors   = ['#FF5C35','#5AAAF0','#3DBF7F','#A78BFA','#F0A030'];
-                      const color    = colors[i % colors.length];
+                      const colors = ['#FF5C35', '#5AAAF0', '#3DBF7F', '#A78BFA', '#F0A030'];
+                      const color = colors[i % colors.length];
                       return (
                         <tr key={c.userId}>
                           <td><span style={{ fontSize: '12px', fontWeight: 700, color: i < 3 ? '#FF5C35' : 'var(--dax-text-muted)' }}>{i + 1}</span></td>
