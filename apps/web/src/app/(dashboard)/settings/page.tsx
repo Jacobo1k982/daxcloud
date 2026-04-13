@@ -18,6 +18,7 @@ import { RolesSection } from '@/components/settings/RolesSection';
 import { NotificationsSection } from '@/components/settings/NotificationsSection';
 import { SecuritySection } from '@/components/settings/SecuritySection';
 import { AppearanceSection } from '@/components/settings/AppearanceSection';
+import { DataSection } from '@/components/settings/DataSection';
 
 const SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
@@ -404,6 +405,7 @@ export default function SettingsPage() {
       {activeSection === 'data' && (
         <div>
           <SectionHeader title="Datos y backups" desc="Exporta y respalda tu información" />
+          <DataSection showToast={showToast} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '480px' }}>
             {[
               { label: 'Exportar productos', desc: 'Catálogo completo en Excel', endpoint: '/exports/products', filename: 'productos' },
