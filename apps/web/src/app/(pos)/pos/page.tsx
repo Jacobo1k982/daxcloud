@@ -11,6 +11,7 @@ import {
   ChefHat, Scissors, Shirt, Leaf, Pill,
   Package, Barcode, Tag, Trash2, AlertCircle,
   PauseCircle, PlayCircle, Clock, ArrowLeft,
+  Users, UserCheck,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getImageUrl }         from '@/lib/imageUrl';
@@ -86,10 +87,15 @@ export default function POSPage() {
   const [selectedModifiers, setSelectedModifiers]= useState<any[]>([]);
   const [search,            setSearch]           = useState('');
 
-  // ── Estado ventas en espera ───────────────────────────────────────────────
+  // ── Órdenes en espera ─────────────────────────────────────────────────────
   const [showHeld,      setShowHeld]      = useState(false);
   const [holdLabel,     setHoldLabel]     = useState('');
   const [showHoldInput, setShowHoldInput] = useState(false);
+
+  // ── Cliente seleccionado ──────────────────────────────────────────────────
+  const [selectedClient,   setSelectedClient]   = useState<any | null>(null);
+  const [clientSearch,     setClientSearch]     = useState('');
+  const [showClientDrop,   setShowClientDrop]   = useState(false);
 
   // ── Queries ───────────────────────────────────────────────────────────────
   const { data: products = [] } = useQuery({
@@ -156,6 +162,16 @@ export default function POSPage() {
     refetchInterval: 60000,
   });
 
+  const { data: clientResults = [] } = useQuery({
+    queryKey: ['pos-client-search', clientSearch],
+    queryFn: async () => {
+      if (clientSearch.length < 2) return [];
+      const { data } = await api.get(`/clients?search=${encodeURIComponent(clientSearch)}&limit=5`);
+      return data.data ?? [];
+    },
+    enabled: clientSearch.length >= 2,
+  });
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const getPrice = (product: any) => {
     if (industry !== 'restaurant' || !(activeHappyHour as any[]).length) return Number(product.price);
@@ -199,6 +215,9 @@ export default function POSPage() {
     setSelectedEmployee('');
     setMixedPayments({ cash: '', card: '', transfer: '' });
     setPaymentMethod('cash');
+    setSelectedClient(null);
+    setClientSearch('');
+    setShowClientDrop(false);
   }, []);
 
   const subtotal    = cart.reduce((a, i) => a + i.price * i.quantity, 0);
@@ -224,17 +243,10 @@ export default function POSPage() {
 
   // ── Retomar orden ─────────────────────────────────────────────────────────
   const handleResumeOrder = useCallback((order: HeldOrder) => {
-    // Si hay algo en el carrito, pausarlo primero
     if (cart.length > 0) {
       holdOrder({
-        label:           `Orden #${heldOrders.length + 1}`,
-        cart,
-        discount,
-        note,
-        paymentMethod,
-        mixedPayments,
-        selectedTable,
-        selectedEmployee,
+        label: `Orden #${heldOrders.length + 1}`,
+        cart, discount, note, paymentMethod, mixedPayments, selectedTable, selectedEmployee,
       });
     }
     setCart(order.cart);
@@ -273,7 +285,9 @@ export default function POSPage() {
 
       if (industry === 'salon' && cart[0]?.serviceId) {
         await api.post('/salon/appointments', {
-          clientName: 'Cliente walk-in',
+          clientName: selectedClient
+            ? `${selectedClient.firstName} ${selectedClient.lastName ?? ''}`.trim()
+            : 'Cliente walk-in',
           employeeId: selectedEmployee || undefined,
           serviceId:  cart[0].serviceId,
           startTime:  new Date().toISOString(),
@@ -282,9 +296,13 @@ export default function POSPage() {
       }
 
       const { data } = await api.post('/sales', {
-        branchId, paymentMethod,
-        discount: discountAmt, subtotal, total,
-        notes: note || undefined,
+        branchId,
+        paymentMethod,
+        discount:  discountAmt,
+        subtotal,
+        total,
+        notes:     note || undefined,
+        clientId:  selectedClient?.id || undefined,
         ...(paymentMethod === 'mixed' && {
           mixedPayments: {
             cash:     parseFloat(mixedPayments.cash     || '0'),
@@ -390,23 +408,12 @@ export default function POSPage() {
             {/* Botón órdenes en espera */}
             <button
               onClick={() => setShowHeld(true)}
-              style={{
-                marginLeft: 'auto',
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '6px 12px', borderRadius: '9px',
-                border: `1px solid ${heldOrders.length > 0 ? 'rgba(240,160,48,.4)' : 'var(--dax-border)'}`,
-                background: heldOrders.length > 0 ? 'rgba(240,160,48,.1)' : 'var(--dax-surface-2)',
-                color: heldOrders.length > 0 ? '#F0A030' : 'var(--dax-text-muted)',
-                cursor: 'pointer', fontSize: '12px', fontWeight: 600,
-                position: 'relative',
-              }}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '9px', border: `1px solid ${heldOrders.length > 0 ? 'rgba(240,160,48,.4)' : 'var(--dax-border)'}`, background: heldOrders.length > 0 ? 'rgba(240,160,48,.1)' : 'var(--dax-surface-2)', color: heldOrders.length > 0 ? '#F0A030' : 'var(--dax-text-muted)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
             >
               <Clock size={13} />
               En espera
               {heldOrders.length > 0 && (
-                <span style={{ background: '#F0A030', color: '#fff', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 800 }}>
-                  {heldOrders.length}
-                </span>
+                <span style={{ background: '#F0A030', color: '#fff', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 800 }}>{heldOrders.length}</span>
               )}
             </button>
 
@@ -517,6 +524,10 @@ export default function POSPage() {
             C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
             onHold={() => cart.length > 0 && setShowHoldInput(true)}
             heldCount={heldOrders.length}
+            selectedClient={selectedClient} setSelectedClient={setSelectedClient}
+            clientSearch={clientSearch} setClientSearch={setClientSearch}
+            showClientDrop={showClientDrop} setShowClientDrop={setShowClientDrop}
+            clientResults={clientResults}
           />
         </div>
 
@@ -540,6 +551,10 @@ export default function POSPage() {
                   C={C} fmt={formatCurrency} industry={industry} selectedTable={selectedTable}
                   onHold={() => { cart.length > 0 && setShowHoldInput(true); setShowCart(false); }}
                   heldCount={heldOrders.length}
+                  selectedClient={selectedClient} setSelectedClient={setSelectedClient}
+                  clientSearch={clientSearch} setClientSearch={setClientSearch}
+                  showClientDrop={showClientDrop} setShowClientDrop={setShowClientDrop}
+                  clientResults={clientResults}
                 />
               </div>
             </div>
@@ -562,7 +577,6 @@ export default function POSPage() {
                 </div>
                 <button onClick={() => setShowHeld(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex' }}><X size={18} /></button>
               </div>
-
               <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
                 {heldOrders.length === 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '10px' }}>
@@ -586,30 +600,17 @@ export default function POSPage() {
                             {formatCurrency(order.cart.reduce((s, i) => s + i.price * i.quantity, 0) * (1 - order.discount / 100))}
                           </p>
                         </div>
-
-                        {/* Items de la orden */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '10px' }}>
                           {order.cart.slice(0, 3).map((item, i) => (
-                            <p key={i} style={{ fontSize: '11px', color: 'var(--dax-text-secondary)' }}>
-                              × {item.quantity} {item.name}
-                            </p>
+                            <p key={i} style={{ fontSize: '11px', color: 'var(--dax-text-secondary)' }}>× {item.quantity} {item.name}</p>
                           ))}
-                          {order.cart.length > 3 && (
-                            <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>+{order.cart.length - 3} más...</p>
-                          )}
+                          {order.cart.length > 3 && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>+{order.cart.length - 3} más...</p>}
                         </div>
-
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => handleResumeOrder(order)}
-                            style={{ flex: 1, padding: '9px', borderRadius: '9px', border: 'none', background: C, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: `0 2px 8px ${C}30` }}
-                          >
+                          <button onClick={() => handleResumeOrder(order)} style={{ flex: 1, padding: '9px', borderRadius: '9px', border: 'none', background: C, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: `0 2px 8px ${C}30` }}>
                             <PlayCircle size={13} /> Retomar
                           </button>
-                          <button
-                            onClick={() => removeOrder(order.id)}
-                            style={{ padding: '9px 12px', borderRadius: '9px', border: '1px solid rgba(224,80,80,.3)', background: 'rgba(224,80,80,.06)', color: 'var(--dax-danger)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          >
+                          <button onClick={() => removeOrder(order.id)} style={{ padding: '9px 12px', borderRadius: '9px', border: '1px solid rgba(224,80,80,.3)', background: 'rgba(224,80,80,.06)', color: 'var(--dax-danger)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Trash2 size={12} /> Cancelar
                           </button>
                         </div>
@@ -635,24 +636,10 @@ export default function POSPage() {
                   <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{cart.length} ítems · {formatCurrency(total)}</p>
                 </div>
               </div>
-
-              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '8px' }}>
-                Nombre o referencia (opcional)
-              </p>
-              <input
-                className="dax-input"
-                placeholder={`Mesa 3, Cliente Juan, Orden #${heldOrders.length + 1}...`}
-                value={holdLabel}
-                onChange={e => setHoldLabel(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleHoldOrder()}
-                autoFocus
-                style={{ margin: '0 0 16px' }}
-              />
-
+              <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '8px' }}>Nombre o referencia (opcional)</p>
+              <input className="dax-input" placeholder={`Mesa 3, Cliente Juan, Orden #${heldOrders.length + 1}...`} value={holdLabel} onChange={e => setHoldLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleHoldOrder()} autoFocus style={{ margin: '0 0 16px' }} />
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => { setShowHoldInput(false); setHoldLabel(''); }} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-                  Cancelar
-                </button>
+                <button onClick={() => { setShowHoldInput(false); setHoldLabel(''); }} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
                 <button onClick={handleHoldOrder} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#F0A030', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 2px 10px rgba(240,160,48,.3)' }}>
                   <PauseCircle size={14} /> Pausar
                 </button>
@@ -719,7 +706,7 @@ export default function POSPage() {
   );
 }
 
-// ══ CARRITO LATERAL ════════════════════════════════════════════════════════════
+// ══ CARRITO LATERAL ══════════════════════════════════════════════════════════
 function CartSide({
   cart, subtotal, discountAmt, total,
   discount, setDiscount, note, setNote,
@@ -730,6 +717,10 @@ function CartSide({
   onSell, isSelling,
   C, fmt, industry, selectedTable,
   onHold, heldCount,
+  selectedClient, setSelectedClient,
+  clientSearch, setClientSearch,
+  showClientDrop, setShowClientDrop,
+  clientResults,
 }: any) {
   const count   = cart.reduce((a: number, i: any) => a + i.quantity, 0);
   const canSell = paymentMethod !== 'mixed' || (mixedIsValid && mixedTotal > 0);
@@ -741,6 +732,12 @@ function CartSide({
 
   const remaining = total - mixedTotal;
 
+  const clientName = selectedClient
+    ? (selectedClient.isCompany
+        ? selectedClient.companyName
+        : `${selectedClient.firstName} ${selectedClient.lastName ?? ''}`.trim())
+    : null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
@@ -750,13 +747,8 @@ function CartSide({
           <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Orden actual</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {count > 0 && <span style={{ fontSize: '10px', color: C, fontWeight: 600 }}>{count} ítem{count !== 1 ? 's' : ''}</span>}
-            {/* Botón pausar */}
             {cart.length > 0 && (
-              <button
-                onClick={onHold}
-                title="Pausar orden"
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', borderRadius: '7px', border: '1px solid rgba(240,160,48,.35)', background: 'rgba(240,160,48,.08)', color: '#F0A030', cursor: 'pointer', fontSize: '11px', fontWeight: 700 }}
-              >
+              <button onClick={onHold} title="Pausar orden" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', borderRadius: '7px', border: '1px solid rgba(240,160,48,.35)', background: 'rgba(240,160,48,.08)', color: '#F0A030', cursor: 'pointer', fontSize: '11px', fontWeight: 700 }}>
                 <PauseCircle size={11} /> Pausar
               </button>
             )}
@@ -771,11 +763,7 @@ function CartSide({
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '8px', color: 'var(--dax-text-muted)' }}>
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${C}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ShoppingCart size={20} color={C} style={{ opacity: .4 }} /></div>
             <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>Carrito vacío</p>
-            {heldCount > 0 && (
-              <p style={{ fontSize: '11px', color: '#F0A030', fontWeight: 600, textAlign: 'center' }}>
-                📋 {heldCount} orden{heldCount !== 1 ? 'es' : ''} en espera
-              </p>
-            )}
+            {heldCount > 0 && <p style={{ fontSize: '11px', color: '#F0A030', fontWeight: 600, textAlign: 'center' }}>📋 {heldCount} orden{heldCount !== 1 ? 'es' : ''} en espera</p>}
           </div>
         ) : cart.map((item: CartItem) => (
           <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '1px solid var(--dax-border-soft)' }}>
@@ -801,6 +789,61 @@ function CartSide({
       {/* Checkout */}
       {cart.length > 0 && (
         <div style={{ padding: '10px 12px', borderTop: '1px solid var(--dax-border)', flexShrink: 0 }}>
+
+          {/* ── Selector de cliente ── */}
+          <div style={{ marginBottom: '8px', position: 'relative' }}>
+            {selectedClient ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: `${C}10`, border: `1px solid ${C}30`, borderRadius: '8px' }}>
+                <UserCheck size={12} color={C} style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: C, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clientName}</p>
+                  {selectedClient.phone && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{selectedClient.phone}</p>}
+                </div>
+                <button
+                  onClick={() => { setSelectedClient(null); setClientSearch(''); setShowClientDrop(false); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', padding: '2px', flexShrink: 0 }}
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ position: 'relative' }}>
+                  <Users size={11} style={{ position: 'absolute', left: '9px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dax-text-muted)' }} />
+                  <input
+                    value={clientSearch}
+                    onChange={e => { setClientSearch(e.target.value); setShowClientDrop(true); }}
+                    onFocus={() => clientSearch.length >= 2 && setShowClientDrop(true)}
+                    placeholder="Buscar cliente... (opcional)"
+                    style={{ width: '100%', padding: '6px 9px 6px 26px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', boxSizing: 'border-box' as const, outline: 'none' }}
+                  />
+                </div>
+                {showClientDrop && (clientResults as any[]).length > 0 && (
+                  <div style={{ position: 'absolute', left: '12px', right: '12px', background: 'var(--dax-surface)', border: '1px solid var(--dax-border)', borderRadius: '8px', zIndex: 50, boxShadow: 'var(--dax-shadow-md)', maxHeight: '150px', overflowY: 'auto' }}>
+                    {(clientResults as any[]).map((c: any) => {
+                      const name = c.isCompany ? c.companyName : `${c.firstName} ${c.lastName ?? ''}`.trim();
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => { setSelectedClient(c); setClientSearch(''); setShowClientDrop(false); }}
+                          style={{ width: '100%', padding: '8px 10px', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' as const, borderBottom: '1px solid var(--dax-border-soft)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: `${C}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: C }}>{name[0]?.toUpperCase()}</span>
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</p>
+                            <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{c.phone ?? c.email ?? ''}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Descuento */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
             <Tag size={11} color="var(--dax-text-muted)" />
@@ -814,7 +857,7 @@ function CartSide({
             </div>
           </div>
 
-          <input value={note} onChange={e => setNote(e.target.value)} placeholder="Nota..." style={{ width: '100%', padding: '6px 9px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', marginBottom: '8px', boxSizing: 'border-box' }} />
+          <input value={note} onChange={e => setNote(e.target.value)} placeholder="Nota..." style={{ width: '100%', padding: '6px 9px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', marginBottom: '8px', boxSizing: 'border-box' as const }} />
 
           <div style={{ background: 'var(--dax-surface-2)', borderRadius: '10px', padding: '8px 10px', marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
@@ -848,40 +891,30 @@ function CartSide({
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '13px', flexShrink: 0 }}>{icon}</span>
                   <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', width: '58px', flexShrink: 0 }}>{label}</span>
-                  <input type="number" min="0" step="100" placeholder="0" value={(mixedPayments as any)[key]} onChange={e => setMixedPayments((p: any) => ({ ...p, [key]: e.target.value }))} style={{ flex: 1, padding: '5px 8px', borderRadius: '7px', border: `1px solid ${(mixedPayments as any)[key] ? C : 'var(--dax-border)'}`, background: 'var(--dax-surface)', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 600, boxSizing: 'border-box' as const, minWidth: 0 }} />
+                  <input
+                    type="number" min="0" step="100"
+                    placeholder="0"
+                    value={mixedPayments[key as keyof MixedPayments]}
+                    onChange={e => setMixedPayments((p: MixedPayments) => ({ ...p, [key]: e.target.value }))}
+                    style={{ flex: 1, padding: '5px 8px', borderRadius: '7px', border: `1px solid var(--dax-border)`, background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', textAlign: 'right' as const }}
+                  />
                 </div>
               ))}
-              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: `1px solid ${C}20` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                  <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Ingresado</span>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: mixedIsValid ? '#22C55E' : 'var(--dax-text-secondary)' }}>{fmt(mixedTotal)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
-                    {mixedDiff > 0.5 ? 'Sobrante' : mixedDiff < -0.5 ? 'Faltante' : 'Diferencia'}
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: Math.abs(mixedDiff) < 1 ? '#22C55E' : mixedDiff > 0 ? '#22C55E' : 'var(--dax-danger)' }}>
-                    {mixedDiff > 0 ? '+' : ''}{fmt(mixedDiff)}
-                  </span>
-                </div>
-                {remaining > 0.5 && mixedTotal < total && (
-                  <button onClick={() => { const empty = MIXED_METHODS.find(m => !parseFloat((mixedPayments as any)[m.key] || '0')); const last = [...MIXED_METHODS].reverse().find(m => parseFloat((mixedPayments as any)[m.key] || '0') > 0); const target = empty ?? last; if (target) { const current = parseFloat((mixedPayments as any)[target.key] || '0'); setMixedPayments((p: any) => ({ ...p, [target.key]: String(Math.round(current + remaining)) })); } }} style={{ width: '100%', marginTop: '6px', padding: '5px', borderRadius: '7px', border: `1px dashed ${C}40`, background: 'transparent', color: C, fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
-                    + Completar {fmt(remaining)} restante
-                  </button>
-                )}
-                {mixedTotal > 0 && !mixedIsValid && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px' }}>
-                    <AlertCircle size={11} color="var(--dax-danger)" />
-                    <span style={{ fontSize: '10px', color: 'var(--dax-danger)', fontWeight: 600 }}>Los montos deben sumar {fmt(total)}</span>
-                  </div>
-                )}
-                {mixedIsValid && mixedTotal > 0 && <p style={{ fontSize: '10px', color: '#22C55E', fontWeight: 700, marginTop: '6px' }}>✓ Montos correctos</p>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: `1px solid ${C}20` }}>
+                <span style={{ fontSize: '11px', color: Math.abs(mixedDiff) < 1 ? 'var(--dax-success)' : 'var(--dax-danger)', fontWeight: 700 }}>
+                  {Math.abs(mixedDiff) < 1 ? '✓ Cuadrado' : mixedDiff > 0 ? `Sobra ${fmt(mixedDiff)}` : `Faltan ${fmt(Math.abs(mixedDiff))}`}
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Total: {fmt(mixedTotal)}</span>
               </div>
             </div>
           )}
 
-          <button onClick={onSell} disabled={isSelling || !canSell} style={{ width: '100%', padding: '12px', background: isSelling || !canSell ? 'var(--dax-surface-2)' : C, color: isSelling || !canSell ? 'var(--dax-text-muted)' : '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800, cursor: isSelling || !canSell ? 'not-allowed' : 'pointer', boxShadow: isSelling || !canSell ? 'none' : `0 3px 12px ${C}35`, transition: 'all .15s' }}>
-            {isSelling ? '⏳ Procesando...' : industry === 'restaurant' && selectedTable ? `🍽️ Cocina · ${fmt(total)}` : `💳 Cobrar · ${fmt(total)}`}
+          <button
+            onClick={onSell}
+            disabled={isSelling || !canSell || cart.length === 0}
+            style={{ width: '100%', padding: '13px', background: canSell ? C : 'var(--dax-surface-3)', color: canSell ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 800, cursor: canSell ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', boxShadow: canSell ? `0 4px 14px ${C}40` : 'none', transition: 'all .15s' }}
+          >
+            {isSelling ? '⏳ Procesando...' : `💳 Cobrar ${fmt(total)}`}
           </button>
         </div>
       )}
@@ -889,52 +922,49 @@ function CartSide({
   );
 }
 
-// ══ MODAL VARIANTES ════════════════════════════════════════════════════════════
+// ══ MODAL VARIANTES ══════════════════════════════════════════════════════════
 function VariantModal({ data, setData, C, fmt, addToCart }: any) {
-  const [selSize,  setSelSize]  = useState('');
-  const [selColor, setSelColor] = useState('');
-  const sizes = [...new Set<string>(data.variants.map((v: any) => v.size).filter(Boolean))];
-  const match = data.variants.find((v: any) => (!selSize || v.size === selSize) && (!selColor || v.color === selColor));
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const product  = data.product;
+  const variants = data.variants ?? [];
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: 'var(--dax-surface)', borderRadius: '14px', padding: '22px', width: '100%', maxWidth: '420px', maxHeight: '80vh', overflowY: 'auto' }}>
+      <div style={{ background: 'var(--dax-surface)', borderRadius: '14px', padding: '22px', width: '100%', maxWidth: '400px', maxHeight: '80vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{data.product.name}</p>
-            <p style={{ fontSize: '12px', color: C, fontWeight: 600 }}>{fmt(Number(data.product.price))}</p>
+            <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '1px' }}>{product.name}</p>
+            <p style={{ fontSize: '12px', color: C, fontWeight: 600 }}>Selecciona una variante</p>
           </div>
           <button onClick={() => setData(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex' }}><X size={18} /></button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {sizes.length > 0 && (
-            <div>
-              <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '8px' }}>Talla</p>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                {sizes.map(s => <button key={s} onClick={() => setSelSize(s === selSize ? '' : s)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, border: `2px solid ${selSize === s ? C : 'var(--dax-border)'}`, background: selSize === s ? `${C}12` : 'var(--dax-surface-2)', color: selSize === s ? C : 'var(--dax-text-secondary)', cursor: 'pointer' }}>{s}</button>)}
-              </div>
-            </div>
-          )}
-          <div>
-            <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-muted)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '8px' }}>Color</p>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {data.variants.filter((v: any, i: number, a: any[]) => a.findIndex((x: any) => x.color === v.color) === i).map((v: any) => (
-                <button key={v.color} onClick={() => setSelColor(v.color === selColor ? '' : v.color)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '8px', border: `2px solid ${selColor === v.color ? C : 'var(--dax-border)'}`, background: selColor === v.color ? `${C}12` : 'var(--dax-surface-2)', cursor: 'pointer' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: v.colorHex ?? '#ccc', border: '1px solid var(--dax-border)' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: selColor === v.color ? C : 'var(--dax-text-secondary)' }}>{v.color}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          {match && (
-            <div style={{ background: 'var(--dax-surface-2)', borderRadius: '8px', padding: '8px 10px', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Stock: <strong style={{ color: match.stock > 0 ? 'var(--dax-success)' : 'var(--dax-danger)' }}>{match.stock}</strong></span>
-              {match.price && <span style={{ fontSize: '12px', fontWeight: 700, color: C }}>{fmt(Number(match.price))}</span>}
-            </div>
-          )}
-          <button onClick={() => { if (!match || match.stock === 0) return; addToCart(data.product, { variantId: match.id, size: selSize, color: selColor, price: match.price ? Number(match.price) : undefined }); setData(null); }} disabled={!match || match.stock === 0} style={{ width: '100%', padding: '11px', background: !match || match.stock === 0 ? 'var(--dax-surface-2)' : C, color: !match || match.stock === 0 ? 'var(--dax-text-muted)' : '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800, cursor: !match || match.stock === 0 ? 'not-allowed' : 'pointer' }}>
-            {!match ? 'Selecciona opciones' : match.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {variants.map((v: any) => {
+            const sel = selectedVariant?.id === v.id;
+            return (
+              <button key={v.id} onClick={() => setSelectedVariant(v)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: sel ? `${C}10` : 'var(--dax-surface-2)', border: `1.5px solid ${sel ? C : 'transparent'}`, borderRadius: '9px', cursor: 'pointer', textAlign: 'left' }}>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: sel ? C : 'var(--dax-text-primary)' }}>
+                    {v.size && `T.${v.size}`}{v.color && ` · ${v.color}`}
+                  </p>
+                  {v.sku && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', fontFamily: 'monospace' }}>{v.sku}</p>}
+                </div>
+                <p style={{ fontSize: '14px', fontWeight: 800, color: C }}>{fmt(Number(v.price ?? product.price))}</p>
+              </button>
+            );
+          })}
         </div>
+        <button
+          onClick={() => {
+            if (!selectedVariant) return;
+            addToCart(product, { price: Number(selectedVariant.price ?? product.price), variantId: selectedVariant.id, size: selectedVariant.size, color: selectedVariant.color });
+            setData(null);
+          }}
+          disabled={!selectedVariant}
+          style={{ width: '100%', padding: '12px', background: selectedVariant ? C : 'var(--dax-surface-3)', color: selectedVariant ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 800, cursor: selectedVariant ? 'pointer' : 'not-allowed', marginTop: '14px' }}
+        >
+          Agregar al carrito
+        </button>
       </div>
     </div>
   );
