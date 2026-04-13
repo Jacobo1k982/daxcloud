@@ -68,18 +68,18 @@ export function BusinessSection({ showToast }: { showToast: (msg: string, type?:
   useEffect(() => {
     if (tenantData) {
       setForm({
-        name:      tenantData.name ?? '',
+        name: tenantData.name ?? '',
         legalName: tenantData.legalName ?? '',
-        taxId:     tenantData.taxId ?? '',
-        industry:  tenantData.industry ?? '',
-        website:   tenantData.website ?? '',
-        phone:     tenantData.phone ?? '',
-        email:     tenantData.email ?? '',
-        address:   tenantData.address ?? '',
-        city:      tenantData.city ?? '',
-        state:     tenantData.state ?? '',
-        zipCode:   tenantData.zipCode ?? '',
-        logoUrl:   tenantData.logoUrl ?? '',
+        taxId: tenantData.taxId ?? '',
+        industry: tenantData.industry ?? '',
+        website: tenantData.website ?? '',
+        phone: tenantData.phone ?? '',
+        email: tenantData.email ?? '',
+        address: tenantData.address ?? '',
+        city: tenantData.city ?? '',
+        state: tenantData.state ?? '',
+        zipCode: tenantData.zipCode ?? '',
+        logoUrl: tenantData.logoUrl ?? '',
       });
     }
   }, [tenantData]);
@@ -102,8 +102,10 @@ export function BusinessSection({ showToast }: { showToast: (msg: string, type?:
       });
       setForm(prev => ({ ...prev, logoUrl: `http://localhost:3001${data.url}` }));
       showToast('Logo actualizado');
-    } catch {
-      showToast('Error al subir el logo', 'error');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? err?.message ?? 'Error al subir el logo';
+      showToast(msg, 'error');
+      console.error('Logo upload error:', err?.response?.data ?? err);
     } finally {
       setUploadingLogo(false);
     }
