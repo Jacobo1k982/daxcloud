@@ -1,10 +1,10 @@
 'use client';
-
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Logo } from './Logo';
 import { ProfileModal } from './ProfileModal';
+import { NotificationBell } from './NotificationBell';
 import {
   LayoutDashboard, ShoppingCart, BarChart2,
   Package, Warehouse, GitBranch, Settings, LogOut,
@@ -14,28 +14,28 @@ import {
 
 const NAV_BASE = [
   { href: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
-  { href: '/pos',       label: 'POS',        icon: ShoppingCart },
-  { href: '/sales',     label: 'Ventas',     icon: TrendingUp },
-  { href: '/clients',   label: 'Clientes',   icon: Users },
-  { href: '/products',  label: 'Productos',  icon: Package },
-  { href: '/inventory', label: 'Inventario', icon: Warehouse },
-  { href: '/analytics', label: 'Analytics',  icon: BarChart2 },
+  { href: '/pos',       label: 'POS',        icon: ShoppingCart    },
+  { href: '/sales',     label: 'Ventas',     icon: TrendingUp      },
+  { href: '/clients',   label: 'Clientes',   icon: Users           },
+  { href: '/products',  label: 'Productos',  icon: Package         },
+  { href: '/inventory', label: 'Inventario', icon: Warehouse       },
+  { href: '/analytics', label: 'Analytics',  icon: BarChart2       },
 ];
 
 const NAV_INDUSTRY: Record<string, { href: string; label: string; icon: any }[]> = {
   restaurant:  [{ href: '/restaurant', label: 'Restaurante', icon: Utensils }],
-  bakery:      [{ href: '/bakery',     label: 'Panadería',   icon: ChefHat }],
-  pharmacy:    [{ href: '/pharmacy',   label: 'Farmacia',    icon: Pill }],
+  bakery:      [{ href: '/bakery',     label: 'Panadería',   icon: ChefHat  }],
+  pharmacy:    [{ href: '/pharmacy',   label: 'Farmacia',    icon: Pill     }],
   salon:       [{ href: '/salon',      label: 'Peluquería',  icon: Scissors }],
-  clothing:    [{ href: '/clothing',   label: 'Ropa',        icon: Shirt }],
-  produce:     [{ href: '/produce',    label: 'Verdulería',  icon: Leaf }],
-  supermarket: [{ href: '/products',   label: 'Catálogo',    icon: Barcode }],
+  clothing:    [{ href: '/clothing',   label: 'Ropa',        icon: Shirt    }],
+  produce:     [{ href: '/produce',    label: 'Verdulería',  icon: Leaf     }],
+  supermarket: [{ href: '/products',   label: 'Catálogo',    icon: Barcode  }],
   general:     [],
 };
 
 const NAV_MANAGEMENT = [
   { href: '/branches',  label: 'Sucursales',    icon: GitBranch },
-  { href: '/settings',  label: 'Configuración', icon: Settings },
+  { href: '/settings',  label: 'Configuración', icon: Settings  },
 ];
 
 const INDUSTRY_COLOR: Record<string, string> = {
@@ -53,7 +53,7 @@ const INDUSTRY_LABEL: Record<string, string> = {
 };
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname      = usePathname();
   const { user, tenant, logout, industry } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
 
@@ -64,18 +64,9 @@ export function Sidebar() {
   const NavLink = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
     const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
     return (
-      <a href={href} style={{
-        display: 'flex', alignItems: 'center', gap: '9px',
-        padding: '8px 10px', borderRadius: 'var(--dax-radius-md)',
-        fontSize: '13px', fontWeight: active ? 600 : 400,
-        color: active ? '#FF5C35' : 'var(--dax-text-muted)',
-        background: active ? 'rgba(255,92,53,0.10)' : 'transparent',
-        textDecoration: 'none', transition: 'all .15s',
-        whiteSpace: 'nowrap', marginBottom: '1px',
-      }}
+      <a href={href} style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '8px 10px', borderRadius: 'var(--dax-radius-md)', fontSize: '13px', fontWeight: active ? 600 : 400, color: active ? '#FF5C35' : 'var(--dax-text-muted)', background: active ? 'rgba(255,92,53,0.10)' : 'transparent', textDecoration: 'none', transition: 'all .15s', whiteSpace: 'nowrap', marginBottom: '1px' }}
         onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'rgba(30,58,95,0.5)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-secondary)'; }}}
-        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}}
-      >
+        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}}>
         <Icon size={15} strokeWidth={active ? 2.2 : 1.8} style={{ color: active ? '#FF5C35' : 'inherit', flexShrink: 0 }} />
         {label}
       </a>
@@ -130,48 +121,26 @@ export function Sidebar() {
             </p>
             {NAV_MANAGEMENT.map(item => <NavLink key={item.href} {...item} />)}
           </div>
+
+          {/* Notificaciones */}
+          <div style={{ marginTop: '14px', borderTop: '1px solid var(--dax-border)', paddingTop: '10px' }}>
+            <NotificationBell />
+          </div>
         </div>
 
         {/* ── Bottom ── */}
         <div style={{ borderTop: '1px solid var(--dax-border)', padding: '12px 12px 16px' }}>
 
-          {/* Avatar clickeable → abre modal de perfil */}
-          <button
-            onClick={() => setShowProfile(true)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '8px 10px', borderRadius: 'var(--dax-radius-md)',
-              background: 'var(--dax-surface-2)',
-              border: '1px solid transparent',
-              cursor: 'pointer', textAlign: 'left',
-              transition: 'all .15s', fontFamily: 'var(--font-primary)',
-              marginBottom: '4px',
-            }}
+          {/* Avatar clickeable */}
+          <button onClick={() => setShowProfile(true)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: 'var(--dax-radius-md)', background: 'var(--dax-surface-2)', border: '1px solid transparent', cursor: 'pointer', textAlign: 'left', transition: 'all .15s', fontFamily: 'var(--font-primary)', marginBottom: '4px' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,92,53,.2)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,.05)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'transparent'; (e.currentTarget as HTMLElement).style.background = 'var(--dax-surface-2)'; }}
-          >
-            {/* Avatar con dot activo */}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'transparent'; (e.currentTarget as HTMLElement).style.background = 'var(--dax-surface-2)'; }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '9px',
-                background: 'linear-gradient(135deg, rgba(255,92,53,.25), rgba(255,61,31,.15))',
-                border: '1px solid rgba(255,92,53,.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>
-                  {user?.firstName?.[0]?.toUpperCase() ?? '?'}
-                </span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'linear-gradient(135deg,rgba(255,92,53,.25),rgba(255,61,31,.15))', border: '1px solid rgba(255,92,53,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>{user?.firstName?.[0]?.toUpperCase() ?? '?'}</span>
               </div>
-              {/* Dot verde activo */}
-              <div style={{
-                position: 'absolute', bottom: '-1px', right: '-1px',
-                width: '9px', height: '9px', borderRadius: '50%',
-                background: '#3DBF7F',
-                border: '1.5px solid var(--dax-navy-900)',
-                boxShadow: '0 0 5px rgba(61,191,127,.5)',
-              }} />
+              <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '9px', height: '9px', borderRadius: '50%', background: '#3DBF7F', border: '1.5px solid var(--dax-navy-900)', boxShadow: '0 0 5px rgba(61,191,127,.5)' }} />
             </div>
-
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                 {user?.firstName} {user?.lastName}
@@ -180,31 +149,18 @@ export function Sidebar() {
                 {tenant?.name}
               </p>
             </div>
-
-            {/* Indicador de acción */}
             <span style={{ fontSize: '14px', color: 'var(--dax-text-muted)', flexShrink: 0, lineHeight: 1 }}>⋯</span>
           </button>
 
           {/* Logout */}
-          <button
-            type="button"
-            onClick={logout}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '7px 10px', background: 'transparent', border: 'none',
-              borderRadius: 'var(--dax-radius-md)', fontSize: '12px', fontWeight: 500,
-              color: 'var(--dax-text-muted)', cursor: 'pointer', transition: 'all .15s',
-              fontFamily: 'var(--font-primary)',
-            }}
+          <button type="button" onClick={logout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: 'transparent', border: 'none', borderRadius: 'var(--dax-radius-md)', fontSize: '12px', fontWeight: 500, color: 'var(--dax-text-muted)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'var(--font-primary)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(224,80,80,0.08)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-danger)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}
-          >
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}>
             <LogOut size={13} /> Cerrar sesión
           </button>
         </div>
       </div>
 
-      {/* Modal de perfil */}
       {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
     </>
   );
