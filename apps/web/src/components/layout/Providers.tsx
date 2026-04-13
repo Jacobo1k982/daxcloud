@@ -6,9 +6,9 @@ import { useState, useEffect } from 'react';
 import { useTheme, ACCENT_COLORS } from '@/hooks/useTheme';
 
 const DENSITY_VARS: Record<string, Record<string, string>> = {
-  comfortable: { '--dax-radius-sm': '6px',  '--dax-radius-md': '10px', '--dax-radius-lg': '14px', '--dax-radius-xl': '18px' },
-  compact:     { '--dax-radius-sm': '4px',  '--dax-radius-md': '7px',  '--dax-radius-lg': '10px', '--dax-radius-xl': '13px' },
-  spacious:    { '--dax-radius-sm': '8px',  '--dax-radius-md': '13px', '--dax-radius-lg': '18px', '--dax-radius-xl': '24px' },
+  comfortable: { '--dax-radius-sm': '6px', '--dax-radius-md': '10px', '--dax-radius-lg': '14px', '--dax-radius-xl': '18px' },
+  compact: { '--dax-radius-sm': '4px', '--dax-radius-md': '7px', '--dax-radius-lg': '10px', '--dax-radius-xl': '13px' },
+  spacious: { '--dax-radius-sm': '8px', '--dax-radius-md': '13px', '--dax-radius-lg': '18px', '--dax-radius-xl': '24px' },
 };
 
 // Aplica acento y densidad al montar
@@ -18,23 +18,25 @@ function PrefsApplier() {
       const saved = localStorage.getItem('dax-prefs');
       if (!saved) return;
       const prefs = JSON.parse(saved);
-      const root  = document.documentElement;
+      const root = document.documentElement;
 
-      if (prefs.accent && ACCENT_COLORS[prefs.accent]) {
-        const a = ACCENT_COLORS[prefs.accent];
-        root.style.setProperty('--dax-coral',        a.primary);
-        root.style.setProperty('--dax-coral-hover',  a.hover);
-        root.style.setProperty('--dax-coral-soft',   a.soft);
+      const accentKey = prefs.accent as keyof typeof ACCENT_COLORS;
+      if (accentKey && ACCENT_COLORS[accentKey]) {
+        const a = ACCENT_COLORS[accentKey];
+        root.style.setProperty('--dax-coral', a.primary);
+        root.style.setProperty('--dax-coral-hover', a.hover);
+        root.style.setProperty('--dax-coral-soft', a.soft);
         root.style.setProperty('--dax-coral-border', a.border);
         root.style.setProperty('--dax-shadow-coral', a.shadow);
       }
 
-      if (prefs.density && DENSITY_VARS[prefs.density]) {
-        Object.entries(DENSITY_VARS[prefs.density]).forEach(([k, v]) =>
+      const densityKey = prefs.density as keyof typeof DENSITY_VARS;
+      if (densityKey && DENSITY_VARS[densityKey]) {
+        Object.entries(DENSITY_VARS[densityKey]).forEach(([k, v]) =>
           root.style.setProperty(k, v)
         );
       }
-    } catch {}
+    } catch { }
   }, []);
 
   return null;
