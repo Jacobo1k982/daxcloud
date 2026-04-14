@@ -10,29 +10,30 @@ import {
   Shirt, Leaf, Utensils, TrendingUp, Barcode,
   Users, Activity, Layers,
 } from 'lucide-react';
+import { NotificationBellMobile } from './NotificationBell';
 
 const INDUSTRY_MODULE: Record<string, { href: string; label: string; icon: React.ElementType }> = {
-  bakery:      { href: '/bakery',     label: 'Panadería',   icon: ChefHat  },
-  pharmacy:    { href: '/pharmacy',   label: 'Farmacia',    icon: Pill     },
-  salon:       { href: '/salon',      label: 'Peluquería',  icon: Scissors },
-  clothing:    { href: '/clothing',   label: 'Ropa',        icon: Shirt    },
-  produce:     { href: '/produce',    label: 'Verdulería',  icon: Leaf     },
-  restaurant:  { href: '/restaurant', label: 'Restaurante', icon: Utensils },
-  supermarket: { href: '/products',   label: 'Catálogo',    icon: Barcode  },
+  bakery: { href: '/bakery', label: 'Panadería', icon: ChefHat },
+  pharmacy: { href: '/pharmacy', label: 'Farmacia', icon: Pill },
+  salon: { href: '/salon', label: 'Peluquería', icon: Scissors },
+  clothing: { href: '/clothing', label: 'Ropa', icon: Shirt },
+  produce: { href: '/produce', label: 'Verdulería', icon: Leaf },
+  restaurant: { href: '/restaurant', label: 'Restaurante', icon: Utensils },
+  supermarket: { href: '/products', label: 'Catálogo', icon: Barcode },
 };
 
 // Todos los items del panel "Más" en orden fijo
 const ALL_MORE_ITEMS: { href: string; label: string; icon: React.ElementType }[] = [
-  { href: '/dashboard', label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/sales',     label: 'Ventas',       icon: TrendingUp      },
-  { href: '/clients',   label: 'Clientes',     icon: Users           },
-  { href: '/analytics', label: 'Reportes',     icon: Activity        },
-  { href: '/branches',  label: 'Sucursales',   icon: GitBranch       },
-  { href: '/settings',  label: 'Configuración',icon: Settings        },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/sales', label: 'Ventas', icon: TrendingUp },
+  { href: '/clients', label: 'Clientes', icon: Users },
+  { href: '/analytics', label: 'Reportes', icon: Activity },
+  { href: '/branches', label: 'Sucursales', icon: GitBranch },
+  { href: '/settings', label: 'Configuración', icon: Settings },
 ];
 
 export function BottomNav() {
-  const pathname  = usePathname();
+  const pathname = usePathname();
   const { user, tenant, logout, industry } = useAuth();
   const [showMore, setShowMore] = useState(false);
 
@@ -46,9 +47,9 @@ export function BottomNav() {
     : ALL_MORE_ITEMS;
 
   const mainItems: { href: string; label: string; icon: React.ElementType }[] = [
-    { href: '/pos',       label: 'POS',        icon: ShoppingCart },
-    { href: '/products',  label: 'Productos',  icon: Package      },
-    { href: '/inventory', label: 'Inventario', icon: Warehouse    },
+    { href: '/pos', label: 'POS', icon: ShoppingCart },
+    { href: '/products', label: 'Productos', icon: Package },
+    { href: '/inventory', label: 'Inventario', icon: Warehouse },
   ];
 
   // Inicial del usuario para el avatar
@@ -111,7 +112,7 @@ export function BottomNav() {
         {/* Grid de items */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '0 16px', marginBottom: '14px' }}>
           {moreItems.map(item => {
-            const Icon   = item.icon;
+            const Icon = item.icon;
             const active = isActive(item.href);
             return (
               <a
@@ -161,7 +162,7 @@ export function BottomNav() {
         backdropFilter: 'blur(10px)',
       }}>
         {mainItems.map(item => {
-          const Icon   = item.icon;
+          const Icon = item.icon;
           const active = isActive(item.href);
           return (
             <a
@@ -178,6 +179,8 @@ export function BottomNav() {
             </a>
           );
         })}
+
+        <NotificationBellMobile />
 
         {/* Botón ··· */}
         <button
