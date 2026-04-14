@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Sidebar }             from '@/components/layout/Sidebar';
@@ -7,7 +7,7 @@ import { useAuthStore }        from '@/store/auth.store';
 import { useRouter }           from 'next/navigation';
 import { useHydration }        from '@/hooks/useHydration';
 import { useAuth }             from '@/hooks/useAuth';
-import { NotificationBell }    from '@/components/layout/NotificationPanel';
+import { NotificationBell }    from '@/components/layout/NotificationBell';
 
 function CloudIcon({ size = 28 }: { size?: number }) {
   return (
@@ -126,3 +126,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+
+
