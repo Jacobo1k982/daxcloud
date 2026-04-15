@@ -509,7 +509,7 @@ export default function LandingPage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               <MessageCircle size={14} color="#3A6A9A" />
-              <p style={{ fontSize: '13px', color: '#3A6A9A' }}>¿Otra pregunta? Escríbenos a <a href="mailto:soporte@daxcloud.shop" style={{ color: '#FF5C35', textDecoration: 'none', fontWeight: 600 }}>soporte@daxcloud.shop</a></p>
+              <p style={{ fontSize: '13px', color: '#3A6A9A' }}>¿Otra pregunta? Escríbenos a <a href="mailto:ventas@daxcloud.shop" style={{ color: '#FF5C35', textDecoration: 'none', fontWeight: 600 }}>ventas@daxcloud.shop</a></p>
             </div>
           </div>
         </div>

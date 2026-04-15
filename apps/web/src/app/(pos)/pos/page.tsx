@@ -1,11 +1,11 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth }             from '@/hooks/useAuth';
-import { api }                 from '@/lib/api';
-import { CashRegisterGate }    from '@/components/pos/CashRegisterGate';
-import { useHeldOrders }       from '@/hooks/useHeldOrders';
-import type { HeldOrder }      from '@/hooks/useHeldOrders';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
+import { CashRegisterGate } from '@/components/pos/CashRegisterGate';
+import { useHeldOrders } from '@/hooks/useHeldOrders';
+import type { HeldOrder } from '@/hooks/useHeldOrders';
 import {
   Search, X, Plus, Minus, ShoppingCart,
   ChefHat, Scissors, Shirt, Leaf, Pill,
@@ -14,10 +14,11 @@ import {
   Users, UserCheck,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getImageUrl }         from '@/lib/imageUrl';
-import { useReceiptPrinter }   from '@/hooks/useReceiptPrinter';
-import { usePrintConfig }      from '@/hooks/usePrintConfig';
-import type { ReceiptData }    from '@/hooks/useReceiptPrinter';
+import { getImageUrl } from '@/lib/imageUrl';
+import { useReceiptPrinter } from '@/hooks/useReceiptPrinter';
+import { usePrintConfig } from '@/hooks/usePrintConfig';
+import type { ReceiptData } from '@/hooks/useReceiptPrinter';
+import { useCashDrawer } from '@/hooks/useCashDrawer';
 
 interface CartItem {
   id: string; productId: string; variantId?: string;
@@ -29,80 +30,81 @@ interface CartItem {
 interface MixedPayments { cash: string; card: string; transfer: string; }
 
 const INDUSTRY_CONFIG: Record<string, { label: string; color: string; icon: any; description: string }> = {
-  restaurant:  { label: 'Restaurante',  color: '#F97316', icon: ChefHat,      description: 'Mesas y comandas'  },
-  bakery:      { label: 'Panadería',    color: '#FF5C35', icon: Package,      description: 'Presentaciones'    },
-  pharmacy:    { label: 'Farmacia',     color: '#5AAAF0', icon: Pill,         description: 'Medicamentos'      },
-  salon:       { label: 'Peluquería',   color: '#A78BFA', icon: Scissors,     description: 'Servicios'         },
-  clothing:    { label: 'Ropa',         color: '#EAB308', icon: Shirt,        description: 'Tallas y colores'  },
-  produce:     { label: 'Verdulería',   color: '#22C55E', icon: Leaf,         description: 'Por peso'          },
-  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode,      description: 'Código de barras'  },
-  general:     { label: 'General',      color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar'   },
+  restaurant: { label: 'Restaurante', color: '#F97316', icon: ChefHat, description: 'Mesas y comandas' },
+  bakery: { label: 'Panadería', color: '#FF5C35', icon: Package, description: 'Presentaciones' },
+  pharmacy: { label: 'Farmacia', color: '#5AAAF0', icon: Pill, description: 'Medicamentos' },
+  salon: { label: 'Peluquería', color: '#A78BFA', icon: Scissors, description: 'Servicios' },
+  clothing: { label: 'Ropa', color: '#EAB308', icon: Shirt, description: 'Tallas y colores' },
+  produce: { label: 'Verdulería', color: '#22C55E', icon: Leaf, description: 'Por peso' },
+  supermarket: { label: 'Supermercado', color: '#5AAAF0', icon: Barcode, description: 'Código de barras' },
+  general: { label: 'General', color: '#FF5C35', icon: ShoppingCart, description: 'Tienda estándar' },
 };
 
 const PAYMENT_METHODS = [
-  { value: 'cash',     label: 'Efectivo', icon: '💵' },
-  { value: 'card',     label: 'Tarjeta',  icon: '💳' },
-  { value: 'transfer', label: 'SINPE',    icon: '📱' },
-  { value: 'mixed',    label: 'Mixto',    icon: '🔀' },
+  { value: 'cash', label: 'Efectivo', icon: '💵' },
+  { value: 'card', label: 'Tarjeta', icon: '💳' },
+  { value: 'transfer', label: 'SINPE', icon: '📱' },
+  { value: 'mixed', label: 'Mixto', icon: '🔀' },
 ];
 const MIXED_METHODS = [
-  { key: 'cash',     label: 'Efectivo', icon: '💵' },
-  { key: 'card',     label: 'Tarjeta',  icon: '💳' },
-  { key: 'transfer', label: 'SINPE',    icon: '📱' },
+  { key: 'cash', label: 'Efectivo', icon: '💵' },
+  { key: 'card', label: 'Tarjeta', icon: '💳' },
+  { key: 'transfer', label: 'SINPE', icon: '📱' },
 ];
 
 function timeAgo(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (mins < 1)  return 'ahora';
+  if (mins < 1) return 'ahora';
   if (mins < 60) return `${mins}m`;
   return `${Math.floor(mins / 60)}h`;
 }
 
 export default function POSPage() {
-  const router      = useRouter();
+  const router = useRouter();
   const { formatCurrency, industry } = useAuth();
   const queryClient = useQueryClient();
-  const searchRef   = useRef<HTMLInputElement>(null);
-  const { print }         = useReceiptPrinter();
+  const searchRef = useRef<HTMLInputElement>(null);
+  const { print } = useReceiptPrinter();
   const { config: printConfig } = usePrintConfig();
   const { orders: heldOrders, holdOrder, removeOrder } = useHeldOrders();
+  const { openDrawer } = useCashDrawer();
 
-  const cfg  = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
+  const cfg = INDUSTRY_CONFIG[industry] ?? INDUSTRY_CONFIG.general;
   const Icon = cfg.icon;
-  const C    = cfg.color;
+  const C = cfg.color;
 
   // ── Estado del carrito ────────────────────────────────────────────────────
-  const [cart,              setCart]             = useState<CartItem[]>([]);
-  const [paymentMethod,     setPaymentMethod]    = useState('cash');
-  const [mixedPayments,     setMixedPayments]    = useState<MixedPayments>({ cash: '', card: '', transfer: '' });
-  const [discount,          setDiscount]         = useState(0);
-  const [showCart,          setShowCart]         = useState(false);
-  const [selectedCategory,  setSelectedCategory] = useState('');
-  const [note,              setNote]             = useState('');
-  const [selectedTable,     setSelectedTable]    = useState('');
-  const [selectedEmployee,  setSelectedEmployee] = useState('');
-  const [weightInput,       setWeightInput]      = useState<Record<string, string>>({});
-  const [showVariantModal,  setShowVariantModal] = useState<any>(null);
-  const [showModifierModal, setShowModifierModal]= useState<any>(null);
-  const [selectedModifiers, setSelectedModifiers]= useState<any[]>([]);
-  const [search,            setSearch]           = useState('');
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [mixedPayments, setMixedPayments] = useState<MixedPayments>({ cash: '', card: '', transfer: '' });
+  const [discount, setDiscount] = useState(0);
+  const [showCart, setShowCart] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [note, setNote] = useState('');
+  const [selectedTable, setSelectedTable] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [weightInput, setWeightInput] = useState<Record<string, string>>({});
+  const [showVariantModal, setShowVariantModal] = useState<any>(null);
+  const [showModifierModal, setShowModifierModal] = useState<any>(null);
+  const [selectedModifiers, setSelectedModifiers] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
 
   // ── Órdenes en espera ─────────────────────────────────────────────────────
-  const [showHeld,      setShowHeld]      = useState(false);
-  const [holdLabel,     setHoldLabel]     = useState('');
+  const [showHeld, setShowHeld] = useState(false);
+  const [holdLabel, setHoldLabel] = useState('');
   const [showHoldInput, setShowHoldInput] = useState(false);
 
   // ── Cliente seleccionado ──────────────────────────────────────────────────
-  const [selectedClient,   setSelectedClient]   = useState<any | null>(null);
-  const [clientSearch,     setClientSearch]     = useState('');
-  const [showClientDrop,   setShowClientDrop]   = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [clientSearch, setClientSearch] = useState('');
+  const [showClientDrop, setShowClientDrop] = useState(false);
 
   // ── Queries ───────────────────────────────────────────────────────────────
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products', search, selectedCategory],
     queryFn: async () => {
       const p = new URLSearchParams();
-      if (search)           p.append('search',   search);
+      if (search) p.append('search', search);
       if (selectedCategory) p.append('category', selectedCategory);
       const { data } = await api.get(`/products?${p}&active=true`);
       return data;
@@ -185,11 +187,11 @@ export default function POSPage() {
   };
 
   const addToCart = (product: any, options?: any) => {
-    const base       = options?.price ?? getPrice(product);
-    const qty        = options?.quantity ?? 1;
-    const modExtra   = (options?.modifiers ?? []).reduce((a: number, m: any) => a + m.extraPrice, 0);
+    const base = options?.price ?? getPrice(product);
+    const qty = options?.quantity ?? 1;
+    const modExtra = (options?.modifiers ?? []).reduce((a: number, m: any) => a + m.extraPrice, 0);
     const finalPrice = base + modExtra;
-    const itemId     = `${product.id}-${options?.variantId ?? ''}-${options?.size ?? ''}-${options?.color ?? ''}-${(options?.modifiers ?? []).map((m: any) => m.optionId).join('-')}`;
+    const itemId = `${product.id}-${options?.variantId ?? ''}-${options?.size ?? ''}-${options?.color ?? ''}-${(options?.modifiers ?? []).map((m: any) => m.optionId).join('-')}`;
 
     setCart(prev => {
       const ex = prev.find(i => i.id === itemId);
@@ -204,7 +206,7 @@ export default function POSPage() {
   const updateQty = (id: string, delta: number) =>
     setCart(prev =>
       prev.map(i => i.id !== id ? i : i.quantity + delta <= 0 ? null : { ...i, quantity: i.quantity + delta })
-          .filter(Boolean) as CartItem[],
+        .filter(Boolean) as CartItem[],
     );
 
   const clearCart = useCallback(() => {
@@ -220,15 +222,15 @@ export default function POSPage() {
     setShowClientDrop(false);
   }, []);
 
-  const subtotal    = cart.reduce((a, i) => a + i.price * i.quantity, 0);
+  const subtotal = cart.reduce((a, i) => a + i.price * i.quantity, 0);
   const discountAmt = discount > 0 ? subtotal * discount / 100 : 0;
-  const total       = subtotal - discountAmt;
-  const cartCount   = cart.reduce((a, i) => a + i.quantity, 0);
+  const total = subtotal - discountAmt;
+  const cartCount = cart.reduce((a, i) => a + i.quantity, 0);
 
   const mixedTotal = paymentMethod === 'mixed'
     ? (parseFloat(mixedPayments.cash || '0') + parseFloat(mixedPayments.card || '0') + parseFloat(mixedPayments.transfer || '0'))
     : 0;
-  const mixedDiff    = paymentMethod === 'mixed' ? mixedTotal - total : 0;
+  const mixedDiff = paymentMethod === 'mixed' ? mixedTotal - total : 0;
   const mixedIsValid = paymentMethod === 'mixed' ? Math.abs(mixedDiff) < 1 : true;
 
   // ── Pausar orden ──────────────────────────────────────────────────────────
@@ -264,11 +266,11 @@ export default function POSPage() {
   const saleMutation = useMutation({
     mutationFn: async () => {
       const branchId = (branches as any[])[0]?.id;
-      if (!branchId)         throw new Error('No hay sucursal disponible.');
+      if (!branchId) throw new Error('No hay sucursal disponible.');
       if (cart.length === 0) throw new Error('El carrito está vacío.');
       if (paymentMethod === 'mixed') {
         if (mixedTotal <= 0) throw new Error('Ingresa los montos para el pago mixto.');
-        if (!mixedIsValid)   throw new Error(`Los montos no suman el total. Diferencia: ${formatCurrency(Math.abs(mixedDiff))}`);
+        if (!mixedIsValid) throw new Error(`Los montos no suman el total. Diferencia: ${formatCurrency(Math.abs(mixedDiff))}`);
       }
 
       if (industry === 'restaurant') {
@@ -289,8 +291,8 @@ export default function POSPage() {
             ? `${selectedClient.firstName} ${selectedClient.lastName ?? ''}`.trim()
             : 'Cliente walk-in',
           employeeId: selectedEmployee || undefined,
-          serviceId:  cart[0].serviceId,
-          startTime:  new Date().toISOString(),
+          serviceId: cart[0].serviceId,
+          startTime: new Date().toISOString(),
           branchId,
         });
       }
@@ -298,22 +300,22 @@ export default function POSPage() {
       const { data } = await api.post('/sales', {
         branchId,
         paymentMethod,
-        discount:  discountAmt,
+        discount: discountAmt,
         subtotal,
         total,
-        notes:     note || undefined,
-        clientId:  selectedClient?.id || undefined,
+        notes: note || undefined,
+        clientId: selectedClient?.id || undefined,
         ...(paymentMethod === 'mixed' && {
           mixedPayments: {
-            cash:     parseFloat(mixedPayments.cash     || '0'),
-            card:     parseFloat(mixedPayments.card     || '0'),
+            cash: parseFloat(mixedPayments.cash || '0'),
+            card: parseFloat(mixedPayments.card || '0'),
             transfer: parseFloat(mixedPayments.transfer || '0'),
           },
         }),
         items: cart.map(item => ({
-          productId: item.productId, quantity:  item.quantity,
-          unitPrice: item.price,     subtotal:  item.price * item.quantity,
-          discount:  0,              notes:     item.notes,
+          productId: item.productId, quantity: item.quantity,
+          unitPrice: item.price, subtotal: item.price * item.quantity,
+          discount: 0, notes: item.notes,
           variantId: item.variantId,
         })),
       });
@@ -323,12 +325,12 @@ export default function POSPage() {
     onSuccess: (saleData: any) => {
       if (printConfig.autoPrint && saleData?.id) {
         const receiptData: ReceiptData = {
-          businessName:  (branches as any[])[0]?.tenant?.name ?? 'Mi Negocio',
-          branchName:    (branches as any[])[0]?.name,
-          saleId:        saleData.id,
-          cashierName:   `${saleData.user?.firstName ?? ''} ${saleData.user?.lastName ?? ''}`.trim(),
-          createdAt:     saleData.createdAt ?? new Date().toISOString(),
-          items:         (saleData.items ?? []).map((i: any) => ({
+          businessName: (branches as any[])[0]?.tenant?.name ?? 'Mi Negocio',
+          branchName: (branches as any[])[0]?.name,
+          saleId: saleData.id,
+          cashierName: `${saleData.user?.firstName ?? ''} ${saleData.user?.lastName ?? ''}`.trim(),
+          createdAt: saleData.createdAt ?? new Date().toISOString(),
+          items: (saleData.items ?? []).map((i: any) => ({
             name: i.product?.name ?? 'Producto', quantity: i.quantity,
             unitPrice: Number(i.unitPrice), subtotal: Number(i.subtotal), discount: Number(i.discount ?? 0),
           })),
@@ -342,6 +344,7 @@ export default function POSPage() {
         print(receiptData, printConfig);
       }
       clearCart();
+      openDrawer();
       setShowCart(false);
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['pos-products'] });
@@ -361,7 +364,7 @@ export default function POSPage() {
     return p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q) || p.barcode?.includes(search);
   });
 
-  const branchId   = (branches as any[])[0]?.id;
+  const branchId = (branches as any[])[0]?.id;
   const branchName = (branches as any[])[0]?.name ?? 'Sucursal';
 
   return (
@@ -489,18 +492,18 @@ export default function POSPage() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
                 {filtered.map((product: any) => {
-                  const price    = getPrice(product);
+                  const price = getPrice(product);
                   const hasOffer = price < Number(product.price);
-                  const inCart   = cart.find(i => i.productId === product.id);
+                  const inCart = cart.find(i => i.productId === product.id);
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   return (
                     <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }} style={{ padding: '10px', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '10px', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', position: 'relative', boxShadow: inCart ? `0 0 0 1px ${C}30` : 'none' }}>
                       {getImageUrl(product.imageUrl) && <img src={getImageUrl(product.imageUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
-                      {inCart   && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
+                      {inCart && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
                       {hasOffer && <div style={{ position: 'absolute', top: '7px', left: '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
                       <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '3px', lineHeight: 1.3 }}>{product.name}</p>
                       {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
-                      {hasOffer  && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
+                      {hasOffer && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
                       <p style={{ fontSize: '13px', fontWeight: 800, color: hasOffer ? '#F97316' : C, lineHeight: 1 }}>{formatCurrency(price)}</p>
                       {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 600 }}>{pvariants.length} variantes</p>}
                     </button>
@@ -722,7 +725,7 @@ function CartSide({
   showClientDrop, setShowClientDrop,
   clientResults,
 }: any) {
-  const count   = cart.reduce((a: number, i: any) => a + i.quantity, 0);
+  const count = cart.reduce((a: number, i: any) => a + i.quantity, 0);
   const canSell = paymentMethod !== 'mixed' || (mixedIsValid && mixedTotal > 0);
 
   const handleSetPaymentMethod = (val: string) => {
@@ -734,8 +737,8 @@ function CartSide({
 
   const clientName = selectedClient
     ? (selectedClient.isCompany
-        ? selectedClient.companyName
-        : `${selectedClient.firstName} ${selectedClient.lastName ?? ''}`.trim())
+      ? selectedClient.companyName
+      : `${selectedClient.firstName} ${selectedClient.lastName ?? ''}`.trim())
     : null;
 
   return (
@@ -778,7 +781,7 @@ function CartSide({
               <p style={{ fontSize: '12px', fontWeight: 700, color: C }}>{fmt(item.price * item.quantity)}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                 <button onClick={() => updateQty(item.id, -1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Minus size={9} /></button>
-                <button onClick={() => updateQty(item.id,  1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Plus  size={9} /></button>
+                <button onClick={() => updateQty(item.id, 1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Plus size={9} /></button>
                 <button onClick={() => removeFromCart(item.id)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: 'none', background: 'var(--dax-danger-bg)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-danger)' }}><Trash2 size={9} /></button>
               </div>
             </div>
@@ -925,7 +928,7 @@ function CartSide({
 // ══ MODAL VARIANTES ══════════════════════════════════════════════════════════
 function VariantModal({ data, setData, C, fmt, addToCart }: any) {
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
-  const product  = data.product;
+  const product = data.product;
   const variants = data.variants ?? [];
 
   return (

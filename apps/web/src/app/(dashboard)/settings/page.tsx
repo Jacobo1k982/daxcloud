@@ -7,31 +7,32 @@ import {
   Bell, Shield, Printer, Palette, Database,
   ChevronRight, ChevronLeft,
 } from 'lucide-react';
-import { ProfileSection }      from '@/components/settings/ProfileSection';
-import { BusinessSection }     from '@/components/settings/BusinessSection';
-import { PlanSection }         from '@/components/settings/PlanSection';
-import { UsersSection }        from '@/components/settings/UsersSection';
-import { LocaleSection }       from '@/components/settings/LocaleSection';
-import { RolesSection }        from '@/components/settings/RolesSection';
-import { NotificationsSection }from '@/components/settings/NotificationsSection';
-import { SecuritySection }     from '@/components/settings/SecuritySection';
-import { AppearanceSection }   from '@/components/settings/AppearanceSection';
-import { DataSection }         from '@/components/settings/DataSection';
-import { PrintingSection }     from '@/components/settings/PrintingSection';
+import { ProfileSection } from '@/components/settings/ProfileSection';
+import { BusinessSection } from '@/components/settings/BusinessSection';
+import { PlanSection } from '@/components/settings/PlanSection';
+import { UsersSection } from '@/components/settings/UsersSection';
+import { LocaleSection } from '@/components/settings/LocaleSection';
+import { RolesSection } from '@/components/settings/RolesSection';
+import { NotificationsSection } from '@/components/settings/NotificationsSection';
+import { SecuritySection } from '@/components/settings/SecuritySection';
+import { AppearanceSection } from '@/components/settings/AppearanceSection';
+import { DataSection } from '@/components/settings/DataSection';
+import { PrintingSection } from '@/components/settings/PrintingSection';
+import { useCashDrawer } from '@/hooks/useCashDrawer';
 
 // ── Secciones ─────────────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'profile',       label: 'Perfil',             icon: User,     desc: 'Tu información personal'           },
-  { id: 'business',      label: 'Negocio',             icon: Building2,desc: 'Datos de tu empresa'               },
-  { id: 'plan',          label: 'Plan y suscripción',  icon: CreditCard,desc:'Tu plan actual y módulos'          },
-  { id: 'users',         label: 'Usuarios',            icon: Users,    desc: 'Gestiona tu equipo'                },
-  { id: 'roles',         label: 'Roles',               icon: Shield,   desc: 'Roles y permisos personalizados'   },
-  { id: 'locale',        label: 'Moneda e idioma',     icon: Globe,    desc: 'Región y formato'                  },
-  { id: 'notifications', label: 'Notificaciones',      icon: Bell,     desc: 'Alertas y avisos'                  },
-  { id: 'security',      label: 'Seguridad',           icon: Shield,   desc: 'Contraseña y acceso'               },
-  { id: 'printing',      label: 'Impresión',           icon: Printer,  desc: 'Recibos y tickets'                 },
-  { id: 'appearance',    label: 'Apariencia',          icon: Palette,  desc: 'Tema y visualización'              },
-  { id: 'data',          label: 'Datos y backups',     icon: Database, desc: 'Exportar y respaldar'              },
+  { id: 'profile', label: 'Perfil', icon: User, desc: 'Tu información personal' },
+  { id: 'business', label: 'Negocio', icon: Building2, desc: 'Datos de tu empresa' },
+  { id: 'plan', label: 'Plan y suscripción', icon: CreditCard, desc: 'Tu plan actual y módulos' },
+  { id: 'users', label: 'Usuarios', icon: Users, desc: 'Gestiona tu equipo' },
+  { id: 'roles', label: 'Roles', icon: Shield, desc: 'Roles y permisos personalizados' },
+  { id: 'locale', label: 'Moneda e idioma', icon: Globe, desc: 'Región y formato' },
+  { id: 'notifications', label: 'Notificaciones', icon: Bell, desc: 'Alertas y avisos' },
+  { id: 'security', label: 'Seguridad', icon: Shield, desc: 'Contraseña y acceso' },
+  { id: 'printing', label: 'Impresión', icon: Printer, desc: 'Recibos y tickets' },
+  { id: 'appearance', label: 'Apariencia', icon: Palette, desc: 'Tema y visualización' },
+  { id: 'data', label: 'Datos y backups', icon: Database, desc: 'Exportar y respaldar' },
 ];
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -58,8 +59,8 @@ function SectionHeader({ title, desc }: { title: string; desc: string }) {
 export default function SettingsPage() {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [isMobile,      setIsMobile]      = useState(false);
-  const [toast,         setToast]         = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -190,7 +191,7 @@ export default function SettingsPage() {
           {/* Sidebar */}
           <div className="dax-card" style={{ padding: '8px', position: 'sticky', top: '24px' }}>
             {SECTIONS.map(section => {
-              const Icon   = section.icon;
+              const Icon = section.icon;
               const active = activeSection === section.id;
               return (
                 <button key={section.id} onClick={() => setActiveSection(section.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '9px', background: active ? 'rgba(255,92,53,.1)' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all .15s', marginBottom: '1px' }}
