@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -297,7 +297,7 @@ export class AnalyticsService {
         quantity: item.quantity,
         price:    Number(item.unitPrice),
         discount: Number(item.discount),
-        subtotal: Number(item.subtotal ?? (item.unitPrice * item.quantity)),
+        subtotal: Number(item.subtotal ?? (Number(item.unitPrice) * Number(item.quantity))),
       })),
     }));
   }
@@ -318,3 +318,4 @@ export class AnalyticsService {
     return { summary, salesByPeriod, topProducts, salesByCategory, branchPerformance, paymentMethods, peakHours, topCashiers, criticalStock };
   }
 }
+
