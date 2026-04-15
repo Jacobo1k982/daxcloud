@@ -25,6 +25,8 @@ interface Sale {
   items: { id: string; quantity: number; unitPrice: number; discount: number; subtotal: number; product: { name: string; sku: string } }[];
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+
 const PAYMENT_LABELS:  Record<string, string> = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'SINPE', mixed: 'Mixto' };
 const PAYMENT_COLORS:  Record<string, string> = { cash: '#3DBF7F', card: '#5AAAF0', transfer: '#A78BFA', mixed: '#F0A030' };
 const PAYMENT_ICONS:   Record<string, any>    = { cash: Wallet, card: CreditCard, transfer: Smartphone, mixed: ArrowUpRight };
@@ -449,4 +451,5 @@ export default function SalesPage() {
     </div>
   );
 }
+
 
