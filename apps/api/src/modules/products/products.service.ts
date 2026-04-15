@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -63,6 +63,7 @@ export class ProductsService {
         category: data.category,
         cost: data.cost,
         metadata: data.metadata ?? Prisma.JsonNull,
+        imageUrl: data.imageUrl,
       },
     });
   }
@@ -89,6 +90,7 @@ export class ProductsService {
         ...(data.category !== undefined && { category: data.category }),
         ...(data.cost !== undefined && { cost: data.cost }),
         ...(data.metadata !== undefined && { metadata: data.metadata }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
       },
     });
   }
