@@ -1,11 +1,10 @@
 'use client';
-
-import { useState }            from 'react';
-import { Lock, LogOut }        from 'lucide-react';
-import { useRouter }           from 'next/navigation';
-import { useCashRegister }     from '@/hooks/useCashRegister';
-import { OpenShiftModal }      from '@/components/pos/OpenShiftModal';
-import { CloseShiftModal }     from '@/components/pos/CloseShiftModal';
+import { useState }        from 'react';
+import { LogOut, Loader2 } from 'lucide-react';
+import { useRouter }       from 'next/navigation';
+import { useCashRegister } from '@/hooks/useCashRegister';
+import { OpenShiftModal }  from '@/components/pos/OpenShiftModal';
+import { CloseShiftModal } from '@/components/pos/CloseShiftModal';
 
 interface Props {
   branchId:       string | undefined;
@@ -15,40 +14,19 @@ interface Props {
   children:       React.ReactNode;
 }
 
-/**
- * CashRegisterGate
- *
- * Envuelve el POS completo. Si no hay turno de caja abierto,
- * muestra el modal de apertura en lugar del POS.
- * Si hay turno abierto, renderiza los hijos y expone el botón
- * de cierre de caja en el topbar mediante un portal/slot.
- */
 export function CashRegisterGate({
-  branchId,
-  branchName,
-  accentColor: C,
-  formatCurrency,
-  children,
+  branchId, branchName, accentColor: C, formatCurrency, children,
 }: Props) {
   const [showClose, setShowClose] = useState(false);
   const router = useRouter();
-
   const { activeShift, isLoading, isOpen, openMutation, closeMutation } =
     useCashRegister(branchId);
 
-  // ── Cargando estado inicial ────────────────────────────────────────────────
   if (isLoading || !branchId) {
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', background: 'var(--dax-bg)',
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--dax-bg)' }}>
         <div style={{ textAlign: 'center', color: 'var(--dax-text-muted)' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '50%',
-            border: `3px solid ${C}`, borderTopColor: 'transparent',
-            animation: 'spin 0.7s linear infinite', margin: '0 auto 12px',
-          }} />
+          <Loader2 size={28} style={{ animation: 'spin 0.7s linear infinite', margin: '0 auto 12px', display: 'block', color: C }} />
           <p style={{ fontSize: '13px' }}>Verificando estado de caja...</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -56,7 +34,6 @@ export function CashRegisterGate({
     );
   }
 
-  // ── Sin caja abierta → muestra modal de apertura bloqueante ───────────────
   if (!isOpen) {
     return (
       <OpenShiftModal
@@ -72,57 +49,31 @@ export function CashRegisterGate({
     );
   }
 
-  // ── Caja abierta → POS normal + barra de estado de caja ───────────────────
+  const openedAt = new Date(activeShift!.openedAt).toLocaleTimeString('es-CR', {
+    hour: '2-digit', minute: '2-digit',
+  });
+
   return (
     <>
-      {/* Barra de estado de caja — aparece encima del POS */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        height: '28px',
-        background: `${C}15`,
-        borderBottom: `1px solid ${C}30`,
-        display: 'flex', alignItems: 'center',
-        padding: '0 16px', gap: '8px',
-      }}>
-        <div style={{
-          width: '6px', height: '6px', borderRadius: '50%',
-          background: '#22C55E',
-          boxShadow: '0 0 6px #22C55E',
-          animation: 'pulse 2s infinite',
-        }} />
-        <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', fontWeight: 600 }}>
-          Caja abierta · {activeShift?.user.firstName} {activeShift?.user.lastName} · desde {new Date(activeShift!.openedAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: '28px', background: `${C}12`, borderBottom: `1px solid ${C}25`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: '8px' }}>
+        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E', animation: 'pulse 2s infinite', flexShrink: 0 }} />
+        <span style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+          Caja abierta · {activeShift?.user.firstName} {activeShift?.user.lastName} · desde {openedAt}
         </span>
-        <span style={{ fontSize: '11px', color: C, fontWeight: 700, marginLeft: '4px' }}>
+        <span style={{ fontSize: '11px', color: C, fontWeight: 700 }}>
           {formatCurrency(Number(activeShift?.openingAmount ?? 0))} apertura
         </span>
-
-        <button
-          onClick={() => setShowClose(true)}
-          style={{
-            marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px',
-            padding: '2px 10px', borderRadius: '6px',
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
-            color: '#EF4444', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-          }}
-        >
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
+          {activeShift?.totalOrders ?? 0} ventas · {formatCurrency(Number(activeShift?.totalSales ?? 0))}
+        </span>
+        <button onClick={() => setShowClose(true)} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 10px', borderRadius: '6px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', fontSize: '10px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
           <LogOut size={10} /> Cerrar caja
         </button>
-
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.4; }
-          }
-        `}</style>
       </div>
-
-      {/* POS desplazado para dar espacio a la barra */}
       <div style={{ paddingTop: '28px', height: '100vh', boxSizing: 'border-box' }}>
         {children}
       </div>
-
-      {/* Modal de cierre */}
       {showClose && activeShift && (
         <CloseShiftModal
           shift={activeShift}
@@ -136,6 +87,7 @@ export function CashRegisterGate({
           }}
         />
       )}
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
     </>
   );
 }

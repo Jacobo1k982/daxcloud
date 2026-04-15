@@ -1,4 +1,4 @@
-export const PLANS = [
+﻿export const PLANS = [
   {
     name:          'starter',
     label:         'Starter',
@@ -71,3 +71,4 @@ export const PLANS = [
 ] as const;
 
 export type PlanName = typeof PLANS[number]['name'];
+
