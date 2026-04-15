@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { X, TrendingUp, Clock, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
@@ -344,3 +344,5 @@ export function CloseShiftModal({
     </div>
   );
 }
+
+

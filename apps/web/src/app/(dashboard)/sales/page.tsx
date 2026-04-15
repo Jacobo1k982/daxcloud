@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Zap, Receipt,
 } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+
 
 interface MixedPayments { cash?: number; card?: number; transfer?: number; }
 interface Sale {
@@ -449,3 +449,4 @@ export default function SalesPage() {
     </div>
   );
 }
+
