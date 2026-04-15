@@ -50,6 +50,7 @@ export class ProductsService {
     description?: string;
     category?: string;
     cost?: number;
+    imageUrl?: string;
     metadata?: Prisma.InputJsonValue;
   }) {
     return this.prisma.product.create({
@@ -76,6 +77,7 @@ export class ProductsService {
     description?: string;
     category?: string;
     cost?: number;
+    imageUrl?: string;
     metadata?: Prisma.InputJsonValue;
   }) {
     await this.findOne(tenantId, productId);
@@ -112,3 +114,4 @@ export class ProductsService {
     return products.map(p => p.category).filter(Boolean);
   }
 }
+
