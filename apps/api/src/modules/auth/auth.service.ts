@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -115,7 +115,7 @@ export class AuthService {
           country: data.country,
           currency: data.currency,
           locale: data.locale,
-          industry: data.industry ?? 'general',
+          industry: this.normalizeIndustry(data.industry),
           settings: {},
         },
       });
@@ -236,5 +236,19 @@ export class AuthService {
         cancelAtPeriodEnd: sub?.cancelAtPeriodEnd ?? false,
       },
     };
+  }
+  private normalizeIndustry(industry?: string): string {
+    const VALID = ['general','restaurant','bakery','pharmacy','salon','clothing','produce','supermarket'];
+    if (!industry) return 'general';
+    const lower = industry.toLowerCase().trim();
+    if (VALID.includes(lower)) return lower;
+    if (lower.includes('panader')) return 'bakery';
+    if (lower.includes('peluquer') || lower.includes('salon') || lower.includes('estetica')) return 'salon';
+    if (lower.includes('farmacia') || lower.includes('pharmacy')) return 'pharmacy';
+    if (lower.includes('restaurante') || lower.includes('restaurant')) return 'restaurant';
+    if (lower.includes('ropa') || lower.includes('clothing') || lower.includes('moda')) return 'clothing';
+    if (lower.includes('verdule') || lower.includes('produce') || lower.includes('fruta')) return 'produce';
+    if (lower.includes('super') || lower.includes('abarrote')) return 'supermarket';
+    return 'general';
   }
 }
