@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -165,3 +165,6 @@ export function Sidebar() {
     </>
   );
 }
+
+
+
