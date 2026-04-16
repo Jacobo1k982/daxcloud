@@ -9,7 +9,7 @@ import {
   Check, X, AlertTriangle, CreditCard,
   Calendar, Receipt, Zap, ArrowRight,
   Shield, Star, Crown, Clock, Loader2,
-  RefreshCw, Gift,
+  RefreshCw, Gift, Smartphone,
 } from 'lucide-react';
 import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 
@@ -177,27 +177,52 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                   ))}
                 </div>
 
-                <button
-                  onClick={() => { if (!isCurrent && !isPending) onChangePlan(plan.name); }}
-                  disabled={isCurrent || isPending}
-                  style={{
-                    width: '100%', padding: '12px',
-                    background: isCurrent ? 'rgba(30,58,95,.3)' : isChanging ? 'rgba(30,58,95,.5)' : plan.popular ? `linear-gradient(135deg, ${plan.color}, #FF3D1F)` : `${plan.color}20`,
-                    border: `1.5px solid ${isCurrent ? 'rgba(30,58,95,.4)' : plan.color}`,
-                    borderRadius: '12px',
-                    color: isCurrent ? 'rgba(113,128,150,.6)' : isChanging ? 'rgba(113,128,150,.6)' : plan.popular ? '#fff' : plan.color,
-                    fontSize: '13px', fontWeight: 700,
-                    cursor: isCurrent || isPending ? 'default' : 'pointer',
-                    transition: 'all .15s',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  }}
-                >
-                  {isChanging
-                    ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Cambiando...</>
-                    : isCurrent ? '✓ Plan actual'
-                      : <>{plan.cta} <ArrowRight size={13} /></>
-                  }
-                </button>
+                {isCurrent ? (
+                  <div style={{ width: '100%', padding: '11px', borderRadius: '12px', border: `1.5px solid ${plan.color}40`, background: `${plan.color}08`, textAlign: 'center', fontSize: '13px', fontWeight: 700, color: plan.color }}>
+                    ✓ Plan actual
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Empezar con trial / cambiar */}
+                    <button onClick={() => onChangePlan(plan.name)} disabled={isPending}
+                      style={{ width: '100%', padding: '11px', background: plan.popular ? `linear-gradient(135deg,${plan.color},#FF3D1F)` : `${plan.color}18`, border: `1.5px solid ${plan.color}`, borderRadius: '12px', color: plan.popular ? '#fff' : plan.color, fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      {isChanging ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Procesando...</> : <>{plan.cta} <ArrowRight size={13} /></>}
+                    </button>
+
+                    {/* Separador */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ flex: 1, height: '1px', background: 'rgba(30,58,95,.4)' }} />
+                      <span style={{ fontSize: '10px', color: 'rgba(113,128,150,.5)', letterSpacing: '.06em', textTransform: 'uppercase' }}>o paga ahora</span>
+                      <div style={{ flex: 1, height: '1px', background: 'rgba(30,58,95,.4)' }} />
+                    </div>
+
+                    {/* Botones de pago */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      {/* SINPE */}
+                      <button onClick={() => onChangePlan(plan.name)}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '10px 8px', background: 'rgba(22,34,53,0.6)', border: '1px solid rgba(61,191,127,.2)', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', fontFamily: 'Outfit, sans-serif' }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(61,191,127,.5)'; el.style.background='rgba(61,191,127,.06)'; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(61,191,127,.2)'; el.style.background='rgba(22,34,53,0.6)'; }}>
+                        <Smartphone size={13} color="#3DBF7F" />
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#3DBF7F' }}>SINPE</span>
+                        <span style={{ fontSize: '9px', color: 'rgba(113,128,150,.6)' }}>Solo CR</span>
+                      </button>
+
+                      {/* Tarjeta */}
+                      <button onClick={() => { const amount = annual ? plan.annualMonthly : plan.monthlyPrice; const params = new URLSearchParams({ plan: plan.name, billing: annual ? 'annual' : 'monthly', amount: String(amount), method: 'pagadito' }); window.location.href = '/register?' + params.toString(); }}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '10px 8px', background: 'rgba(22,34,53,0.6)', border: '1px solid rgba(255,107,0,.2)', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', fontFamily: 'Outfit, sans-serif' }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,107,0,.5)'; el.style.background='rgba(255,107,0,.06)'; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,107,0,.2)'; el.style.background='rgba(22,34,53,0.6)'; }}>
+                        <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                          <svg width="22" height="8" viewBox="0 0 28 9" fill="none"><text x="0" y="8" fontSize="9" fontWeight="900" fontFamily="Arial,sans-serif" fill="#1A1F71">VISA</text></svg>
+                          <svg width="13" height="9" viewBox="0 0 16 10"><circle cx="6" cy="5" r="5" fill="#EB001B" opacity=".9"/><circle cx="10" cy="5" r="5" fill="#F79E1B" opacity=".9"/><path d="M8 1.8a5 5 0 010 6.4A5 5 0 018 1.8z" fill="#FF5F00" opacity=".9"/></svg>
+                        </div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF6B00' }}>Tarjeta</span>
+                        <span style={{ fontSize: '9px', color: 'rgba(113,128,150,.6)' }}>Latinoamérica</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

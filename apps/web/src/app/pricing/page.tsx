@@ -145,8 +145,12 @@ function PlanCard({ plan, annual, idx, mounted, onSinpe, onPagadito, pagaditoLoa
                     <CreditCard size={14} color="#FF6B00" />
                   </div>
               }
+              <span style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+                <svg width='24' height='8' viewBox='0 0 28 9' fill='none'><text x='0' y='8' fontSize='9' fontWeight='900' fontFamily='Arial,sans-serif' fill='#1A1F71'>VISA</text></svg>
+                <svg width='14' height='9' viewBox='0 0 16 10'><circle cx='6' cy='5' r='5' fill='#EB001B' opacity='.9'/><circle cx='10' cy='5' r='5' fill='#F79E1B' opacity='.9'/><path d='M8 1.8a5 5 0 010 6.4A5 5 0 018 1.8z' fill='#FF5F00' opacity='.9'/></svg>
+              </span>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF6B00', lineHeight: 1 }}>Tarjeta</span>
-              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Visa · Mastercard · Débito</span>
+              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Débito · Crédito</span>
             </button>
           </div>
 
@@ -337,6 +341,7 @@ export default function PricingPage() {
     </div>
   );
 }
+
 
 
 
