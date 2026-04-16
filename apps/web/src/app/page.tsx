@@ -517,7 +517,7 @@ export default function LandingPage() {
           </div>
           <div style={{ textAlign: 'center', marginTop: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <Smartphone size={14} color="#3DBF7F" />
-            <p style={{ fontSize: '13px', color: '#3DBF7F', fontWeight: 600 }}>SINPE Móvil (CR) · Tarjeta débito/crédito vía Pagadito · Toda Latinoamérica hábiles</p>
+            <p style={{ fontSize: '13px', color: '#3DBF7F', fontWeight: 600 }}>SINPE Móvil (CR) · Tarjeta débito/crédito débito / crédito · Visa · Mastercard · Débito hábiles</p>
           </div>
         </div>
       </section>
@@ -585,5 +585,7 @@ export default function LandingPage() {
     </div>
   );
 }
+
+
 
 

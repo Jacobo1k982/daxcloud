@@ -132,7 +132,7 @@ function PlanCard({ plan, annual, idx, mounted, onSinpe, onPagadito, pagaditoLoa
                 <Smartphone size={14} color="#3DBF7F" />
               </div>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#3DBF7F', lineHeight: 1 }}>SINPE</span>
-              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Solo Costa Rica</span>
+              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Transferencia bancaria</span>
             </button>
 
             {/* Pagadito */}
@@ -146,7 +146,7 @@ function PlanCard({ plan, annual, idx, mounted, onSinpe, onPagadito, pagaditoLoa
                   </div>
               }
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF6B00', lineHeight: 1 }}>Tarjeta</span>
-              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Toda Latinoamérica</span>
+              <span style={{ fontSize: '9px', color: '#2A5280', textAlign: 'center' as const }}>Visa · Mastercard · Débito</span>
             </button>
           </div>
 
@@ -272,8 +272,8 @@ export default function PricingPage() {
           <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
             {[
               { icon: '📱', label: 'SINPE Móvil', sub: 'Costa Rica', color: '#3DBF7F' },
-              { icon: '💳', label: 'Visa / Mastercard', sub: 'Toda Latinoamérica', color: '#5AAAF0' },
-              { icon: '💳', label: 'Débito', sub: 'Vía Pagadito', color: '#FF6B00' },
+              { icon: '💳', label: 'Visa / Mastercard', sub: 'Visa · Mastercard · Débito', color: '#5AAAF0' },
+              { icon: '💳', label: 'Débito', sub: 'débito / crédito', color: '#FF6B00' },
             ].map(m => (
               <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', background: `${m.color}08`, border: `1px solid ${m.color}20`, borderRadius: '10px' }}>
                 <span style={{ fontSize: '16px' }}>{m.icon}</span>
@@ -295,7 +295,7 @@ export default function PricingPage() {
               { q: '¿Qué pasa al terminar los 14 días de prueba?',     a: 'Te avisamos 3 días antes. Si no agregas un método de pago, tu cuenta pasa a modo de solo lectura. Tus datos se conservan 30 días.' },
               { q: '¿El módulo de industria tiene costo adicional?',    a: 'Sí, los módulos especializados tienen un costo adicional de $22/mes sobre tu plan base.' },
               { q: '¿Cómo funciona la facturación anual?',             a: 'Pagas un año por adelantado y obtienes el equivalente a 2 meses gratis.' },
-              { q: '¿Pagadito acepta tarjetas de todos los países?',   a: 'Pagadito acepta tarjetas Visa y Mastercard emitidas en Costa Rica, Guatemala, El Salvador, Honduras, Nicaragua, Panamá, República Dominicana y México.' },
+              { q: '¿Aceptamos tarjetas de todos los países?',   a: 'Aceptamos tarjetas Visa y Mastercard emitidas en Costa Rica, Guatemala, El Salvador, Honduras, Nicaragua, Panamá, República Dominicana y México.' },
             ].map((faq, i) => <FAQItem key={i} question={faq.q} answer={faq.a} />)}
           </div>
         </div>
@@ -337,4 +337,6 @@ export default function PricingPage() {
     </div>
   );
 }
+
+
 
