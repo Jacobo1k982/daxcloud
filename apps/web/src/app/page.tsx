@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Logo } from '@/components/layout/Logo';
 import {
@@ -67,55 +67,55 @@ function useReveal(threshold = 0.12) {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Zap,        color: '#FF5C35', title: 'POS adaptativo',          desc: 'El sistema detecta tu industria y adapta la interfaz automáticamente. Restaurante, farmacia, peluquería — cada negocio tiene su flujo.' },
-  { icon: BarChart2,  color: '#5AAAF0', title: 'Analytics en tiempo real', desc: 'Ventas, inventario y métricas clave actualizados al instante. Toma decisiones basadas en datos, no en suposiciones.' },
-  { icon: Globe,      color: '#3DBF7F', title: 'Multi-moneda',             desc: 'Soporte nativo para 20+ países de América Latina. CRC, USD, MXN, COP y más, con formatos locales correctos.' },
-  { icon: Shield,     color: '#F0A030', title: 'Multi-tenant seguro',      desc: 'Cada negocio tiene su propio espacio aislado. Roles, permisos y sucursales completamente independientes.' },
-  { icon: Smartphone, color: '#A78BFA', title: 'Responsive total',         desc: 'Funciona igual en desktop, tablet y móvil. El POS, el dashboard y los reportes adaptados a cualquier pantalla.' },
-  { icon: Package,    color: '#EC4899', title: 'Inventario inteligente',   desc: 'Control de stock, movimientos y alertas automáticas cuando el inventario baja del mínimo configurado.' },
+  { icon: Zap, color: '#FF5C35', title: 'POS adaptativo', desc: 'El sistema detecta tu industria y adapta la interfaz automáticamente. Restaurante, farmacia, peluquería — cada negocio tiene su flujo.' },
+  { icon: BarChart2, color: '#5AAAF0', title: 'Analytics en tiempo real', desc: 'Ventas, inventario y métricas clave actualizados al instante. Toma decisiones basadas en datos, no en suposiciones.' },
+  { icon: Globe, color: '#3DBF7F', title: 'Multi-moneda', desc: 'Soporte nativo para 20+ países de América Latina. CRC, USD, MXN, COP y más, con formatos locales correctos.' },
+  { icon: Shield, color: '#F0A030', title: 'Multi-tenant seguro', desc: 'Cada negocio tiene su propio espacio aislado. Roles, permisos y sucursales completamente independientes.' },
+  { icon: Smartphone, color: '#A78BFA', title: 'Responsive total', desc: 'Funciona igual en desktop, tablet y móvil. El POS, el dashboard y los reportes adaptados a cualquier pantalla.' },
+  { icon: Package, color: '#EC4899', title: 'Inventario inteligente', desc: 'Control de stock, movimientos y alertas automáticas cuando el inventario baja del mínimo configurado.' },
 ];
 
 const INDUSTRIES = [
-  { icon: Utensils,    label: 'Restaurante', color: '#F97316' },
-  { icon: ChefHat,     label: 'Panadería',   color: '#FF5C35' },
-  { icon: Pill,        label: 'Farmacia',    color: '#5AAAF0' },
-  { icon: Scissors,    label: 'Peluquería',  color: '#A78BFA' },
-  { icon: Shirt,       label: 'Ropa',        color: '#EAB308' },
-  { icon: Leaf,        label: 'Verdulería',  color: '#22C55E' },
-  { icon: ShoppingCart,label: 'Supermercado',color: '#5AAAF0' },
-  { icon: Package,     label: 'Tienda',      color: '#FF5C35' },
+  { icon: Utensils, label: 'Restaurante', color: '#F97316' },
+  { icon: ChefHat, label: 'Panadería', color: '#FF5C35' },
+  { icon: Pill, label: 'Farmacia', color: '#5AAAF0' },
+  { icon: Scissors, label: 'Peluquería', color: '#A78BFA' },
+  { icon: Shirt, label: 'Ropa', color: '#EAB308' },
+  { icon: Leaf, label: 'Verdulería', color: '#22C55E' },
+  { icon: ShoppingCart, label: 'Supermercado', color: '#5AAAF0' },
+  { icon: Package, label: 'Tienda', color: '#FF5C35' },
 ];
 
 const STEPS = [
-  { num: '01', icon: Users,      color: '#FF5C35', title: 'Crea tu cuenta',        desc: 'Regístrate en 2 minutos. Sin tarjeta, sin compromisos. Solo tu nombre y correo.' },
-  { num: '02', icon: Package,    color: '#5AAAF0', title: 'Configura tu negocio',  desc: 'Agrega tus productos, sucursales y usuarios. Importa desde Excel o agrégalos uno a uno.' },
-  { num: '03', icon: TrendingUp, color: '#3DBF7F', title: 'Empieza a vender',      desc: 'Abre el POS y empieza a procesar ventas de inmediato. Los reportes se actualizan en tiempo real.' },
+  { num: '01', icon: Users, color: '#FF5C35', title: 'Crea tu cuenta', desc: 'Regístrate en 2 minutos. Sin tarjeta, sin compromisos. Solo tu nombre y correo.' },
+  { num: '02', icon: Package, color: '#5AAAF0', title: 'Configura tu negocio', desc: 'Agrega tus productos, sucursales y usuarios. Importa desde Excel o agrégalos uno a uno.' },
+  { num: '03', icon: TrendingUp, color: '#3DBF7F', title: 'Empieza a vender', desc: 'Abre el POS y empieza a procesar ventas de inmediato. Los reportes se actualizan en tiempo real.' },
 ];
 
 const TESTIMONIALS = [
-  { name: 'María González',  role: 'Panadería La Esperanza', country: '🇨🇷 Costa Rica', text: 'Antes llevaba todo en Excel. Ahora el inventario se actualiza solo y sé exactamente cuánto vendí cada día.', rating: 5 },
-  { name: 'Carlos Mendez',   role: 'Restaurante El Fogón',   country: '🇲🇽 México',      text: 'El módulo de restaurante es increíble. Mesas, comandas, todo en una sola pantalla. Mis meseros aprendieron en 10 minutos.', rating: 5 },
-  { name: 'Andrea Ruiz',     role: 'Farmacia Central',       country: '🇨🇴 Colombia',    text: 'Lo que más me gustó es que funciona igual en el celular que en la computadora. Reviso las ventas desde donde sea.', rating: 5 },
+  { name: 'María González', role: 'Panadería La Esperanza', country: '🇨🇷 Costa Rica', text: 'Antes llevaba todo en Excel. Ahora el inventario se actualiza solo y sé exactamente cuánto vendí cada día.', rating: 5 },
+  { name: 'Carlos Mendez', role: 'Restaurante El Fogón', country: '🇲🇽 México', text: 'El módulo de restaurante es increíble. Mesas, comandas, todo en una sola pantalla. Mis meseros aprendieron en 10 minutos.', rating: 5 },
+  { name: 'Andrea Ruiz', role: 'Farmacia Central', country: '🇨🇴 Colombia', text: 'Lo que más me gustó es que funciona igual en el celular que en la computadora. Reviso las ventas desde donde sea.', rating: 5 },
 ];
 
 const COMPARISON = [
-  { feature: 'POS multi-industria',       dax: true,  excel: false, other: false },
-  { feature: 'Inventario en tiempo real', dax: true,  excel: false, other: true  },
-  { feature: 'Multi-sucursal',            dax: true,  excel: false, other: false },
-  { feature: 'Analytics avanzado',        dax: true,  excel: false, other: true  },
-  { feature: 'App móvil incluida',        dax: true,  excel: false, other: false },
-  { feature: 'Pago con SINPE Móvil',      dax: true,  excel: false, other: false },
-  { feature: 'Sin costo de instalación',  dax: true,  excel: true,  other: false },
-  { feature: 'Soporte en español',        dax: true,  excel: false, other: false },
+  { feature: 'POS multi-industria', dax: true, excel: false, other: false },
+  { feature: 'Inventario en tiempo real', dax: true, excel: false, other: true },
+  { feature: 'Multi-sucursal', dax: true, excel: false, other: false },
+  { feature: 'Analytics avanzado', dax: true, excel: false, other: true },
+  { feature: 'App móvil incluida', dax: true, excel: false, other: false },
+  { feature: 'Pago con SINPE Móvil', dax: true, excel: false, other: false },
+  { feature: 'Sin costo de instalación', dax: true, excel: true, other: false },
+  { feature: 'Soporte en español', dax: true, excel: false, other: false },
 ];
 
 const FAQS = [
-  { q: '¿Necesito tarjeta de crédito para la prueba gratuita?',         a: 'No. Los 14 días de prueba son completamente gratuitos y no requieren ningún método de pago. Puedes explorar todas las funciones sin ningún compromiso.' },
-  { q: '¿Puedo cambiar de plan en cualquier momento?',                   a: 'Sí. Puedes subir o bajar de plan cuando quieras. Los cambios se aplican de inmediato y el cobro se ajusta proporcionalmente.' },
-  { q: '¿Cómo funciona el pago por SINPE Móvil?',                       a: 'Haces la transferencia al número registrado, nos envías el comprobante y activamos tu cuenta en menos de 2 horas hábiles.' },
-  { q: '¿Funciona sin internet?',                                        a: 'El POS requiere conexión para sincronizar en tiempo real. Estamos desarrollando un modo offline para futuras versiones.' },
-  { q: '¿Puedo importar mis productos desde Excel?',                     a: 'Sí. DaxCloud acepta importación masiva desde archivos Excel (.xlsx) con nombre, precio, costo, SKU y categoría.' },
-  { q: '¿Mis datos están seguros?',                                      a: 'Sí. Cada negocio tiene su base de datos aislada. Usamos cifrado en tránsito y en reposo, con backups automáticos diarios.' },
+  { q: '¿Necesito tarjeta de crédito para la prueba gratuita?', a: 'No. Los 14 días de prueba son completamente gratuitos y no requieren ningún método de pago. Puedes explorar todas las funciones sin ningún compromiso.' },
+  { q: '¿Puedo cambiar de plan en cualquier momento?', a: 'Sí. Puedes subir o bajar de plan cuando quieras. Los cambios se aplican de inmediato y el cobro se ajusta proporcionalmente.' },
+  { q: '¿Cómo funciona el pago por SINPE Móvil?', a: 'Haces la transferencia al número registrado, nos envías el comprobante y activamos tu cuenta en menos de 2 horas hábiles.' },
+  { q: '¿Funciona sin internet?', a: 'El POS requiere conexión para sincronizar en tiempo real. Estamos desarrollando un modo offline para futuras versiones.' },
+  { q: '¿Puedo importar mis productos desde Excel?', a: 'Sí. DaxCloud acepta importación masiva desde archivos Excel (.xlsx) con nombre, precio, costo, SKU y categoría.' },
+  { q: '¿Mis datos están seguros?', a: 'Sí. Cada negocio tiene su base de datos aislada. Usamos cifrado en tránsito y en reposo, con backups automáticos diarios.' },
 ];
 
 const PLAN_ICONS: Record<string, any> = { starter: Shield, growth: Star, scale: Crown };
@@ -197,18 +197,20 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 // ── Página ────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [mounted,   setMounted]   = useState(false);
-  const [annual,    setAnnual]    = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [annual, setAnnual] = useState(false);
   const [sinpePlan, setSinpePlan] = useState<typeof PLANS[number] | null>(null);
-  const [navOpen,   setNavOpen]   = useState(false);
+  const [pagaditoPlan, setPagaditoPlan] = useState<typeof PLANS[number] | null>(null);
+  const [pagaditoLoading, setPagaditoLoading] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
-  const featuresReveal     = useReveal();
-  const industriesReveal   = useReveal();
-  const stepsReveal        = useReveal();
-  const comparisonReveal   = useReveal();
+  const featuresReveal = useReveal();
+  const industriesReveal = useReveal();
+  const stepsReveal = useReveal();
+  const comparisonReveal = useReveal();
   const testimonialsReveal = useReveal();
-  const faqReveal          = useReveal();
-  const ctaReveal          = useReveal();
+  const faqReveal = useReveal();
+  const ctaReveal = useReveal();
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
@@ -220,7 +222,7 @@ export default function LandingPage() {
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: '62px', borderBottom: '1px solid rgba(30,58,95,0.5)', background: 'rgba(6,13,22,0.88)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', padding: '0 clamp(20px,5vw,80px)', justifyContent: 'space-between', gap: '16px' }}>
         <Logo size="sm" />
         <div style={{ display: 'none', gap: '4px', alignItems: 'center' }} className="nav-links">
-          {[['#features','Funciones'],['#como-funciona','Cómo funciona'],['#precios','Precios'],['#faq','FAQ']].map(([href,label]) => (
+          {[['#features', 'Funciones'], ['#como-funciona', 'Cómo funciona'], ['#precios', 'Precios'], ['#faq', 'FAQ']].map(([href, label]) => (
             <a key={href} href={href} style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '13px', color: 'rgba(176,208,240,.5)', textDecoration: 'none', transition: 'all .15s' }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.color = '#F0F4FF'; el.style.background = 'rgba(30,58,95,.3)'; }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.color = 'rgba(176,208,240,.5)'; el.style.background = 'transparent'; }}>
@@ -377,16 +379,16 @@ export default function LandingPage() {
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 120px 120px', padding: '12px 20px', borderBottom: i < COMPARISON.length - 1 ? '1px solid rgba(30,58,95,.25)' : 'none', background: i % 2 === 0 ? 'transparent' : 'rgba(30,58,95,.05)' }}>
                   <span style={{ fontSize: '13px', color: '#7BBEE8' }}>{row.feature}</span>
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    {row.dax  ? <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(61,191,127,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={11} color="#3DBF7F" strokeWidth={3} /></div>
-                              : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(224,80,80,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="#E05050" strokeWidth={2} /></div>}
+                    {row.dax ? <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(61,191,127,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={11} color="#3DBF7F" strokeWidth={3} /></div>
+                      : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(224,80,80,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="#E05050" strokeWidth={2} /></div>}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {row.excel ? <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(61,191,127,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={11} color="#3DBF7F" strokeWidth={3} /></div>
-                               : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(113,128,150,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="rgba(113,128,150,.4)" strokeWidth={2} /></div>}
+                      : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(113,128,150,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="rgba(113,128,150,.4)" strokeWidth={2} /></div>}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     {row.other ? <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(61,191,127,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={11} color="#3DBF7F" strokeWidth={3} /></div>
-                               : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(113,128,150,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="rgba(113,128,150,.4)" strokeWidth={2} /></div>}
+                      : <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(113,128,150,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} color="rgba(113,128,150,.4)" strokeWidth={2} /></div>}
                   </div>
                 </div>
               ))}
@@ -442,7 +444,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '16px' }}>
             {PLANS.map(plan => {
-              const Icon  = PLAN_ICONS[plan.name] ?? Shield;
+              const Icon = PLAN_ICONS[plan.name] ?? Shield;
               const price = annual ? plan.annualMonthly : plan.monthlyPrice;
               const saving = plan.monthlyPrice * 12 - plan.annualPrice;
               return (
@@ -463,7 +465,7 @@ export default function LandingPage() {
                       <span style={{ fontSize: '13px', color: 'rgba(176,208,240,.4)', marginBottom: '7px' }}>/mes USD</span>
                     </div>
                     {annual ? <p style={{ fontSize: '11px', color: '#3DBF7F', fontWeight: 600 }}>${plan.annualPrice}/año · ahorras ${saving}</p>
-                            : <p style={{ fontSize: '11px', color: 'rgba(176,208,240,.35)' }}>${plan.monthlyPrice * 12}/año facturado mensual</p>}
+                      : <p style={{ fontSize: '11px', color: 'rgba(176,208,240,.35)' }}>${plan.monthlyPrice * 12}/año facturado mensual</p>}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', marginBottom: '24px' }}>
                     {plan.features.map((feat, i) => (
@@ -479,11 +481,35 @@ export default function LandingPage() {
                     <a href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '13px', background: plan.popular ? `linear-gradient(135deg,${plan.color},#FF3D1F)` : `${plan.color}18`, border: `1.5px solid ${plan.color}`, borderRadius: '13px', color: plan.popular ? '#fff' : plan.color, fontSize: '13px', fontWeight: 700, textDecoration: 'none', transition: 'all .15s' }}>
                       Empezar gratis <ArrowRight size={13} />
                     </a>
-                    <button onClick={() => setSinpePlan(plan as any)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', background: 'transparent', border: '1px solid rgba(30,58,95,.5)', borderRadius: '13px', color: 'rgba(176,208,240,.45)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', fontFamily: 'Outfit, sans-serif' }}
-                      onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = plan.color; el.style.color = plan.color; }}
-                      onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(30,58,95,.5)'; el.style.color = 'rgba(176,208,240,.45)'; }}>
-                      <CreditCard size={12} /> Pagar con SINPE
-                    </button>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      {/* SINPE - transferencia CR */}
+                      <button onClick={() => setSinpePlan(plan as any)}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '9px 8px', background: 'transparent', border: '1px solid rgba(30,58,95,.5)', borderRadius: '10px', color: 'rgba(176,208,240,.45)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', fontFamily: 'Outfit, sans-serif' }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#3DBF7F'; el.style.color = '#3DBF7F'; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(30,58,95,.5)'; el.style.color = 'rgba(176,208,240,.45)'; }}>
+                        SINPE
+                      </button>
+
+                      {/* Pagadito - tarjeta CR + Latam */}
+                      <button onClick={async () => {
+                        try {
+                          const { api } = await import('@/lib/api');
+                          const { data } = await api.post('/billing/pagadito/initiate', {
+                            planName: plan.name, planLabel: plan.label,
+                            amount: annual ? plan.annualMonthly : plan.monthlyPrice,
+                            currency: 'USD', annual,
+                          });
+                          sessionStorage.setItem('pagadito_session_token', data.sessionToken);
+                          sessionStorage.setItem('pagadito_ern', data.ern);
+                          window.location.href = data.url;
+                        } catch (e: any) { alert(e?.response?.data?.message ?? 'Error al conectar con Pagadito'); }
+                      }}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '9px 8px', background: 'transparent', border: '1px solid rgba(30,58,95,.5)', borderRadius: '10px', color: 'rgba(176,208,240,.45)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', fontFamily: 'Outfit, sans-serif' }}
+                        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#FF6B00'; el.style.color = '#FF6B00'; }}
+                        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(30,58,95,.5)'; el.style.color = 'rgba(176,208,240,.45)'; }}>
+                        Tarjeta
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -491,7 +517,7 @@ export default function LandingPage() {
           </div>
           <div style={{ textAlign: 'center', marginTop: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <Smartphone size={14} color="#3DBF7F" />
-            <p style={{ fontSize: '13px', color: '#3DBF7F', fontWeight: 600 }}>Aceptamos SINPE Móvil · Activación en menos de 2 horas hábiles</p>
+            <p style={{ fontSize: '13px', color: '#3DBF7F', fontWeight: 600 }}>SINPE Móvil (CR) · Tarjeta débito/crédito vía Pagadito · Toda Latinoamérica hábiles</p>
           </div>
         </div>
       </section>
@@ -559,3 +585,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
