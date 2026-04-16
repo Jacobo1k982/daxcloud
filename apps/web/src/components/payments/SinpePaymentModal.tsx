@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -233,6 +233,31 @@ export function SinpePaymentModal({
                   : 'Continuar →'
                 }
               </button>
+              {/* Separador */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '12px 0' }}>
+                <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
+                <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>o paga con tarjeta</span>
+                <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
+              </div>
+
+              <button
+                onClick={async () => {
+                  try {
+                    const { data } = await import('@/lib/api').then(m => m.api.post('/billing/pagadito/initiate', {
+                      planName: planName, planLabel: planLabel, amount: amount, currency: 'USD', annual: cycle === 'annual',
+                    }));
+                    sessionStorage.setItem('pagadito_session_token', data.sessionToken);
+                    sessionStorage.setItem('pagadito_ern', data.ern);
+                    window.location.href = data.url;
+                  } catch (e: any) {
+                    alert(e?.response?.data?.message ?? 'Error al conectar con Pagadito');
+                  }
+                }}
+                style={{ width: '100%', padding: '11px', borderRadius: '12px', border: '1px solid rgba(30,58,95,.5)', background: 'transparent', color: 'var(--dax-text-muted)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all .15s' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#FF6B00"/><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="800" fill="white">PG</text></svg>
+                Pagar con Pagadito (tarjeta)
+              </button>
               {createMutation.isError && (
                 <p style={{ fontSize: '12px', color: 'var(--dax-danger)', textAlign: 'center', marginTop: '8px' }}>
                   {(createMutation.error as any)?.response?.data?.message ?? 'Error al crear solicitud'}
@@ -337,3 +362,4 @@ export function SinpePaymentModal({
     document.body
   );
 }
+
