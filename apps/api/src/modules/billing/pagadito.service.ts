@@ -1,5 +1,4 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+﻿import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 
 export interface PagaditoTransDetail {
   quantity:    number;
@@ -20,11 +19,11 @@ export interface PagaditoStatusResult {
 @Injectable()
 export class PagaditoService {
   private readonly logger = new Logger(PagaditoService.name);
-  constructor(private config: ConfigService) {}
+  constructor() {}
 
-  private get uid():      string { return this.config.get<string>('PAGADITO_UID') ?? ''; }
-  private get wsk():      string { return this.config.get<string>('PAGADITO_WSK') ?? ''; }
-  private get isSandbox():boolean{ return (this.config.get<string>('PAGADITO_ENV') ?? 'sandbox') === 'sandbox'; }
+  private get uid():      string { return process.env.PAGADITO_UID ?? ''; }
+  private get wsk():      string { return process.env.PAGADITO_WSK ?? ''; }
+  private get isSandbox():boolean{ return (process.env.PAGADITO_ENV ?? 'sandbox') === 'sandbox'; }
   private get endpoint(): string {
     return this.isSandbox
       ? 'https://sandbox.pagadito.com/comercios/wspg/charges.php'
@@ -94,3 +93,4 @@ export class PagaditoService {
     return { url: trans.url, sessionToken: conn.token };
   }
 }
+
