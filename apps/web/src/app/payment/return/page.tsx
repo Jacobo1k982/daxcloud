@@ -1,4 +1,5 @@
-'use client';
+﻿'use client';
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -6,7 +7,7 @@ import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
 
 type State = 'loading' | 'success' | 'pending' | 'failed';
 
-export default function PaymentReturnPage() {
+function PaymentReturnInner() {
   const params    = useSearchParams();
   const router    = useRouter();
   const [state,   setState]   = useState<State>('loading');
@@ -84,3 +85,16 @@ export default function PaymentReturnPage() {
     </div>
   );
 }
+
+export default function PaymentReturnPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', background: '#060D16', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#3A6A9A', fontSize: '14px', fontFamily: 'Outfit, sans-serif' }}>Cargando...</div>
+      </div>
+    }>
+      <PaymentReturnInner />
+    </Suspense>
+  );
+}
+
