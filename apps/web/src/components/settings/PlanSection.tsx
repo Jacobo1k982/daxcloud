@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -209,7 +209,20 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                       </button>
 
                       {/* Tarjeta */}
-                      <button onClick={() => { const amount = annual ? plan.annualMonthly : plan.monthlyPrice; const params = new URLSearchParams({ plan: plan.name, billing: annual ? 'annual' : 'monthly', amount: String(amount), method: 'pagadito' }); window.location.href = '/register?' + params.toString(); }}
+                      <button onClick={async () => {
+          try {
+            const amount = annual ? plan.annualMonthly : plan.monthlyPrice;
+            const { data } = await api.post('/billing/pagadito/initiate', {
+              planName: plan.name, planLabel: plan.label,
+              amount, currency: 'USD', annual,
+            });
+            sessionStorage.setItem('pagadito_session_token', data.sessionToken);
+            sessionStorage.setItem('pagadito_ern', data.ern);
+            window.location.href = data.url;
+          } catch (e: any) {
+            alert(e?.response?.data?.message ?? 'Error al procesar pago');
+          }
+        }}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '10px 8px', background: 'rgba(22,34,53,0.6)', border: '1px solid rgba(255,107,0,.2)', borderRadius: '11px', cursor: 'pointer', transition: 'all .2s', fontFamily: 'Outfit, sans-serif' }}
                         onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,107,0,.5)'; el.style.background='rgba(255,107,0,.06)'; }}
                         onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,107,0,.2)'; el.style.background='rgba(22,34,53,0.6)'; }}>
@@ -705,3 +718,4 @@ export function PlanSection({ showToast }: {
     </>
   );
 }
+
