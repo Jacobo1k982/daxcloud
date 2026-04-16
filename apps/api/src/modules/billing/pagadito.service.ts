@@ -1,29 +1,29 @@
 ﻿import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 
 export interface PagaditoTransDetail {
-  quantity:    number;
+  quantity: number;
   description: string;
-  price:       number;
+  price: number;
   url_product: string;
 }
 
 export interface PagaditoStatusResult {
-  success:    boolean;
-  status?:    'REGISTERED' | 'COMPLETED' | 'VERIFYING' | 'REVOKED' | 'FAILED' | 'CANCELED' | 'EXPIRED';
+  success: boolean;
+  status?: 'REGISTERED' | 'COMPLETED' | 'VERIFYING' | 'REVOKED' | 'FAILED' | 'CANCELED' | 'EXPIRED';
   reference?: string;
   dateTrans?: string;
-  code?:      string;
-  message?:   string;
+  code?: string;
+  message?: string;
 }
 
 @Injectable()
 export class PagaditoService {
   private readonly logger = new Logger(PagaditoService.name);
-  constructor() {}
+  constructor() { }
 
-  private get uid():      string { return process.env.PAGADITO_UID ?? ''; }
-  private get wsk():      string { return process.env.PAGADITO_WSK ?? ''; }
-  private get isSandbox():boolean{ return (process.env.PAGADITO_ENV ?? 'sandbox') === 'sandbox'; }
+  private get uid(): string { return process.env.PAGADITO_UID ?? ''; }
+  private get wsk(): string { return process.env.PAGADITO_WSK ?? ''; }
+  private get isSandbox(): boolean { return (process.env.PAGADITO_ENV ?? 'sandbox') === 'sandbox'; }
   private get endpoint(): string {
     return this.isSandbox
       ? 'https://sandbox.pagadito.com/comercios/wspg/charges.php'
@@ -31,26 +31,39 @@ export class PagaditoService {
   }
 
   private escapeXml(s: string): string {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
   }
 
   private parseXml(xml: string): { code: string; message: string; value: any } {
-    const get = (tag: string) => { const m = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`)); return m ? m[1].trim() : ''; };
-    let value: any = get('value');
-    try { if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) value = JSON.parse(value); } catch {}
-    return { code: get('code'), message: get('message'), value };
+    const returnMatch = xml.match(/<return[^>]*>([\s\S]*?)<\/return>/);
+    let jsonStr = returnMatch ? returnMatch[1].trim() : '';
+    jsonStr = jsonStr
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>');
+    try {
+      const parsed = JSON.parse(jsonStr);
+      return { code: parsed.code ?? '', message: parsed.message ?? '', value: parsed.value ?? '' };
+    } catch {
+      const get = (tag: string) => {
+        const m = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
+        return m ? m[1].trim() : '';
+      };
+      return { code: get('code'), message: get('message'), value: get('value') };
+    }
   }
 
   private async soapCall(action: string, params: Record<string, string>): Promise<{ code: string; message: string; value: any }> {
     const body = `<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="urn:wspg" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <SOAP-ENV:Body>
-    <ns1:${action}>${Object.entries(params).map(([k,v]) => `<${k} xsi:type="xsd:string">${this.escapeXml(v)}</${k}>`).join('')}</ns1:${action}>
+    <ns1:${action}>${Object.entries(params).map(([k, v]) => `<${k} xsi:type="xsd:string">${this.escapeXml(v)}</${k}>`).join('')}</ns1:${action}>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>`;
 
     try {
-      const res  = await fetch(this.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/xml; charset=utf-8', 'SOAPAction': `urn:ws#${action}` }, body });
+      const res = await fetch(this.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/xml; charset=utf-8', 'SOAPAction': `urn:ws#${action}` }, body });
       const text = await res.text();
       this.logger.debug(`SOAP ${action}: ${text.slice(0, 200)}`);
       return this.parseXml(text);
