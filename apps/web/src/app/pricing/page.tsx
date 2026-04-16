@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Check, X, Zap, ArrowRight, Smartphone, CreditCard, Loader2 } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
@@ -187,23 +187,15 @@ export default function PricingPage() {
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
-  const handlePagadito = async (plan: typeof PLANS[number]) => {
-    setPagaditoLoading(plan.name);
-    try {
-      const { api } = await import('@/lib/api');
-      const amount = annual ? plan.annualMonthly : plan.monthlyPrice;
-      const { data } = await api.post('/billing/pagadito/initiate', {
-        planName: plan.name, planLabel: plan.label,
-        amount, currency: 'USD', annual,
-      });
-      sessionStorage.setItem('pagadito_session_token', data.sessionToken);
-      sessionStorage.setItem('pagadito_ern', data.ern);
-      window.location.href = data.url;
-    } catch (e: any) {
-      alert(e?.response?.data?.message ?? 'Error al conectar con Pagadito');
-    } finally {
-      setPagaditoLoading(null);
-    }
+  const handlePagadito = (plan: typeof PLANS[number]) => {
+    const amount = annual ? plan.annualMonthly : plan.monthlyPrice;
+    const params = new URLSearchParams({
+      plan:    plan.name,
+      billing: annual ? "annual" : "monthly",
+      amount:  String(amount),
+      method:  "pagadito",
+    });
+    window.location.href = `/register?${params.toString()}`;
   };
 
   return (
@@ -345,3 +337,4 @@ export default function PricingPage() {
     </div>
   );
 }
+

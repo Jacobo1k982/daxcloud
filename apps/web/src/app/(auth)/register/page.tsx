@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -381,6 +381,18 @@ export default function RegisterPage() {
   });
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
+
+  // Leer params de URL para preseleccionar plan y método de pago
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const p = new URLSearchParams(window.location.search);
+    const planParam   = p.get('plan');
+    const methodParam = p.get('method');
+    const billingParam = p.get('billing');
+    if (planParam) set('plan', planParam);
+    if (methodParam) set('paymentMethod', methodParam);
+    if (billingParam) set('billing', billingParam);
+  }, []);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
     check(); window.addEventListener('resize', check);
@@ -593,3 +605,6 @@ function STYLES_EL() {
     `}</style>
   );
 }
+
+
+
