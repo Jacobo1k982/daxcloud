@@ -491,18 +491,10 @@ export default function LandingPage() {
                       </button>
 
                       {/* Pagadito - tarjeta CR + Latam */}
-                      <button onClick={async () => {
-                        try {
-                          const { api } = await import('@/lib/api');
-                          const { data } = await api.post('/billing/pagadito/initiate', {
-                            planName: plan.name, planLabel: plan.label,
-                            amount: annual ? plan.annualMonthly : plan.monthlyPrice,
-                            currency: 'USD', annual,
-                          });
-                          sessionStorage.setItem('pagadito_session_token', data.sessionToken);
-                          sessionStorage.setItem('pagadito_ern', data.ern);
-                          window.location.href = data.url;
-                        } catch (e: any) { alert(e?.response?.data?.message ?? 'Error al conectar con Pagadito'); }
+                      <button onClick={() => {
+                        const amount = annual ? plan.annualMonthly : plan.monthlyPrice;
+                        const params = new URLSearchParams({ plan: plan.name, billing: annual ? 'annual' : 'monthly', amount: String(amount), method: 'pagadito' });
+                        window.location.href = '/register?' + params.toString();
                       }}
                         style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '9px 8px', background: 'transparent', border: '1px solid rgba(30,58,95,.5)', borderRadius: '10px', color: 'rgba(176,208,240,.45)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', fontFamily: 'Outfit, sans-serif' }}
                         onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#FF6B00'; el.style.color = '#FF6B00'; }}
@@ -585,6 +577,7 @@ export default function LandingPage() {
     </div>
   );
 }
+
 
 
 
