@@ -82,10 +82,10 @@ export class BillingController {
         tenantId:  user.tenantId,
         amount:    body.amount,
         planName:  body.planName,
-        billingCycle: body.annual ? `"annual"` : `"monthly"`,
+        billingCycle: body.annual ? 'annual' : 'monthly',
         status:    'pending',
         reference: ern,
-        requestedBy: user.id,
+        requestedBy: user.sub,
         notes:     JSON.stringify({ sessionToken: result.sessionToken, annual: body.annual }),
       },
     });
@@ -126,4 +126,6 @@ export class BillingController {
     return { status: statusResult.status, message: 'Transacción pendiente' };
   }
 }
+
+
 
