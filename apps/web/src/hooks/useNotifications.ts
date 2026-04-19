@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -30,7 +30,8 @@ export function useNotifications() {
     const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api')
       .replace('/api', '');
 
-    const socket = io(`${baseUrl}/notifications`, {
+    const wsUrl = baseUrl.replace(/\/+$/, '');
+    const socket = io(`${wsUrl}/notifications`, {
       auth: { token },
       transports: ['websocket'],
       reconnection: true,
@@ -75,3 +76,4 @@ export function useNotifications() {
 
   return { notifications, unreadCount, connected, markRead, markAllRead };
 }
+
