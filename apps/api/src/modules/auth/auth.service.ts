@@ -242,7 +242,7 @@ export class AuthService {
     if (!industry) return 'general';
     const lower = industry.toLowerCase().trim();
     if (VALID.includes(lower)) return lower;
-    if (lower.includes('panader')) return 'bakery';
+    if (lower.includes('panader') || lower.includes('pastel') || lower.includes('bakery')) return 'bakery';
     if (lower.includes('peluquer') || lower.includes('salon') || lower.includes('estetica')) return 'salon';
     if (lower.includes('farmacia') || lower.includes('pharmacy')) return 'pharmacy';
     if (lower.includes('restaurante') || lower.includes('restaurant')) return 'restaurant';
@@ -252,3 +252,4 @@ export class AuthService {
     return 'general';
   }
 }
+
