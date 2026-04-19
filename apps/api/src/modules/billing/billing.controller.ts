@@ -117,7 +117,12 @@ export class BillingController {
     }
     if (!sessionToken) throw new BadRequestException('No se pudo recuperar la sesión de pago');
 
-    const statusResult = await this.pagaditoService.getStatus(body.sessionToken, body.tokenTrans);
+    // Reconectar para obtener token fresco antes de consultar estado
+    const freshConn = await this.pagaditoService.connect();
+    if (!freshConn.success || !freshConn.token) {
+      throw new BadRequestException('No se pudo reconectar con Pagadito para verificar');
+    }
+    const statusResult = await this.pagaditoService.getStatus(freshConn.token, body.tokenTrans);
     if (!statusResult.success) throw new BadRequestException(statusResult.message ?? 'Error al verificar');
 
     const paymentReq = await this.prisma.paymentRequest.findFirst({
@@ -141,6 +146,7 @@ export class BillingController {
     return { status: statusResult.status, message: 'Transacción pendiente' };
   }
 }
+
 
 
 
