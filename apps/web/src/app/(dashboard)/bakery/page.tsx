@@ -919,8 +919,8 @@ export default function BakeryPage() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart2 },
     { id: 'production', label: 'Producción', icon: ChefHat, badge: stats?.pending },
     { id: 'recipes', label: 'Recetas', icon: ClipboardList, badge: (recipes as any[]).length },
-    { id: 'encargos', label: 'Encargos', icon: ShoppingBag, badge: urgentEncargos.length || undefined },
     { id: 'wastes', label: 'Mermas', icon: AlertTriangle },
+    { id: 'encargos', label: 'Encargos', icon: ShoppingBag, badge: urgentEncargos.length || undefined },
     { id: 'suppliers', label: 'Proveedores', icon: Truck },
     { id: 'orders', label: 'Compras', icon: Package },
     { id: 'minimums', label: 'Mínimos', icon: Calendar },
@@ -955,7 +955,7 @@ export default function BakeryPage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', marginBottom: '28px', paddingBottom: '4px' }}>
+      <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', marginBottom: '28px', paddingBottom: '8px', scrollbarWidth: 'thin', scrollbarColor: 'var(--dax-coral) transparent', WebkitOverflowScrolling: 'touch' }}>
         {TABS.map(t => {
           const Icon = t.icon;
           const active = tab === t.id;
@@ -1634,3 +1634,4 @@ export default function BakeryPage() {
     </div>
   );
 }
+
