@@ -33,7 +33,7 @@ export function useNotifications() {
     const wsUrl = baseUrl.replace(/\/+$/, '');
     const socket = io(`${wsUrl}/notifications`, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionDelay: 2000,
     });
@@ -76,4 +76,5 @@ export function useNotifications() {
 
   return { notifications, unreadCount, connected, markRead, markAllRead };
 }
+
 
