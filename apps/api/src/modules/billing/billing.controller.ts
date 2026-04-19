@@ -100,7 +100,22 @@ export class BillingController {
     @CurrentUser() user: any,
     @Body() body: { tokenTrans: string; ern: string; sessionToken: string },
   ) {
-    if (!body.tokenTrans || !body.sessionToken) throw new BadRequestException('tokenTrans y sessionToken requeridos');
+    if (!body.tokenTrans) throw new BadRequestException('tokenTrans requerido');
+
+    // Si no viene sessionToken del frontend, lo recuperamos del PaymentRequest guardado
+    let sessionToken = body.sessionToken;
+    if (!sessionToken) {
+      const req = await this.prisma.paymentRequest.findFirst({
+        where: { tenantId: user.tenantId, reference: body.ern, status: 'pending' },
+      });
+      if (req?.notes) {
+        try {
+          const notes = JSON.parse(req.notes);
+          sessionToken = notes.sessionToken;
+        } catch {}
+      }
+    }
+    if (!sessionToken) throw new BadRequestException('No se pudo recuperar la sesión de pago');
 
     const statusResult = await this.pagaditoService.getStatus(body.sessionToken, body.tokenTrans);
     if (!statusResult.success) throw new BadRequestException(statusResult.message ?? 'Error al verificar');
@@ -126,6 +141,7 @@ export class BillingController {
     return { status: statusResult.status, message: 'Transacción pendiente' };
   }
 }
+
 
 
 

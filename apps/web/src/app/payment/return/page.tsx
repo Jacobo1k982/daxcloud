@@ -15,15 +15,17 @@ function PaymentReturnInner() {
   const [plan,    setPlan]    = useState('');
 
   useEffect(() => {
-    const tokenTrans   = params.get('token');
-    const ern          = params.get('ern');
-    const sessionToken = sessionStorage.getItem('pagadito_session_token');
+    const tokenTrans = params.get('token');
+    const ern         = params.get('ern');
 
-    if (!tokenTrans || !ern || !sessionToken) {
+    if (!tokenTrans || !ern) {
       setState('failed');
-      setMessage('Parámetros de retorno inválidos.');
+      setMessage('Parámetros de retorno inválidos. Contacta soporte si ya realizaste el pago.');
       return;
     }
+
+    // sessionToken puede venir del sessionStorage o lo recupera el backend por ERN
+    const sessionToken = sessionStorage.getItem('pagadito_session_token') ?? '';
 
     api.post('/billing/pagadito/verify', { tokenTrans, ern, sessionToken })
       .then(({ data }) => {
@@ -97,4 +99,5 @@ export default function PaymentReturnPage() {
     </Suspense>
   );
 }
+
 
