@@ -299,24 +299,6 @@ export default function LoginPage() {
       {/* ── DERECHA — Card login ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative', zIndex: 1 }}>
 
-        {/* Logo móvil */}
-        <div className="login-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '44px', ...tr(0) }}>
-          <svg width="36" height="27" viewBox="0 0 64 48" fill="none">
-            <defs>
-              <linearGradient id="lml" x1="0" y1="0" x2="64" y2="48" gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stopColor="#C8A882"/>
-                <stop offset="45%"  stopColor="#FF5C35"/>
-                <stop offset="100%" stopColor="#C8A882"/>
-              </linearGradient>
-            </defs>
-            <path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="url(#lml)" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round"/>
-          </svg>
-          <div>
-            <span style={{ fontSize: '20px', fontWeight: 800, color: '#fff', letterSpacing: '-.03em' }}>Dax</span>
-            <span style={{ fontSize: '20px', fontWeight: 300, color: '#FF5C35', letterSpacing: '-.03em' }}>cloud</span>
-          </div>
-        </div>
-
         {/* Card glassmorphism */}
         <div style={{ width: '100%', maxWidth: '400px', ...tr(.15) }}>
           <div style={{
@@ -447,7 +429,7 @@ export default function LoginPage() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        @media(min-width:1024px){.login-left{display:flex!important}.login-mobile-logo{display:none!important}}
+        @media(min-width:1024px){.login-left{display:flex!important}}
         @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
