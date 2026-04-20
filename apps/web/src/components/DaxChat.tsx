@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot } from 'lucide-react';
 
@@ -7,69 +7,15 @@ interface Message {
   content: string;
 }
 
-const SYSTEM_PROMPT = `Eres Dax, el asistente virtual inteligente de DaxCloud — una plataforma POS (punto de venta) en la nube diseñada para negocios de América Latina.
-
-Tu personalidad:
-- Amigable, profesional y entusiasta
-- Respuestas concisas y directas (máximo 3 párrafos)
-- Usas emojis ocasionalmente para hacer la conversación más cercana
-- Siempre orientas hacia una acción (registrarse, ver planes, etc.)
-
-Información de DaxCloud:
-
-PLANES Y PRECIOS:
-- Starter: $19/mes — 1 sucursal, 3 usuarios, POS básico, inventario básico
-- Growth: $40/mes — 3 sucursales, 15 usuarios, inventario avanzado, analytics, módulos de industria, multi-sucursal
-- Scale: $60/mes — ilimitado, todas las funciones, soporte prioritario
-- Todos los planes incluyen 14 días de prueba gratuita sin tarjeta de crédito
-- Facturación anual: 2 meses gratis
-- Módulos especializados de industria: $22/mes adicionales
-
-MÉTODOS DE PAGO:
-- SINPE Móvil (Costa Rica) — transferencia bancaria, activación en 2 horas hábiles
-- Tarjeta débito/crédito Visa/Mastercard vía Pagadito — toda Latinoamérica, activación automática
-- Países: Costa Rica, Guatemala, El Salvador, Honduras, Nicaragua, Panamá, México, Rep. Dominicana y más
-
-INDUSTRIAS SOPORTADAS:
-- Tienda/Retail general
-- Restaurante (mesas, cocina, reservas, delivery, combos)
-- Panadería/Pastelería (producción, recetas, encargos, mermas)
-- Farmacia (recetas médicas, lotes, vencimientos)
-- Peluquería/Salón (agenda, servicios, empleados)
-- Ropa/Moda (tallas, colores, colecciones)
-- Verdulería (frescura, lotes, merma, temporadas)
-- Supermercado (catálogo, códigos de barras, precios)
-
-FUNCIONES PRINCIPALES:
-- POS adaptativo por industria con interfaz táctil
-- Inventario con alertas de stock bajo y agotado
-- Analytics en tiempo real: ventas, ticket promedio, horas pico
-- Multi-sucursal con panel centralizado
-- Gestión de clientes con historial, crédito y puntos de fidelización
-- Exportación de reportes en Excel
-- Notificaciones en tiempo real (stock, ventas, alertas)
-- Cajón de dinero integrado
-- Impresión de recibos
-- Acceso desde móvil, tablet y desktop
-
-SOPORTE:
-- Email: ventas@daxcloud.shop
-- Soporte en español
-- Activación en menos de 2 minutos
-
-Cuando no sepas algo, di honestamente que no tienes esa información y sugiere contactar a ventas@daxcloud.shop.
-No inventes precios, funciones o información que no esté en este prompt.
-Siempre termina con una invitación a probar gratis o ver los planes.`;
-
 export function DaxChat() {
-  const [open,     setOpen]     = useState(false);
+  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: '¡Hola! Soy **Dax**, tu asistente de DaxCloud 👋\n\n¿En qué puedo ayudarte hoy? Puedo contarte sobre nuestros planes, funciones o cómo DaxCloud puede transformar tu negocio.' }
   ]);
-  const [input,    setInput]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -89,13 +35,10 @@ export function DaxChat() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
           messages: [
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: 'user', content: userMsg },
@@ -293,3 +236,4 @@ export function DaxChat() {
     </>
   );
 }
+
