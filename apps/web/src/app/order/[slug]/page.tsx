@@ -37,7 +37,6 @@ export default function OrderPage({ params }: { params: { slug: string } }) {
       .then(data => {
         setTenant(data.tenant);
         setProducts((data.products ?? []).map((p: any) => ({ ...p, price: Number(p.price) })));
-        setBranches(data.branches ?? []);
         setLoading(false);
       })
       .catch(() => { setError('No se pudo cargar el catálogo'); setLoading(false); });
