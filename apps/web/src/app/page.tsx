@@ -11,6 +11,7 @@ import {
 import { PLANS } from '@/lib/plans';
 import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 import { StructuredData } from '@/components/StructuredData';
+import { DaxChat } from '@/components/DaxChat';
 
 // ── Particle field ────────────────────────────────────────────────────────────
 function ParticleField() {
@@ -570,8 +571,8 @@ export default function LandingPage() {
         <p style={{ fontSize: '11px', color: '#162235' }}>© {new Date().getFullYear()} DaxCloud · by <a href="https://jacana-dev.com" target="_blank" rel="noopener noreferrer" style={{ color: '#FF5C35', textDecoration: 'none', fontWeight: 700 }}>jacana-dev.com</a></p>
       </footer>
 
+      <DaxChat />
       {sinpePlan && <SinpePaymentModal planName={sinpePlan.name} planLabel={sinpePlan.label} planColor={sinpePlan.color} monthlyPrice={sinpePlan.monthlyPrice} annualPrice={sinpePlan.annualPrice} onClose={() => setSinpePlan(null)} />}
-
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth}
@@ -582,6 +583,8 @@ export default function LandingPage() {
     </div>
   );
 }
+
+
 
 
 
