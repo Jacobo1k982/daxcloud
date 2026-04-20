@@ -46,7 +46,7 @@ export class AuthService {
       country: tenant.country,
       currency: tenant.currency,
       locale: tenant.locale,
-      industry: tenant.industry ?? 'general',
+      industry: this.normalizeIndustry(tenant.industry),
       features,
     };
 
@@ -72,7 +72,7 @@ export class AuthService {
         country: tenant.country,
         currency: tenant.currency,
         locale: tenant.locale,
-        industry: tenant.industry ?? 'general',
+        industry: this.normalizeIndustry(tenant.industry),
         plan: sub?.plan?.name ?? 'starter',
       },
       subscription: {
@@ -177,7 +177,7 @@ export class AuthService {
         currency: result.tenant.currency,
         country: result.tenant.country,
         locale: result.tenant.locale,
-        industry: result.tenant.industry ?? 'general',
+        industry: this.normalizeIndustry(result.tenant.industry),
       },
       user: {
         id: result.user.id,
@@ -226,7 +226,7 @@ export class AuthService {
       ...user,
       tenant: {
         ...user.tenant,
-        industry: user.tenant.industry ?? 'general',
+        industry: this.normalizeIndustry(user.tenant.industry),
         plan: sub?.plan?.name ?? 'starter',
       },
       subscription: {
@@ -252,4 +252,5 @@ export class AuthService {
     return 'general';
   }
 }
+
 
