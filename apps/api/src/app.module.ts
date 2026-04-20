@@ -1,4 +1,4 @@
-import { Module }              from '@nestjs/common';
+﻿import { Module }              from '@nestjs/common';
 import { APP_GUARD }           from '@nestjs/core';
 import { PrismaModule }        from './prisma/prisma.module';
 import { AuthModule }          from './modules/auth/auth.module';
@@ -20,6 +20,7 @@ import { SalonModule }         from './modules/salon/salon.module';
 import { ClothingModule }      from './modules/clothing/clothing.module';
 import { ProduceModule }       from './modules/produce/produce.module';
 import { RestaurantModule }    from './modules/restaurant/restaurant.module';
+import { OnlineOrdersModule } from './modules/online-orders/online-orders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CashRegisterModule }  from './modules/cash-register/cash-register.module';
 import { SubscriptionGuard }   from './modules/auth/guards/subscription.guard';
@@ -49,6 +50,7 @@ import { ClientsModule } from './modules/clients/clients.module';
     ProduceModule,
     RestaurantModule,
     NotificationsModule,
+    OnlineOrdersModule,
     CashRegisterModule,  // ← registrado globalmente
     PaymentRequestsModule,
     ClientsModule,
@@ -62,3 +64,4 @@ import { ClientsModule } from './modules/clients/clients.module';
   ],
 })
 export class AppModule {}
+

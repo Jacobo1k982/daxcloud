@@ -161,6 +161,7 @@ model Tenant {
   deliveryOrders       DeliveryOrder[]
   cashRegisterShifts   CashRegisterShift[]
   happyHours           HappyHour[]
+  onlineOrders OnlineOrder[]
   notifications        Notification[]
   paymentRequests      PaymentRequest[]
 
@@ -307,6 +308,7 @@ model Branch {
   reservations       Reservation[]
   kitchenStations    KitchenStation[]
   cashRegisterShifts CashRegisterShift[]
+  onlineOrders       OnlineOrder[]
 
   @@map("branches")
 }
@@ -1557,3 +1559,28 @@ model PaymentRequest {
   @@index([status])
   @@map("payment_requests")
 }
+
+model OnlineOrder {
+  id         String   @id @default(uuid())
+  tenantId   String
+  branchId   String?
+  orderNumber String  @unique
+  status     String   @default("new")
+  type       String   @default("pickup")
+  customerName  String
+  customerPhone String
+  customerAddress String?
+  notes      String?
+  items      Json
+  subtotal   Decimal  @db.Decimal(10,2)
+  total      Decimal  @db.Decimal(10,2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@map("online_orders")
+}
+
+

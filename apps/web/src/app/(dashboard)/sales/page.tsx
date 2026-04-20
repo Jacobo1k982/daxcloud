@@ -9,8 +9,9 @@ import {
   Filter, Download, X, RefreshCw, Eye, Loader2,
   Wallet, CreditCard, Smartphone, ArrowUpRight,
   User, MapPin, Calendar, FileText, Package,
-  ChevronLeft, ChevronRight, Zap, Receipt,
+  ChevronLeft, ChevronRight, Zap, Receipt, ShoppingBag,
 } from 'lucide-react';
+import { OnlineOrdersTab } from '@/components/sales/OnlineOrdersTab';
 
 
 
@@ -181,11 +182,17 @@ export default function SalesPage() {
   const { formatCurrency } = useAuth();
   const { token }          = useAuthStore();
 
+  const [activeTab,      setActiveTab]      = useState('sales');
   const [selectedSale,   setSelectedSale]   = useState<Sale | null>(null);
   const [search,         setSearch]         = useState('');
   const [paymentFilter,  setPaymentFilter]  = useState('');
   const [exporting,      setExporting]      = useState(false);
   const [filters, setFilters] = useState({ startDate: '', endDate: '', branchId: '', page: 1 });
+
+  const TABS = [
+    { id: 'sales',  label: 'Ventas',         icon: ShoppingCart },
+    { id: 'online', label: 'Pedidos online',  icon: ShoppingBag  },
+  ];
 
   const { data: branches = [] } = useQuery({
     queryKey: ['branches'],
@@ -284,6 +291,23 @@ export default function SalesPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--dax-surface-2)', padding: '4px', borderRadius: '12px', border: '1px solid var(--dax-border)', marginBottom: '20px', width: 'fit-content' }}>
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '9px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: active ? 700 : 500, background: active ? 'var(--dax-surface)' : 'transparent', color: active ? 'var(--dax-coral)' : 'var(--dax-text-muted)', transition: 'all .15s', boxShadow: active ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>
+              <Icon size={14} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {activeTab === 'online' && <OnlineOrdersTab />}
+
+      {activeTab === 'sales' && <>
       {/* Stats — GRID FIJO 2 cols */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px' }}>
         {STATS.map(s => {
@@ -444,6 +468,8 @@ export default function SalesPage() {
           </div>
         )}
       </div>
+
+      </>}
 
       {selectedSale && <SaleDetailModal sale={selectedSale} onClose={() => setSelectedSale(null)} formatCurrency={formatCurrency} />}
 
