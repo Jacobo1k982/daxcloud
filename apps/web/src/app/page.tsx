@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { PLANS } from '@/lib/plans';
+import { ManualModal } from '@/components/ManualModal';
 import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 import { StructuredData } from '@/components/StructuredData';
 import { DaxChat } from '@/components/DaxChat';
@@ -525,6 +526,7 @@ export default function LandingPage() {
       </footer>
 
       {/* Modals */}
+      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       {sinpePlan && <SinpePaymentModal planName={sinpePlan.name} planLabel={sinpePlan.label} planColor={sinpePlan.color} monthlyPrice={sinpePlan.monthlyPrice} annualPrice={sinpePlan.annualPrice} onClose={() => setSinpePlan(null)} />}
       <DaxChat />
 
