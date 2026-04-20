@@ -82,7 +82,7 @@ function POSMockup() {
       <div style={{ position: 'absolute', bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '180px', background: 'radial-gradient(ellipse,rgba(255,92,53,0.18),transparent 70%)', pointerEvents: 'none' }} />
 
       {/* Notif flotante izq */}
-      <div style={{ position: 'absolute', top: '-18px', left: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(61,191,127,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s .5s ease-in-out infinite', whiteSpace: 'nowrap' }}>
+      <div className="notif-float" style={{ position: 'absolute', top: '-18px', left: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(61,191,127,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s .5s ease-in-out infinite', whiteSpace: 'nowrap' }}>
         <div style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(61,191,127,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3DBF7F" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
@@ -93,7 +93,7 @@ function POSMockup() {
       </div>
 
       {/* Notif flotante der */}
-      <div style={{ position: 'absolute', top: '-18px', right: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(240,160,48,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s 1s ease-in-out infinite', whiteSpace: 'nowrap' }}>
+      <div className="notif-float" style={{ position: 'absolute', top: '-18px', right: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(240,160,48,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s 1s ease-in-out infinite', whiteSpace: 'nowrap' }}>
         <div style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(240,160,48,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0A030" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
         </div>
@@ -117,7 +117,7 @@ function POSMockup() {
         </div>
 
         {/* POS Body */}
-        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr 260px', minHeight: '380px' }}>
+        <div className="pos-body" style={{ display: 'grid', gridTemplateColumns: '200px 1fr 260px', minHeight: '380px' }}>
           {/* Sidebar */}
           <div style={{ background: 'rgba(8,12,20,0.98)', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginBottom: '8px' }}>
@@ -155,7 +155,7 @@ function POSMockup() {
                 <span key={cat} style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, background: i === 0 ? 'rgba(255,92,53,0.12)' : 'rgba(255,255,255,0.03)', color: i === 0 ? '#FF5C35' : 'rgba(255,255,255,0.3)', border: i === 0 ? '1px solid rgba(255,92,53,0.25)' : '1px solid rgba(255,255,255,0.07)', cursor: 'default' }}>{cat}</span>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '7px', flex: 1 }}>
+            <div className="prod-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '7px', flex: 1 }}>
               {PRODUCTS.map((p, i) => (
                 <div key={i} onClick={() => setSelected(i)} style={{ background: selected === i ? 'rgba(255,92,53,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected === i ? 'rgba(255,92,53,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '9px', padding: '10px', cursor: 'pointer', transition: 'all .15s' }}>
                   <div style={{ width: '100%', aspectRatio: '1', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', marginBottom: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -273,7 +273,7 @@ export default function LandingPage() {
           <span style={{ fontSize: '17px', fontWeight: 700, letterSpacing: '-.02em', color: '#fff' }}>Dax<span style={{ color: S.coral, fontWeight: 300 }}>cloud</span></span>
         </a>
 
-        <div style={{ display: 'flex', gap: '2px', flex: 1, justifyContent: 'center' }} className="nav-links">
+        <div style={{ display: 'none', gap: '2px', flex: 1, justifyContent: 'center' }} className="nav-links">
           {[['#features','Funciones'],['#industries','Industrias'],['#pricing','Precios']].map(([href, label]) => (
             <a key={href} href={href} style={{ color: S.muted, fontSize: '13px', padding: '7px 14px', borderRadius: '7px', textDecoration: 'none', transition: 'color .15s', fontWeight: 500 }}
               onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
@@ -287,7 +287,7 @@ export default function LandingPage() {
         </div>
 
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-          <a href="/login" style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: S.muted, textDecoration: 'none', transition: 'color .15s' }}
+          <a href="/login" className="nav-login-btn" style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: S.muted, textDecoration: 'none', transition: 'color .15s' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={e => (e.currentTarget.style.color = S.muted)}>Iniciar sesión</a>
           <a href="/register" style={{ padding: '9px 20px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 2px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}
@@ -297,7 +297,7 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section style={{ padding: 'clamp(80px,12vh,120px) clamp(20px,5vw,72px) 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <section className="hero-section" style={{ padding: 'clamp(60px,10vh,120px) clamp(16px,5vw,72px) 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <ParticleCanvas />
         {/* Glow hero */}
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(ellipse at 50% 0%,rgba(255,92,53,0.1) 0%,transparent 65%)', pointerEvents: 'none' }} />
@@ -318,8 +318,8 @@ export default function LandingPage() {
             Ventas, inventario y analytics en una plataforma que escala contigo. Sin hojas de cálculo, sin sistemas lentos.
           </p>
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '72px' }}>
-            <a href="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '15px 32px', borderRadius: '12px', fontSize: '15px', fontWeight: 700, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 4px 28px rgba(255,92,53,0.35)', transition: 'all .25s', letterSpacing: '-.01em' }}
+          <div className="hero-actions" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'clamp(40px,6vh,72px)' }}>
+            <a href="/register" className="btn-hero-main" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '15px 32px', borderRadius: '12px', fontSize: '15px', fontWeight: 700, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 4px 28px rgba(255,92,53,0.35)', transition: 'all .25s', letterSpacing: '-.01em' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(255,92,53,0.5)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 28px rgba(255,92,53,0.35)'; }}>
               Comenzar gratis <ArrowRight size={16} />
@@ -339,7 +339,7 @@ export default function LandingPage() {
       </section>
 
       {/* STATS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px', maxWidth: '960px', margin: '0 auto', padding: '80px clamp(20px,5vw,72px)' }}>
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px', maxWidth: '960px', margin: '0 auto', padding: '80px clamp(20px,5vw,72px)' }}>
         {[
           { n: '8+', l: 'Industrias soportadas', c: S.coral },
           { n: '14 días', l: 'Prueba gratis · sin tarjeta', c: '#fff' },
@@ -362,7 +362,7 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 800, letterSpacing: '-.03em', background: 'linear-gradient(180deg,#fff 40%,rgba(255,255,255,0.5))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '16px' }}>Todo lo que necesitas</h2>
           <p style={{ fontSize: '16px', color: S.muted, maxWidth: '480px', margin: '0 auto', lineHeight: 1.8 }}>Sin módulos extra, sin costos ocultos. Todo incluido desde el primer día.</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1px', background: S.border, borderRadius: '20px', overflow: 'hidden', border: `1px solid ${S.border}` }}>
+        <div className="feat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1px', background: S.border, borderRadius: '20px', overflow: 'hidden', border: `1px solid ${S.border}` }}>
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} style={{ padding: '32px 28px', background: S.bg, transition: 'all .2s', cursor: 'default' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.03)'; }}
@@ -534,8 +534,37 @@ export default function LandingPage() {
         html { scroll-behavior: smooth; }
         @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @media(min-width:768px){.nav-links{display:flex!important}}
         input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #080C14 inset!important; -webkit-text-fill-color:#fff!important; }
+
+        /* ── RESPONSIVE MOBILE ── */
+        @media(min-width:768px){
+          .nav-links { display:flex!important }
+          .nav-login-btn { display:flex!important }
+          .notif-float { display:flex!important }
+          .pos-body { grid-template-columns: 200px 1fr 260px!important }
+          .stats-grid { grid-template-columns: repeat(4,1fr)!important }
+          .feat-grid { grid-template-columns: repeat(3,1fr)!important }
+          .prod-grid { grid-template-columns: repeat(3,1fr)!important }
+          .hero-actions { flex-direction:row!important }
+          .btn-hero-main { width:auto!important }
+        }
+
+        @media(max-width:767px){
+          .nav-login-btn { display:none!important }
+          .notif-float { display:none!important }
+          .pos-body {
+            grid-template-columns: 1fr!important;
+            min-height:auto!important;
+          }
+          .pos-body > *:nth-child(1) { display:none!important }
+          .pos-body > *:nth-child(3) { border-left:none!important; border-top:1px solid rgba(255,255,255,0.06)!important }
+          .stats-grid { grid-template-columns: repeat(2,1fr)!important; padding:40px 16px!important }
+          .feat-grid { grid-template-columns: 1fr!important }
+          .prod-grid { grid-template-columns: repeat(2,1fr)!important }
+          .hero-actions { flex-direction:column!important; align-items:stretch!important; padding:0 8px }
+          .btn-hero-main { justify-content:center!important }
+          .hero-section { padding-top:48px!important }
+        }
       `}</style>
     </div>
   );
