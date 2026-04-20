@@ -1,0 +1,53 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="#080C14"/>
+  <!-- Orb coral izq -->
+  <radialGradient id="orb1" cx="0" cy="0" r="1"><stop offset="0%" stop-color="#FF5C35" stop-opacity="0.18"/><stop offset="100%" stop-color="#FF5C35" stop-opacity="0"/></radialGradient>
+  <ellipse cx="200" cy="200" rx="420" ry="380" fill="url(#orb1)"/>
+  <!-- Orb azul der -->
+  <radialGradient id="orb2" cx="0" cy="0" r="1"><stop offset="0%" stop-color="#1E3A5F" stop-opacity="0.22"/><stop offset="100%" stop-color="#1E3A5F" stop-opacity="0"/></radialGradient>
+  <ellipse cx="1050" cy="480" rx="400" ry="350" fill="url(#orb2)"/>
+  <!-- Grid sutil -->
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+
+  <!-- LOGO ICONO — nube coral grande -->
+  <g transform="translate(120, 180) scale(3.2)">
+    <defs>
+      <linearGradient id="cloudgrad" x1="0" y1="0" x2="64" y2="48" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FF8C00"/>
+        <stop offset="45%" stop-color="#FF5C35"/>
+        <stop offset="100%" stop-color="#FF8C00"/>
+      </linearGradient>
+      <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z"
+      fill="none" stroke="url(#cloudgrad)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+
+  <!-- TEXTO "Dax" -->
+  <text x="350" y="320" font-family="Inter,system-ui,sans-serif" font-size="148" font-weight="800" fill="#FFFFFF" letter-spacing="-6">Dax</text>
+  <!-- TEXTO "cloud" -->
+  <text x="668" y="320" font-family="Inter,system-ui,sans-serif" font-size="148" font-weight="300" fill="#FF5C35" letter-spacing="-4">cloud</text>
+
+  <!-- Tagline -->
+  <text x="350" y="385" font-family="Inter,system-ui,sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.35)" letter-spacing="1">Sistema POS cloud para América Latina</text>
+
+  <!-- Badge -->
+  <rect x="350" y="420" width="320" height="44" rx="22" fill="rgba(255,92,53,0.1)" stroke="rgba(255,92,53,0.3)" stroke-width="1"/>
+  <circle cx="378" cy="442" r="5" fill="#FF5C35"/>
+  <text x="395" y="448" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="600" fill="rgba(255,92,53,0.85)" letter-spacing="1">14 días gratis · daxcloud.shop</text>
+
+  <!-- Partículas decorativas -->
+  <circle cx="90" cy="100" r="2" fill="rgba(255,92,53,0.3)"/>
+  <circle cx="1100" cy="150" r="1.5" fill="rgba(255,92,53,0.2)"/>
+  <circle cx="1050" cy="80" r="2.5" fill="rgba(255,255,255,0.15)"/>
+  <circle cx="180" cy="520" r="1.5" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="1120" cy="520" r="2" fill="rgba(255,92,53,0.2)"/>
+  <circle cx="950" cy="200" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Línea decorativa inferior -->
+  <rect x="350" y="490" width="500" height="1" rx="1" fill="rgba(255,92,53,0.15)"/>
+</svg>
