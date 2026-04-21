@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   User, Building2, CreditCard, Users, Globe,
   Bell, Shield, Printer, Palette, Database,
-  ChevronRight, ChevronLeft,
+  ChevronRight, ChevronLeft, Sparkles,
 } from 'lucide-react';
 import { ProfileSection } from '@/components/settings/ProfileSection';
 import { BusinessSection } from '@/components/settings/BusinessSection';
@@ -19,6 +19,7 @@ import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { DataSection } from '@/components/settings/DataSection';
 import { PrintingSection } from '@/components/settings/PrintingSection';
 import { useCashDrawer } from '@/hooks/useCashDrawer';
+import { PublicProfileSection } from '@/components/settings/PublicProfileSection';
 
 // ── Secciones ─────────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -33,6 +34,7 @@ const SECTIONS = [
   { id: 'printing', label: 'Impresión', icon: Printer, desc: 'Recibos y tickets' },
   { id: 'appearance', label: 'Apariencia', icon: Palette, desc: 'Tema y visualización' },
   { id: 'data', label: 'Datos y backups', icon: Database, desc: 'Exportar y respaldar' },
+  { id: 'public-profile', label: 'Perfil público', icon: Sparkles, desc: 'Cómo ven tus clientes tu negocio' },
 ];
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -161,6 +163,8 @@ export default function SettingsPage() {
           <DataSection showToast={showToast} />
         </>
       )}
+
+      {activeSection === 'public-profile' && <PublicProfileSection />}
     </div>
   );
 
