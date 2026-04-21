@@ -5,6 +5,7 @@ import { ManualModal } from '@/components/ManualModal';
 import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 import { StructuredData } from '@/components/StructuredData';
 import { DaxChat } from '@/components/DaxChat';
+import { analytics } from '@/components/Analytics';
 import {
   Zap, BarChart2, Globe, Package, Users, Smartphone,
   ShoppingCart, Search, ArrowRight, ChevronDown,
@@ -85,7 +86,7 @@ function POSMockup() {
       {/* Notif flotante izq */}
       <div className="notif-float" style={{ position: 'absolute', top: '-18px', left: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(61,191,127,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s .5s ease-in-out infinite', whiteSpace: 'nowrap' }}>
         <div style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(61,191,127,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3DBF7F" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3DBF7F" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
         </div>
         <div>
           <p style={{ fontSize: '10px', color: 'rgba(61,191,127,0.6)', marginBottom: '1px', fontWeight: 600 }}>Venta completada</p>
@@ -96,7 +97,7 @@ function POSMockup() {
       {/* Notif flotante der */}
       <div className="notif-float" style={{ position: 'absolute', top: '-18px', right: '-8px', zIndex: 10, display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 14px', background: 'rgba(8,14,26,0.96)', border: '1px solid rgba(240,160,48,0.3)', borderRadius: '12px', backdropFilter: 'blur(12px)', animation: 'float 4s 1s ease-in-out infinite', whiteSpace: 'nowrap' }}>
         <div style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(240,160,48,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0A030" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0A030" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /></svg>
         </div>
         <div>
           <p style={{ fontSize: '10px', color: 'rgba(240,160,48,0.6)', marginBottom: '1px', fontWeight: 600 }}>Stock bajo</p>
@@ -109,7 +110,7 @@ function POSMockup() {
         {/* Browser bar */}
         <div style={{ height: '38px', background: 'rgba(8,12,20,0.98)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: '8px' }}>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {['#FF5F57','#FFBD2E','#28CA41'].map((c,i) => <div key={i} style={{ width: '11px', height: '11px', borderRadius: '50%', background: c }} />)}
+            {['#FF5F57', '#FFBD2E', '#28CA41'].map((c, i) => <div key={i} style={{ width: '11px', height: '11px', borderRadius: '50%', background: c }} />)}
           </div>
           <div style={{ flex: 1, margin: '0 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', height: '22px', display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
             daxcloud.shop/pos
@@ -123,7 +124,7 @@ function POSMockup() {
           <div style={{ background: 'rgba(8,12,20,0.98)', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginBottom: '8px' }}>
               <div style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(255,92,53,0.15)', border: '1px solid rgba(255,92,53,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="12" height="9" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round"/></svg>
+                <svg width="12" height="9" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" /></svg>
               </div>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>DaxPOS</span>
             </div>
@@ -152,7 +153,7 @@ function POSMockup() {
               Buscar producto, SKU...
             </div>
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const }}>
-              {['Todos','Bebidas','Comidas','Postres'].map((cat, i) => (
+              {['Todos', 'Bebidas', 'Comidas', 'Postres'].map((cat, i) => (
                 <span key={cat} style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, background: i === 0 ? 'rgba(255,92,53,0.12)' : 'rgba(255,255,255,0.03)', color: i === 0 ? '#FF5C35' : 'rgba(255,255,255,0.3)', border: i === 0 ? '1px solid rgba(255,92,53,0.25)' : '1px solid rgba(255,255,255,0.07)', cursor: 'default' }}>{cat}</span>
               ))}
             </div>
@@ -184,7 +185,7 @@ function POSMockup() {
             <div>
               <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.25)', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase' as const, marginBottom: '6px' }}>Método</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                {['Efectivo','SINPE','Tarjeta','Mixto'].map(m => (
+                {['Efectivo', 'SINPE', 'Tarjeta', 'Mixto'].map(m => (
                   <div key={m} onClick={() => setPayMethod(m)} style={{ padding: '6px', borderRadius: '7px', textAlign: 'center' as const, fontSize: '9px', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', background: payMethod === m ? 'rgba(255,92,53,0.12)' : 'rgba(255,255,255,0.03)', border: payMethod === m ? '1px solid rgba(255,92,53,0.35)' : '1px solid rgba(255,255,255,0.07)', color: payMethod === m ? '#FF5C35' : 'rgba(255,255,255,0.3)' }}>{m}</div>
                 ))}
               </div>
@@ -223,42 +224,44 @@ function FAQ({ q, a }: { q: string; a: string }) {
 
 // ── Página ────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [annual, setAnnual]         = useState(false);
-  const [sinpePlan, setSinpePlan]   = useState<typeof PLANS[number] | null>(null);
+  const [annual, setAnnual] = useState(false);
+  const [sinpePlan, setSinpePlan] = useState<typeof PLANS[number] | null>(null);
   const [showManual, setShowManual] = useState(false);
-  const [mounted, setMounted]       = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
 
   const handlePagadito = (plan: typeof PLANS[number]) => {
+    analytics.selectPlan(plan.name, annual ? plan.annualMonthly : plan.monthlyPrice, annual ? 'annual' : 'monthly');
+    analytics.paymentMethodSelected('pagadito', plan.name);
     const amount = annual ? plan.annualMonthly : plan.monthlyPrice;
     const params = new URLSearchParams({ plan: plan.name, billing: annual ? 'annual' : 'monthly', amount: String(amount), method: 'pagadito' });
     window.location.href = '/register?' + params.toString();
   };
 
   const FEATURES = [
-    { icon: Zap,       title: 'POS adaptativo',       desc: 'Se adapta a tu industria automáticamente. Rápido, táctil y sin curva de aprendizaje.' },
-    { icon: BarChart2, title: 'Analytics en vivo',    desc: 'Ventas, horas pico y ticket promedio actualizados en tiempo real desde cualquier dispositivo.' },
-    { icon: Globe,     title: 'Multi-sucursal',        desc: 'Gestiona todas tus sedes desde un panel centralizado con reportes consolidados.' },
-    { icon: Package,   title: 'Inventario inteligente',desc: 'Alertas automáticas de stock bajo. Control de lotes y vencimientos.' },
-    { icon: Users,     title: 'Clientes y fidelización',desc: 'Historial, crédito interno y puntos de fidelización integrados en el POS.' },
-    { icon: Smartphone,title: 'Responsive total',      desc: 'Funciona perfectamente en móvil, tablet y desktop. Sin instalaciones.' },
+    { icon: Zap, title: 'POS adaptativo', desc: 'Se adapta a tu industria automáticamente. Rápido, táctil y sin curva de aprendizaje.' },
+    { icon: BarChart2, title: 'Analytics en vivo', desc: 'Ventas, horas pico y ticket promedio actualizados en tiempo real desde cualquier dispositivo.' },
+    { icon: Globe, title: 'Multi-sucursal', desc: 'Gestiona todas tus sedes desde un panel centralizado con reportes consolidados.' },
+    { icon: Package, title: 'Inventario inteligente', desc: 'Alertas automáticas de stock bajo. Control de lotes y vencimientos.' },
+    { icon: Users, title: 'Clientes y fidelización', desc: 'Historial, crédito interno y puntos de fidelización integrados en el POS.' },
+    { icon: Smartphone, title: 'Responsive total', desc: 'Funciona perfectamente en móvil, tablet y desktop. Sin instalaciones.' },
   ];
 
   const INDUSTRIES = [
-    '🍽️ Restaurante','🥖 Panadería','💊 Farmacia','✂️ Peluquería',
-    '👕 Ropa','🥬 Verdulería','🛒 Supermercado','📦 Tienda',
+    '🍽️ Restaurante', '🥖 Panadería', '💊 Farmacia', '✂️ Peluquería',
+    '👕 Ropa', '🥬 Verdulería', '🛒 Supermercado', '📦 Tienda',
   ];
 
   const tr = (d = 0) => ({ opacity: mounted ? 1 : 0, transform: mounted ? 'none' : 'translateY(20px)', transition: `all .8s ${d}s cubic-bezier(.22,1,.36,1)` });
 
   const S = {
-    bg:    '#080C14',
+    bg: '#080C14',
     coral: '#FF5C35',
     muted: 'rgba(255,255,255,0.35)',
-    dim:   'rgba(255,255,255,0.12)',
-    border:'rgba(255,255,255,0.07)',
-    surf:  'rgba(255,255,255,0.025)',
+    dim: 'rgba(255,255,255,0.12)',
+    border: 'rgba(255,255,255,0.07)',
+    surf: 'rgba(255,255,255,0.025)',
   };
 
   return (
@@ -269,31 +272,27 @@ export default function LandingPage() {
       <nav style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(20px,5vw,72px)', borderBottom: `1px solid ${S.border}`, background: 'rgba(8,12,20,0.92)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50, gap: '16px' }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,92,53,0.12)', border: '1px solid rgba(255,92,53,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="12" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round"/></svg>
+            <svg width="16" height="12" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round" /></svg>
           </div>
           <span style={{ fontSize: '17px', fontWeight: 700, letterSpacing: '-.02em', color: '#fff' }}>Dax<span style={{ color: S.coral, fontWeight: 300 }}>cloud</span></span>
         </a>
 
         <div style={{ display: 'none', gap: '2px', flex: 1, justifyContent: 'center' }} className="nav-links">
-          {[['#features','Funciones'],['#industries','Industrias'],['#pricing','Precios']].map(([href, label]) => (
+          {[['#features', 'Funciones'], ['#industries', 'Industrias'], ['#pricing', 'Precios']].map(([href, label]) => (
             <a key={href} href={href} style={{ color: S.muted, fontSize: '13px', padding: '7px 14px', borderRadius: '7px', textDecoration: 'none', transition: 'color .15s', fontWeight: 500 }}
               onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
               onMouseLeave={e => (e.currentTarget.style.color = S.muted)}>{label}</a>
           ))}
-          <button onClick={() => setShowManual(true)} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: S.coral, fontSize: '13px', padding: '7px 14px', borderRadius: '7px', background: 'rgba(255,92,53,0.07)', border: '1px solid rgba(255,92,53,0.15)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, transition: 'all .15s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.14)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.07)'; }}>
-            <BookOpen size={13} /> Manual
-          </button>
         </div>
 
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
           <a href="/login" className="nav-login-btn" style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: S.muted, textDecoration: 'none', transition: 'color .15s' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={e => (e.currentTarget.style.color = S.muted)}>Iniciar sesión</a>
-          <a href="/register" style={{ padding: '9px 20px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 2px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}
+          <a href="/register" onClick={() => analytics.clickCTA('empezar_gratis', 'navbar')} style={{ padding: '9px 20px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 2px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(255,92,53,0.45)'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 16px rgba(255,92,53,0.3)'; }}>Empezar gratis</a>
+          <a href="/register" onClick={() => analytics.clickCTA('empezar_gratis', 'nav')}></a>
         </div>
       </nav>
 
@@ -428,8 +427,8 @@ export default function LandingPage() {
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                       <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: f.included ? 'rgba(255,92,53,0.12)' : 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {f.included
-                          ? <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#FF5C35" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-                          : <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          ? <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#FF5C35" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                          : <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                         }
                       </div>
                       <span style={{ fontSize: '13px', color: f.included ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.2)', textDecoration: f.included ? 'none' : 'line-through' }}>{f.text}</span>
@@ -437,7 +436,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
-                  <a href="/register" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '13px', background: plan.popular ? 'linear-gradient(135deg,#FF5C35,#FF3D1F)' : 'transparent', border: plan.popular ? 'none' : `1.5px solid ${plan.color}40`, borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: plan.popular ? '#fff' : plan.color, textDecoration: 'none', transition: 'all .2s' }}>
+                  <a href="/register" onClick={() => analytics.clickCTA('crear_cuenta_final', 'cta_final')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '16px 36px', background: plan.popular ? 'linear-gradient(135deg,#FF5C35,#FF3D1F)' : 'transparent', border: plan.popular ? 'none' : `1.5px solid ${plan.color}40`, borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: plan.popular ? '#fff' : plan.color, textDecoration: 'none', transition: 'all .2s' }}>
                     {plan.cta} <ArrowRight size={14} />
                   </a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -458,7 +457,7 @@ export default function LandingPage() {
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,107,0,0.15)'; }}>
                       <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
                         <svg width="20" height="7" viewBox="0 0 28 9" fill="none"><text x="0" y="8" fontSize="9" fontWeight="900" fontFamily="Arial,sans-serif" fill="#1A1F71">VISA</text></svg>
-                        <svg width="12" height="8" viewBox="0 0 16 10"><circle cx="6" cy="5" r="5" fill="#EB001B" opacity=".9"/><circle cx="10" cy="5" r="5" fill="#F79E1B" opacity=".9"/><path d="M8 1.8a5 5 0 010 6.4A5 5 0 018 1.8z" fill="#FF5F00" opacity=".9"/></svg>
+                        <svg width="12" height="8" viewBox="0 0 16 10"><circle cx="6" cy="5" r="5" fill="#EB001B" opacity=".9" /><circle cx="10" cy="5" r="5" fill="#F79E1B" opacity=".9" /><path d="M8 1.8a5 5 0 010 6.4A5 5 0 018 1.8z" fill="#FF5F00" opacity=".9" /></svg>
                       </div>
                       <span style={{ fontSize: '10px', fontWeight: 700, color: '#FF6B00' }}>Tarjeta</span>
                       <span style={{ fontSize: '8px', color: S.muted }}>Latinoamérica</span>
@@ -497,7 +496,7 @@ export default function LandingPage() {
             Empieza hoy.<br />Sin compromisos.
           </h2>
           <p style={{ fontSize: '17px', color: S.muted, marginBottom: '44px', lineHeight: 1.8 }}>14 días gratis, sin tarjeta. Configura tu negocio en 2 minutos.</p>
-          <a href="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '16px 36px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 4px 28px rgba(255,92,53,0.35)', letterSpacing: '.01em', transition: 'all .2s' }}
+          <a href="/register" onClick={() => analytics.clickCTA('comenzar_gratis', 'hero')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '15px 32px', borderRadius: '14px', fontSize: '16px', fontWeight: 800, background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', textDecoration: 'none', boxShadow: '0 4px 28px rgba(255,92,53,0.35)', letterSpacing: '.01em', transition: 'all .2s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(255,92,53,0.5)'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 28px rgba(255,92,53,0.35)'; }}>
             Crear cuenta gratis <ArrowRight size={16} />
@@ -510,7 +509,7 @@ export default function LandingPage() {
       <footer style={{ borderTop: `1px solid ${S.border}`, padding: '28px clamp(20px,5vw,72px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(255,92,53,0.1)', border: '1px solid rgba(255,92,53,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="12" height="9" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round"/></svg>
+            <svg width="12" height="9" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" /></svg>
           </div>
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.35)' }}>Dax<span style={{ color: 'rgba(255,92,53,0.45)' }}>cloud</span></span>
           <span style={{ fontSize: '11px', color: S.dim }}>· by <a href="https://jacana-dev.com" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,92,53,0.35)', textDecoration: 'none', fontWeight: 600 }}>jacana-dev.com</a></span>

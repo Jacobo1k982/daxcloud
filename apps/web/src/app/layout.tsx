@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
+import { Analytics } from '@/components/Analytics';
 
 const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['300','400','500','600','700','800','900'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
   variable: '--font-outfit',
   display: 'swap',
 });
@@ -97,8 +98,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Apple touch icons */}
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="72x72"   href="/icons/icon-72x72.png" />
-        <link rel="apple-touch-icon" sizes="96x96"   href="/icons/icon-96x96.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="96x96" href="/icons/icon-96x96.png" />
         <link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128x128.png" />
         <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
@@ -114,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={outfit.className}>
+        <Analytics />
         <Providers>{children}</Providers>
       </body>
     </html>
