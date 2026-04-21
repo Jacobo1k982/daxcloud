@@ -13,7 +13,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   metadataBase: new URL('https://daxcloud.shop'),
   title: {
-    default: 'DaxCloud — Sistema POS para América Latina',
+    default: 'DaxCloud – Sistema POS para América Latina',
     template: '%s | DaxCloud POS',
   },
   description: 'Sistema POS multi-industria para América Latina. Gestiona ventas, inventario y sucursales desde un solo lugar. Restaurante, farmacia, peluquería, tienda y más. 14 días gratis.',
@@ -43,20 +43,20 @@ export const metadata: Metadata = {
     locale: 'es_CR',
     url: 'https://daxcloud.shop',
     siteName: 'DaxCloud POS',
-    title: 'DaxCloud — Sistema POS para América Latina',
+    title: 'DaxCloud – Sistema POS para América Latina',
     description: 'Gestiona ventas, inventario y sucursales desde un solo sistema. Multi-industria, multi-moneda. 14 días gratis, sin tarjeta.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'DaxCloud POS — Sistema multi-industria para América Latina',
+        alt: 'DaxCloud POS – Sistema multi-industria para América Latina',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DaxCloud — Sistema POS para América Latina',
+    title: 'DaxCloud – Sistema POS para América Latina',
     description: 'Gestiona ventas, inventario y sucursales. Multi-industria, 14 días gratis.',
     images: ['/og-image.png'],
     creator: '@jacanadev',
@@ -65,10 +65,16 @@ export const metadata: Metadata = {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: [
+      { url: '/icons/icon-152x152.png', sizes: '152x152' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512' },
+    ],
   },
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
   alternates: {
     canonical: 'https://daxcloud.shop',
     languages: {
@@ -81,10 +87,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning className={outfit.variable}>
       <head>
+        {/* PWA / App */}
         <meta name="theme-color" content="#FF5C35" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="DaxCloud" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="DaxCloud" />
+
+        {/* Apple touch icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="72x72"   href="/icons/icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="96x96"   href="/icons/icon-96x96.png" />
+        <link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128x128.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="384x384" href="/icons/icon-384x384.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
+
+        {/* Splash screens iOS */}
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={outfit.className}>
         <Providers>{children}</Providers>
