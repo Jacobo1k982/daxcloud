@@ -365,6 +365,7 @@ export default function POSPage() {
   });
 
   const branchId = (branches as any[])[0]?.id;
+  console.log('branches:', branches, 'branchId:', branchId);
   const branchName = (branches as any[])[0]?.name ?? 'Sucursal';
 
   return (

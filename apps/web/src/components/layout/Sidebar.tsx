@@ -9,64 +9,65 @@ import {
   LayoutDashboard, ShoppingCart, BarChart2,
   Package, Warehouse, GitBranch, Settings, LogOut,
   ChefHat, Pill, Scissors, Shirt, Leaf, Utensils,
-  TrendingUp, Barcode, Users,
+  TrendingUp, Barcode, Users, BookOpen,
 } from 'lucide-react';
 
 const NAV_BASE = [
-  { href: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
-  { href: '/pos',       label: 'POS',        icon: ShoppingCart    },
-  { href: '/sales',     label: 'Ventas',     icon: TrendingUp      },
-  { href: '/clients',   label: 'Clientes',   icon: Users           },
-  { href: '/products',  label: 'Productos',  icon: Package         },
-  { href: '/inventory', label: 'Inventario', icon: Warehouse       },
-  { href: '/analytics', label: 'Analytics',  icon: BarChart2       },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/pos', label: 'POS', icon: ShoppingCart },
+  { href: '/sales', label: 'Ventas', icon: TrendingUp },
+  { href: '/clients', label: 'Clientes', icon: Users },
+  { href: '/products', label: 'Productos', icon: Package },
+  { href: '/inventory', label: 'Inventario', icon: Warehouse },
+  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/accounting', label: 'Contabilidad', icon: BookOpen }
 ];
 
 const NAV_INDUSTRY: Record<string, { href: string; label: string; icon: any }[]> = {
-  restaurant:  [{ href: '/restaurant', label: 'Restaurante', icon: Utensils }],
-  bakery:      [{ href: '/bakery',     label: 'Panadería',   icon: ChefHat  }],
-  pharmacy:    [{ href: '/pharmacy',   label: 'Farmacia',    icon: Pill     }],
-  salon:       [{ href: '/salon',      label: 'Peluquería',  icon: Scissors }],
-  clothing:    [{ href: '/clothing',   label: 'Ropa',        icon: Shirt    }],
-  produce:     [{ href: '/produce',    label: 'Verdulería',  icon: Leaf     }],
-  supermarket: [{ href: '/products',   label: 'Catálogo',    icon: Barcode  }],
-  general:     [],
+  restaurant: [{ href: '/restaurant', label: 'Restaurante', icon: Utensils }],
+  bakery: [{ href: '/bakery', label: 'Panadería', icon: ChefHat }],
+  pharmacy: [{ href: '/pharmacy', label: 'Farmacia', icon: Pill }],
+  salon: [{ href: '/salon', label: 'Peluquería', icon: Scissors }],
+  clothing: [{ href: '/clothing', label: 'Ropa', icon: Shirt }],
+  produce: [{ href: '/produce', label: 'Verdulería', icon: Leaf }],
+  supermarket: [{ href: '/products', label: 'Catálogo', icon: Barcode }],
+  general: [],
 };
 
 const NAV_MANAGEMENT = [
-  { href: '/branches',  label: 'Sucursales',    icon: GitBranch },
-  { href: '/settings',  label: 'Configuración', icon: Settings  },
+  { href: '/branches', label: 'Sucursales', icon: GitBranch },
+  { href: '/settings', label: 'Configuración', icon: Settings },
 ];
 
 const INDUSTRY_COLOR: Record<string, string> = {
-  restaurant:  '#F97316', bakery:      '#FF5C35',
-  pharmacy:    '#5AAAF0', salon:       '#A78BFA',
-  clothing:    '#EAB308', produce:     '#22C55E',
-  supermarket: '#5AAAF0', general:     '#FF5C35',
+  restaurant: '#F97316', bakery: '#FF5C35',
+  pharmacy: '#5AAAF0', salon: '#A78BFA',
+  clothing: '#EAB308', produce: '#22C55E',
+  supermarket: '#5AAAF0', general: '#FF5C35',
 };
 
 const INDUSTRY_LABEL: Record<string, string> = {
-  restaurant:  'Restaurante', bakery:      'Panadería',
-  pharmacy:    'Farmacia',    salon:       'Peluquería',
-  clothing:    'Ropa',        produce:     'Verdulería',
-  supermarket: 'Supermercado', general:    'General',
+  restaurant: 'Restaurante', bakery: 'Panadería',
+  pharmacy: 'Farmacia', salon: 'Peluquería',
+  clothing: 'Ropa', produce: 'Verdulería',
+  supermarket: 'Supermercado', general: 'General',
 };
 
 export function Sidebar() {
-  const pathname      = usePathname();
+  const pathname = usePathname();
   const { user, tenant, logout, industry } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
 
   const industryModules = NAV_INDUSTRY[industry] ?? [];
-  const industryColor   = INDUSTRY_COLOR[industry] ?? '#FF5C35';
-  const industryLabel   = INDUSTRY_LABEL[industry] ?? 'General';
+  const industryColor = INDUSTRY_COLOR[industry] ?? '#FF5C35';
+  const industryLabel = INDUSTRY_LABEL[industry] ?? 'General';
 
   const NavLink = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
     const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
     return (
       <a href={href} style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '8px 10px', borderRadius: 'var(--dax-radius-md)', fontSize: '13px', fontWeight: active ? 600 : 400, color: active ? '#FF5C35' : 'var(--dax-text-muted)', background: active ? 'rgba(255,92,53,0.10)' : 'transparent', textDecoration: 'none', transition: 'all .15s', whiteSpace: 'nowrap', marginBottom: '1px' }}
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'rgba(30,58,95,0.5)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-secondary)'; }}}
-        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}}>
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'rgba(30,58,95,0.5)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-secondary)'; } }}
+        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; } }}>
         <Icon size={15} strokeWidth={active ? 2.2 : 1.8} style={{ color: active ? '#FF5C35' : 'inherit', flexShrink: 0 }} />
         {label}
       </a>
