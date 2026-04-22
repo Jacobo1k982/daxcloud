@@ -1,349 +1,712 @@
 'use client';
-
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth }      from '@/hooks/useAuth';
-import { api }          from '@/lib/api';
-import { getImageUrl }  from '@/lib/imageUrl';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
+import { getImageUrl } from '@/lib/imageUrl';
 import {
-  Upload, X, Loader2, Package, Search,
-  Pencil, Trash2, Plus, Tag, DollarSign,
-  TrendingUp, Filter,
+  Upload, X, Loader2, Package, Search, Pencil, Trash2, Plus,
+  Tag, DollarSign, TrendingUp, Filter, Barcode, FileText,
+  Image as ImageIcon, Link, ChevronDown, ToggleLeft, ToggleRight,
+  Percent, Truck, Building, Hash, Scale, Star, Eye, EyeOff,
+  AlertCircle, Check, ChevronRight, Copy,
 } from 'lucide-react';
 
+// ── Tipos ─────────────────────────────────────────────────────────────────────
 interface Product {
   id: string; name: string; price: number; cost: number;
-  sku: string; barcode: string; category: string;
-  imageUrl: string; active: boolean;
+  sku: string; barcode: string; category: string; description: string;
+  imageUrl: string; active: boolean; metadata?: any;
+  inventory?: { quantity: number }[];
 }
 
-const emptyForm = { name: '', price: '', cost: '', sku: '', barcode: '', category: '', imageUrl: '' };
+interface ProductForm {
+  // Básico
+  name: string; description: string; category: string;
+  // Identificación
+  sku: string; barcode: string;
+  // Precios
+  price: string; cost: string;
+  // IVA
+  taxRate: string; taxIncluded: boolean;
+  // Inventario
+  minStock: string; unit: string;
+  // Info adicional
+  brand: string; supplier: string; notes: string;
+  // Imagen
+  imageUrl: string;
+  // Estado
+  active: boolean;
+}
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'var(--dax-text-muted)', marginBottom: '7px' }}>
-    {children}
-  </label>
-);
+const emptyForm: ProductForm = {
+  name: '', description: '', category: '',
+  sku: '', barcode: '',
+  price: '', cost: '',
+  taxRate: '13', taxIncluded: true,
+  minStock: '5', unit: 'unidad',
+  brand: '', supplier: '', notes: '',
+  imageUrl: '',
+  active: true,
+};
 
-function ProductImage({ src, alt, size = 42, radius = 8 }: { src?: string | null; alt: string; size?: number; radius?: number }) {
-  const [error, setError] = useState(false);
-  const url = getImageUrl(src);
-  if (!url || error) {
-    return (
-      <div style={{ width: size, height: size, borderRadius: radius, background: 'var(--dax-surface-2)', border: '1px solid var(--dax-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Package size={size * 0.38} color="var(--dax-text-muted)" style={{ opacity: .3 }} />
-      </div>
-    );
+const UNITS = ['unidad','kg','g','lb','oz','litro','ml','caja','paquete','docena','par','metro','cm'];
+const TAX_RATES = [
+  { value: '0',   label: 'Exento (0%)' },
+  { value: '1',   label: 'Canasta básica (1%)' },
+  { value: '2',   label: 'Medicamentos (2%)' },
+  { value: '4',   label: 'Reducido (4%)' },
+  { value: '13',  label: 'Estándar (13%)' },
+  { value: 'custom', label: 'Personalizado' },
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(n: number) {
+  return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(n);
+}
+
+function calcMargin(price: string, cost: string) {
+  const p = parseFloat(price), c = parseFloat(cost);
+  if (!p || !c || p <= 0) return null;
+  return ((p - c) / p * 100).toFixed(1);
+}
+
+function calcTaxAmount(price: string, taxRate: string, taxIncluded: boolean) {
+  const p = parseFloat(price), r = parseFloat(taxRate) / 100;
+  if (!p || !r) return { base: p || 0, tax: 0 };
+  if (taxIncluded) {
+    const base = p / (1 + r);
+    return { base, tax: p - base };
   }
-  return <img src={url} alt={alt} onError={() => setError(true)} style={{ width: size, height: size, borderRadius: radius, objectFit: 'cover', border: '1px solid var(--dax-border)', flexShrink: 0, display: 'block' }} />;
+  return { base: p, tax: p * r };
 }
 
-function ImageUploader({ value, onChange, onUploading }: { value: string; onChange: (url: string) => void; onUploading: (v: boolean) => void }) {
-  const [tab, setTab]           = useState<'upload' | 'url'>('upload');
-  const [dragging, setDragging] = useState(false);
-  const [loading, setLoading]   = useState(false);
+// ── Image Uploader ────────────────────────────────────────────────────────────
+function ImageUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const [tab, setTab] = useState<'upload'|'url'>('upload');
+  const [loading, setLoading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
-  const [error, setError]       = useState('');
+  const [drag, setDrag] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) { setError('Solo se permiten imagenes'); return; }
-    if (file.size > 5 * 1024 * 1024)    { setError('Maximo 5MB por imagen'); return; }
-    setError(''); setLoading(true); onUploading(true);
+  const uploadFile = async (file: File) => {
+    setLoading(true);
+    const fd = new FormData(); fd.append('file', file);
     try {
-      const fd = new FormData(); fd.append('file', file);
       const { data } = await api.post('/uploads/product-image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      onChange(data.url);
-    } catch (e: any) { setError(e?.response?.data?.message ?? 'Error al subir imagen'); }
-    finally { setLoading(false); onUploading(false); }
-  }, [onChange, onUploading]);
-
-  const previewUrl = getImageUrl(value);
+      onChange(data.url ?? data.imageUrl ?? '');
+    } catch { alert('Error al subir imagen'); }
+    finally { setLoading(false); }
+  };
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
-        {(['upload', 'url'] as const).map(t => (
-          <button key={t} type="button" onClick={() => setTab(t)} style={{ padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, border: 'none', cursor: 'pointer', background: tab === t ? '#FF5C35' : 'var(--dax-surface-2)', color: tab === t ? '#fff' : 'var(--dax-text-muted)', transition: 'all .15s' }}>
-            {t === 'upload' ? 'Subir archivo' : 'URL externa'}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '2px' }}>
+        {['upload','url'].map(t => (
+          <button key={t} type="button" onClick={() => setTab(t as any)}
+            style={{ padding: '5px 12px', borderRadius: '8px', border: `1px solid ${tab===t ? 'rgba(255,92,53,0.4)' : 'rgba(255,255,255,0.08)'}`, background: tab===t ? 'rgba(255,92,53,0.1)' : 'transparent', color: tab===t ? '#FF5C35' : 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+            {t === 'upload' ? 'Subir archivo' : 'URL'}
           </button>
         ))}
       </div>
-      {tab === 'upload' ? (
-        <div
-          onDragOver={e => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) uploadFile(f); }}
-          onClick={() => inputRef.current?.click()}
-          style={{ border: `2px dashed ${dragging ? '#FF5C35' : 'var(--dax-border)'}`, borderRadius: '12px', padding: '24px', textAlign: 'center', cursor: 'pointer', background: dragging ? 'rgba(255,92,53,0.04)' : 'var(--dax-surface-2)', transition: 'all .15s' }}>
-          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }} />
-          {loading
-            ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}><Loader2 size={22} color="#FF5C35" style={{ animation: 'spin .7s linear infinite' }} /><p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Subiendo imagen...</p></div>
-            : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}><Upload size={22} color="var(--dax-text-muted)" /><p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>Arrastra o haz clic</p><p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>JPG, PNG o WebP - Max 5MB</p></div>
-          }
-        </div>
-      ) : (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input className="dax-input" type="url" placeholder="https://ejemplo.com/imagen.jpg" value={urlInput} onChange={e => setUrlInput(e.target.value)} style={{ margin: 0, flex: 1 }} />
-          <button type="button" onClick={() => { if (!urlInput.trim()) return; try { new URL(urlInput); onChange(urlInput.trim()); setError(''); } catch { setError('URL invalida'); } }} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#FF5C35', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>Aplicar</button>
+
+      {/* Preview */}
+      {value && (
+        <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,92,53,0.25)' }}>
+          <img src={getImageUrl(value) ?? value} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+          <button type="button" onClick={() => onChange('')} style={{ position: 'absolute', top: '6px', right: '6px', width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(0,0,0,0.7)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <X size={12} color="#fff"/>
+          </button>
         </div>
       )}
-      {error && <p style={{ fontSize: '11px', color: 'var(--dax-danger)', marginTop: '6px', fontWeight: 600 }}>* {error}</p>}
-      {previewUrl && (
-        <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: 'var(--dax-surface-2)', borderRadius: '10px', border: '1px solid var(--dax-border)' }}>
-          <img src={previewUrl} alt="Preview" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '52px', height: '52px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--dax-border)' }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Vista previa</p>
-            <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
-          </div>
-          <button type="button" onClick={() => { onChange(''); setUrlInput(''); }} style={{ background: 'var(--dax-danger-bg)', border: 'none', cursor: 'pointer', color: 'var(--dax-danger)', padding: '6px', borderRadius: '7px', display: 'flex' }}><X size={13} /></button>
+
+      {tab === 'upload' && !value && (
+        <div
+          onDragOver={e => { e.preventDefault(); setDrag(true); }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) uploadFile(f); }}
+          onClick={() => inputRef.current?.click()}
+          style={{ height: '100px', border: `2px dashed ${drag ? 'rgba(255,92,53,0.6)' : 'rgba(255,255,255,0.1)'}`, borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '8px', background: drag ? 'rgba(255,92,53,0.04)' : 'transparent', transition: 'all .2s' }}>
+          {loading ? <Loader2 size={22} color="rgba(255,92,53,0.7)" style={{ animation: 'spin .7s linear infinite' }}/> : <Upload size={22} color="rgba(255,255,255,0.25)"/>}
+          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>{loading ? 'Subiendo...' : 'Arrastra o haz clic · JPG, PNG, WebP · máx 2MB'}</p>
+          <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}/>
+        </div>
+      )}
+
+      {tab === 'url' && !value && (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input value={urlInput} onChange={e => setUrlInput(e.target.value)} placeholder="https://..." type="url"
+            style={{ flex: 1, padding: '9px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '9px', color: '#F0F4FF', fontSize: '12px', fontFamily: 'inherit', outline: 'none' }}/>
+          <button type="button" onClick={() => { if (urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); }}}
+            style={{ padding: '9px 14px', background: 'rgba(255,92,53,0.1)', border: '1px solid rgba(255,92,53,0.25)', borderRadius: '9px', color: '#FF5C35', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            Aplicar
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-export default function ProductsPage() {
-  const { formatCurrency } = useAuth();
-  const queryClient = useQueryClient();
-  const [showForm, setShowForm]             = useState(false);
-  const [search, setSearch]                 = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [form, setForm]                     = useState(emptyForm);
-  const [editId, setEditId]                 = useState<string | null>(null);
-  const [error, setError]                   = useState('');
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [confirmDelete, setConfirmDelete]   = useState<Product | null>(null);
+// ── Field ─────────────────────────────────────────────────────────────────────
+function Field({ label, value, onChange, type = 'text', placeholder, icon: Icon, prefix, suffix, required, hint }: any) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: focused ? '#FF5C35' : 'rgba(255,255,255,0.3)', marginBottom: '6px', transition: 'color .2s' }}>
+        <span>{label}{required && <span style={{ color: '#FF5C35', marginLeft: '3px' }}>*</span>}</span>
+        {hint && <span style={{ fontSize: '9px', fontWeight: 500, letterSpacing: 0, textTransform: 'none' as const, color: 'rgba(255,255,255,0.25)' }}>{hint}</span>}
+      </label>
+      <div style={{ position: 'relative' }}>
+        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'rgba(255,255,255,0.2)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', transition: 'color .2s' }}/>}
+        {prefix && <span style={{ position: 'absolute', left: Icon ? '32px' : '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }}>{prefix}</span>}
+        <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          style={{ width: '100%', padding: `10px ${suffix ? '60px' : '14px'} 10px ${prefix ? (Icon ? '48px' : '30px') : Icon ? '34px' : '14px'}`, background: focused ? 'rgba(255,92,53,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '10px', color: '#F0F4FF', fontSize: '13px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const, transition: 'all .2s', boxShadow: focused ? '0 0 0 3px rgba(255,92,53,0.07)' : 'none' }}/>
+        {suffix && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}>{suffix}</div>}
+      </div>
+    </div>
+  );
+}
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products', search],
-    queryFn: async () => { const { data } = await api.get(`/products?search=${search}`); return data; },
+function SelectField({ label, value, onChange, options, icon: Icon }: any) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: focused ? '#FF5C35' : 'rgba(255,255,255,0.3)', marginBottom: '6px', transition: 'color .2s' }}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'rgba(255,255,255,0.2)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>}
+        <select value={value} onChange={e => onChange(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          style={{ width: '100%', padding: `10px 32px 10px ${Icon ? '34px' : '14px'}`, background: focused ? 'rgba(255,92,53,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '10px', color: '#F0F4FF', fontSize: '13px', fontFamily: 'inherit', outline: 'none', appearance: 'none', cursor: 'pointer', boxSizing: 'border-box' as const, transition: 'all .2s' }}>
+          {options.map((o: any) => <option key={o.value} value={o.value} style={{ background: '#080C14' }}>{o.label}</option>)}
+        </select>
+        <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+      </div>
+    </div>
+  );
+}
+
+function TextareaField({ label, value, onChange, placeholder, rows = 2 }: any) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: focused ? '#FF5C35' : 'rgba(255,255,255,0.3)', marginBottom: '6px', transition: 'color .2s' }}>{label}</label>
+      <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        style={{ width: '100%', padding: '10px 14px', background: focused ? 'rgba(255,92,53,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '10px', color: '#F0F4FF', fontSize: '13px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' as const, boxSizing: 'border-box' as const, transition: 'all .2s' }}/>
+    </div>
+  );
+}
+
+function Toggle({ label, desc, checked, onChange }: any) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px' }}>
+      <div>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: desc ? '2px' : 0 }}>{label}</p>
+        {desc && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>{desc}</p>}
+      </div>
+      <div onClick={() => onChange(!checked)} style={{ width: '38px', height: '21px', borderRadius: '12px', background: checked ? '#FF5C35' : 'rgba(255,255,255,0.12)', position: 'relative', cursor: 'pointer', transition: 'background .2s', flexShrink: 0 }}>
+        <div style={{ position: 'absolute', top: '2.5px', left: checked ? '19px' : '2.5px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: 'left .2s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }}/>
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ title, desc }: { title: string; desc?: string }) {
+  return (
+    <div style={{ paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '14px' }}>
+      <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.8)', letterSpacing: '-.01em' }}>{title}</h3>
+      {desc && <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>{desc}</p>}
+    </div>
+  );
+}
+
+// ── Product Form Modal ────────────────────────────────────────────────────────
+function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, error, categories }: any) {
+  const [customTax, setCustomTax] = useState('');
+  const [activeTab, setActiveTab] = useState('basic');
+
+  const margin  = calcMargin(form.price, form.cost);
+  const taxRate = form.taxRate === 'custom' ? customTax : form.taxRate;
+  const taxCalc = calcTaxAmount(form.price, taxRate, form.taxIncluded);
+  const priceWithTax = form.taxIncluded ? parseFloat(form.price || '0') : taxCalc.base + taxCalc.tax;
+
+  const TABS = [
+    { id: 'basic',     label: 'General' },
+    { id: 'pricing',   label: 'Precio e IVA' },
+    { id: 'inventory', label: 'Inventario' },
+    { id: 'extra',     label: 'Más info' },
+  ];
+
+  const f = (key: keyof ProductForm) => (v: any) => setForm((p: ProductForm) => ({ ...p, [key]: v }));
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', overflow: 'auto', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+      <div style={{ width: '100%', maxWidth: '680px', background: '#080C14', border: '1px solid rgba(255,92,53,0.18)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)', animation: 'modalOpen .25s cubic-bezier(.22,1,.36,1)', marginTop: '20px' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(255,92,53,0.4),transparent)' }}/>
+        </div>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(255,92,53,0.1)', border: '1px solid rgba(255,92,53,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Package size={17} color="#FF5C35"/>
+            </div>
+            <div>
+              <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', letterSpacing: '-.02em', margin: 0 }}>
+                {editId ? 'Editar producto' : 'Nuevo producto'}
+              </h2>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', margin: 0, marginTop: '1px' }}>
+                {editId ? 'Modifica los datos del producto' : 'Completa la información del producto'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <X size={14} color="rgba(255,255,255,0.5)"/>
+          </button>
+        </div>
+
+        {/* Sub-tabs */}
+        <div style={{ display: 'flex', gap: '2px', padding: '12px 24px 0', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              style={{ padding: '8px 14px', borderRadius: '8px 8px 0 0', border: 'none', borderBottom: activeTab === t.id ? '2px solid #FF5C35' : '2px solid transparent', background: activeTab === t.id ? 'rgba(255,92,53,0.07)' : 'transparent', color: activeTab === t.id ? '#FF5C35' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: activeTab === t.id ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', marginBottom: '-1px' }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '24px', maxHeight: '65vh', overflowY: 'auto' }}>
+
+          {/* ── GENERAL ── */}
+          {activeTab === 'basic' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '16px', alignItems: 'start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <Field label="Nombre del producto" value={form.name} onChange={f('name')} placeholder="Ej: Coca Cola 350ml" required icon={Package}/>
+                  <TextareaField label="Descripción" value={form.description} onChange={f('description')} placeholder="Descripción visible en el catálogo online..."/>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <Field label="Categoría" value={form.category} onChange={f('category')} placeholder="Bebidas, Lácteos..." icon={Tag}/>
+                    <SelectField label="Unidad de medida" value={form.unit} onChange={f('unit')} icon={Scale}
+                      options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))}/>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)', marginBottom: '8px' }}>Imagen</label>
+                  <ImageUploader value={form.imageUrl} onChange={f('imageUrl')}/>
+                </div>
+              </div>
+
+              <SectionTitle title="Identificación" desc="Códigos para búsqueda y escaneo"/>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="SKU / Código interno" value={form.sku} onChange={f('sku')} placeholder="CC-231" icon={Hash}
+                  suffix={
+                    <button type="button" onClick={() => f('sku')(`SKU-${Date.now().toString(36).toUpperCase()}`)}
+                      style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,92,53,0.7)', background: 'rgba(255,92,53,0.08)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '5px', padding: '3px 7px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' as const }}>
+                      Generar
+                    </button>
+                  }/>
+                <Field label="Código de barras" value={form.barcode} onChange={f('barcode')} placeholder="7501234567890" icon={Barcode}/>
+              </div>
+
+              <Toggle label="Producto activo"
+                desc="Visible en el POS y catálogo online"
+                checked={form.active} onChange={f('active')}/>
+            </div>
+          )}
+
+          {/* ── PRECIO E IVA ── */}
+          {activeTab === 'pricing' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <SectionTitle title="Precios" desc="Configura precio de venta, costo y margen"/>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="Precio de venta" value={form.price} onChange={f('price')} type="number" placeholder="0" icon={DollarSign}
+                  hint={form.taxIncluded ? 'IVA incluido' : 'Sin IVA'}/>
+                <Field label="Costo / Precio compra" value={form.cost} onChange={f('cost')} type="number" placeholder="0" icon={TrendingUp}/>
+              </div>
+
+              {/* Margen */}
+              {margin && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: parseFloat(margin) >= 20 ? 'rgba(61,191,127,0.06)' : parseFloat(margin) >= 10 ? 'rgba(240,160,48,0.06)' : 'rgba(224,80,80,0.06)', border: `1px solid ${parseFloat(margin) >= 20 ? 'rgba(61,191,127,0.2)' : parseFloat(margin) >= 10 ? 'rgba(240,160,48,0.2)' : 'rgba(224,80,80,0.2)'}`, borderRadius: '10px' }}>
+                  <TrendingUp size={14} color={parseFloat(margin) >= 20 ? '#3DBF7F' : parseFloat(margin) >= 10 ? '#F0A030' : '#E05050'}/>
+                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Margen de ganancia:</span>
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: parseFloat(margin) >= 20 ? '#3DBF7F' : parseFloat(margin) >= 10 ? '#F0A030' : '#E05050' }}>{margin}%</span>
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginLeft: 'auto' }}>
+                    Ganancia: {fmt(parseFloat(form.price || '0') - parseFloat(form.cost || '0'))}
+                  </span>
+                </div>
+              )}
+
+              <SectionTitle title="Configuración de IVA" desc="Impuesto al Valor Agregado"/>
+
+              <Toggle label="Precio incluye IVA"
+                desc={form.taxIncluded ? 'El precio ya tiene el IVA incluido' : 'El IVA se suma al precio de venta'}
+                checked={form.taxIncluded} onChange={f('taxIncluded')}/>
+
+              <SelectField label="Tasa de IVA" value={form.taxRate} onChange={f('taxRate')} icon={Percent}
+                options={TAX_RATES}/>
+
+              {form.taxRate === 'custom' && (
+                <Field label="Tasa personalizada (%)" value={customTax} onChange={setCustomTax} type="number" placeholder="0" icon={Percent}/>
+              )}
+
+              {/* Desglose IVA */}
+              {parseFloat(form.price) > 0 && parseFloat(taxRate) > 0 && (
+                <div style={{ padding: '14px', background: 'rgba(90,170,240,0.05)', border: '1px solid rgba(90,170,240,0.15)', borderRadius: '12px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'rgba(90,170,240,0.7)', marginBottom: '10px' }}>Desglose del precio</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {[
+                      { label: 'Base imponible', value: fmt(taxCalc.base) },
+                      { label: `IVA (${taxRate}%)`, value: fmt(taxCalc.tax), color: '#5AAAF0' },
+                      { label: 'Precio total al cliente', value: fmt(priceWithTax), bold: true },
+                    ].map(({ label, value, color, bold }) => (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)' }}>{label}</span>
+                        <span style={{ fontSize: bold ? '14px' : '12px', fontWeight: bold ? 800 : 600, color: color ?? (bold ? '#fff' : 'rgba(255,255,255,0.7)') }}>{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── INVENTARIO ── */}
+          {activeTab === 'inventory' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <SectionTitle title="Control de inventario" desc="Stock mínimo y alertas"/>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="Stock mínimo (alerta)" value={form.minStock} onChange={f('minStock')} type="number" placeholder="5" icon={AlertCircle}
+                  hint="Alerta cuando llegue a este nivel"/>
+                <SelectField label="Unidad de medida" value={form.unit} onChange={f('unit')} icon={Scale}
+                  options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))}/>
+              </div>
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px' }}>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+                  💡 El stock se actualiza automáticamente al procesar ventas en el POS. Para ajustes manuales, usa el módulo de <strong style={{ color: 'rgba(255,255,255,0.6)' }}>Inventario</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── EXTRA ── */}
+          {activeTab === 'extra' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <SectionTitle title="Información adicional" desc="Marca, proveedor y notas internas"/>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="Marca" value={form.brand} onChange={f('brand')} placeholder="Coca Cola, Nike..." icon={Star}/>
+                <Field label="Proveedor" value={form.supplier} onChange={f('supplier')} placeholder="Distribuidora..." icon={Truck}/>
+              </div>
+              <TextareaField label="Notas internas" value={form.notes} onChange={f('notes')} placeholder="Notas para el equipo (no visibles para clientes)..." rows={3}/>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div style={{ display: 'flex', gap: '8px', padding: '10px 14px', background: 'rgba(224,80,80,0.07)', border: '1px solid rgba(224,80,80,0.2)', borderRadius: '10px', marginTop: '14px', animation: 'shake .3s ease' }}>
+              <AlertCircle size={14} color="#E07070" style={{ flexShrink: 0, marginTop: '1px' }}/>
+              <p style={{ fontSize: '12px', color: '#E07070' }}>{error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(8,12,20,0.8)' }}>
+          <button type="button" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+            Cancelar
+          </button>
+          <button type="button" onClick={onSave} disabled={saving}
+            style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', background: saving ? 'rgba(255,92,53,0.2)' : 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: saving ? 'rgba(255,92,53,0.5)' : '#fff', fontSize: '13px', fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px', boxShadow: saving ? 'none' : '0 4px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}>
+            {saving ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }}/> Guardando...</> : <><Check size={13}/> {editId ? 'Guardar cambios' : 'Crear producto'}</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Product Card ──────────────────────────────────────────────────────────────
+function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: () => void; onDelete: () => void }) {
+  const stock = product.inventory?.[0]?.quantity ?? null;
+  const meta  = product.metadata ?? {};
+  const taxRate = meta.taxRate ?? 0;
+
+  return (
+    <div style={{ background: 'rgba(10,18,32,0.95)', border: `1px solid ${!product.active ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '14px', overflow: 'hidden', transition: 'all .2s', opacity: product.active ? 1 : .5 }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,92,53,0.25)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = !product.active ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.07)'; }}>
+
+      {/* Imagen */}
+      <div style={{ position: 'relative', height: '120px', background: 'rgba(255,255,255,0.03)' }}>
+        {product.imageUrl
+          ? <img src={getImageUrl(product.imageUrl) ?? product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={32} color="rgba(255,255,255,0.1)"/></div>
+        }
+        {!product.active && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: '6px' }}>INACTIVO</span></div>}
+        {stock !== null && stock <= (meta.minStock ?? 5) && stock > 0 && (
+          <div style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(240,160,48,0.9)', borderRadius: '6px', padding: '2px 7px', fontSize: '9px', fontWeight: 700, color: '#fff' }}>⚠ {stock}</div>
+        )}
+        {stock === 0 && <div style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(224,80,80,0.9)', borderRadius: '6px', padding: '2px 7px', fontSize: '9px', fontWeight: 700, color: '#fff' }}>AGOTADO</div>}
+      </div>
+
+      {/* Info */}
+      <div style={{ padding: '12px 14px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{product.name}</p>
+        {product.category && <p style={{ fontSize: '10px', color: 'rgba(255,92,53,0.7)', fontWeight: 600, marginBottom: '6px' }}>{product.category}</p>}
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
+          <div>
+            <p style={{ fontSize: '18px', fontWeight: 900, color: '#FF5C35', letterSpacing: '-.02em', lineHeight: 1 }}>{fmt(Number(product.price))}</p>
+            {product.cost > 0 && <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>Costo: {fmt(Number(product.cost))}</p>}
+          </div>
+          {taxRate > 0 && <span style={{ fontSize: '9px', fontWeight: 700, color: '#5AAAF0', background: 'rgba(90,170,240,0.1)', border: '1px solid rgba(90,170,240,0.2)', borderRadius: '5px', padding: '2px 6px' }}>IVA {taxRate}%</span>}
+        </div>
+
+        {/* SKU/Barcode */}
+        {(product.sku || product.barcode) && (
+          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace', marginBottom: '8px' }}>
+            {product.sku && <span>{product.sku}</span>}
+            {product.sku && product.barcode && <span> · </span>}
+            {product.barcode && <span>{product.barcode}</span>}
+          </p>
+        )}
+
+        {/* Acciones */}
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button onClick={onEdit} style={{ flex: 1, padding: '7px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', transition: 'all .15s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,92,53,0.3)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'; }}>
+            <Pencil size={11}/> Editar
+          </button>
+          <button onClick={onDelete} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(224,80,80,0.15)', background: 'transparent', color: 'rgba(224,80,80,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(224,80,80,0.4)'; (e.currentTarget as HTMLElement).style.color = '#E07070'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(224,80,80,0.15)'; (e.currentTarget as HTMLElement).style.color = 'rgba(224,80,80,0.4)'; }}>
+            <Trash2 size={13}/>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
+export default function ProductsPage() {
+  const { industry } = useAuth();
+  const qc = useQueryClient();
+
+  const [showForm,       setShowForm]       = useState(false);
+  const [search,         setSearch]         = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [activeFilter,   setActiveFilter]   = useState<'all'|'active'|'inactive'>('all');
+  const [form,           setForm]           = useState<ProductForm>(emptyForm);
+  const [editId,         setEditId]         = useState<string | null>(null);
+  const [error,          setError]          = useState('');
+  const [confirmDelete,  setConfirmDelete]  = useState<Product | null>(null);
+  const [viewMode,       setViewMode]       = useState<'grid'|'list'>('grid');
+
+  const { data: rawProducts = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products?limit=500&include=inventory');
+      return data?.data ?? data ?? [];
+    },
+  });
+
+  const { data: categories = [] } = useQuery<string[]>({
+    queryKey: ['product-categories'],
+    queryFn: async () => { const { data } = await api.get('/products/categories'); return data ?? []; },
   });
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => editId ? api.put(`/products/${editId}`, payload) : api.post('/products', payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['pos-products'] });
-      setShowForm(false); setForm(emptyForm); setEditId(null); setError('');
-    },
-    onError: (err: any) => setError(err.response?.data?.message ?? 'Error al guardar'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['products'] }); qc.invalidateQueries({ queryKey: ['product-categories'] }); setShowForm(false); setForm(emptyForm); setEditId(null); setError(''); },
+    onError: (e: any) => setError(e?.response?.data?.message ?? 'Error al guardar'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/products/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['pos-products'] });
-      setConfirmDelete(null);
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['products'] }); setConfirmDelete(null); },
   });
 
-  const handleEdit = (p: Product) => {
-    setForm({ name: p.name, price: String(p.price), cost: String(p.cost ?? ''), sku: p.sku ?? '', barcode: p.barcode ?? '', category: p.category ?? '', imageUrl: p.imageUrl ?? '' });
-    setEditId(p.id); setShowForm(true); setError('');
+  const handleSave = () => {
+    if (!form.name.trim()) return setError('El nombre es requerido');
+    if (!form.price || parseFloat(form.price) <= 0) return setError('El precio es requerido');
+    const taxRate = form.taxRate === 'custom' ? '0' : form.taxRate;
+    const payload = {
+      name:        form.name.trim(),
+      description: form.description || undefined,
+      category:    form.category    || undefined,
+      sku:         form.sku         || undefined,
+      barcode:     form.barcode     || undefined,
+      price:       parseFloat(form.price),
+      cost:        form.cost ? parseFloat(form.cost) : undefined,
+      imageUrl:    form.imageUrl    || undefined,
+      active:      form.active,
+      metadata: {
+        taxRate:     parseFloat(taxRate),
+        taxIncluded: form.taxIncluded,
+        minStock:    parseInt(form.minStock) || 5,
+        unit:        form.unit,
+        brand:       form.brand    || undefined,
+        supplier:    form.supplier || undefined,
+        notes:       form.notes    || undefined,
+      },
+    };
+    saveMutation.mutate(payload);
   };
 
-  const f = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (uploadingImage) return;
-    saveMutation.mutate({ ...form, price: parseFloat(form.price), cost: form.cost ? parseFloat(form.cost) : undefined });
+  const openEdit = (p: Product) => {
+    const meta = p.metadata ?? {};
+    setForm({
+      name: p.name, description: p.description ?? '', category: p.category ?? '',
+      sku: p.sku ?? '', barcode: p.barcode ?? '',
+      price: String(p.price), cost: String(p.cost ?? ''),
+      taxRate: String(meta.taxRate ?? '13'), taxIncluded: meta.taxIncluded ?? true,
+      minStock: String(meta.minStock ?? 5), unit: meta.unit ?? 'unidad',
+      brand: meta.brand ?? '', supplier: meta.supplier ?? '', notes: meta.notes ?? '',
+      imageUrl: p.imageUrl ?? '', active: p.active ?? true,
+    });
+    setEditId(p.id); setError(''); setShowForm(true);
   };
 
-  const categories = [...new Set((products as Product[]).map(p => p.category).filter(Boolean))];
-  const filtered = (products as Product[]).filter(p => !categoryFilter || p.category === categoryFilter);
-  const totalProducts = (products as Product[]).length;
-  const activeProducts = (products as Product[]).filter(p => p.active !== false).length;
-  const avgPrice = totalProducts ? (products as Product[]).reduce((s, p) => s + Number(p.price), 0) / totalProducts : 0;
-  const withImage = (products as Product[]).filter(p => p.imageUrl).length;
+  const products = (rawProducts as Product[]).filter(p => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase()) || p.barcode?.includes(search);
+    const matchCat    = !categoryFilter || p.category === categoryFilter;
+    const matchActive = activeFilter === 'all' || (activeFilter === 'active' ? p.active : !p.active);
+    return matchSearch && matchCat && matchActive;
+  });
+
+  const stats = {
+    total:    (rawProducts as Product[]).length,
+    active:   (rawProducts as Product[]).filter((p: Product) => p.active).length,
+    lowStock: (rawProducts as Product[]).filter((p: Product) => { const s = p.inventory?.[0]?.quantity ?? 99; return s <= ((p.metadata as any)?.minStock ?? 5) && s > 0; }).length,
+    outStock: (rawProducts as Product[]).filter((p: Product) => (p.inventory?.[0]?.quantity ?? 1) === 0).length,
+  };
+
+  const S = { muted: 'rgba(255,255,255,0.35)', border: 'rgba(255,255,255,0.07)' };
 
   return (
-    <div style={{ padding: 'clamp(16px,4vw,40px)', maxWidth: '1100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+    <div style={{ padding: '24px', maxWidth: '1300px', fontFamily: "'Inter','Outfit',system-ui,sans-serif" }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: 'clamp(20px,3vw,26px)', marginBottom: '4px' }}>Productos</h1>
-          <p style={{ color: 'var(--dax-text-muted)', fontSize: '13px' }}>Gestiona tu catalogo de productos</p>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', letterSpacing: '-.02em', marginBottom: '3px' }}>Productos</h1>
+          <p style={{ fontSize: '13px', color: S.muted }}>{stats.total} productos · {stats.active} activos</p>
         </div>
-        <button onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); setError(''); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(255,92,53,.3)' }}>
-          <Plus size={14} /> Nuevo producto
+        <button onClick={() => { setForm(emptyForm); setEditId(null); setError(''); setShowForm(true); }}
+          style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', border: 'none', borderRadius: '11px', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}>
+          <Plus size={15}/> Nuevo producto
         </button>
       </div>
 
-      {totalProducts > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px' }}>
-          {[
-            { label: 'Total productos', value: totalProducts,            color: '#5AAAF0', icon: Package    },
-            { label: 'Activos',         value: activeProducts,           color: '#3DBF7F', icon: TrendingUp },
-            { label: 'Precio promedio', value: formatCurrency(avgPrice), color: '#FF5C35', icon: DollarSign },
-            { label: 'Con imagen',      value: `${withImage}/${totalProducts}`, color: '#A78BFA', icon: Tag },
-          ].map(s => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} className="dax-card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${s.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${s.color}20` }}>
-                  <Icon size={16} color={s.color} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p style={{ fontSize: '18px', fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: '2px' }}>{s.value}</p>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{s.label}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="dax-card" style={{ padding: '12px 16px', marginBottom: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-          <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dax-text-muted)' }} />
-          <input className="dax-input" placeholder="Buscar por nombre, SKU o codigo de barras..." value={search} onChange={e => setSearch(e.target.value)} style={{ margin: 0, paddingLeft: '30px', height: '36px', fontSize: '12px' }} />
-        </div>
-        {categories.length > 0 && (
-          <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Filter size={12} color="var(--dax-text-muted)" />
-            {['', ...categories].map(cat => (
-              <button key={cat} onClick={() => setCategoryFilter(cat)} style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: categoryFilter === cat ? 700 : 400, border: 'none', cursor: 'pointer', background: categoryFilter === cat ? '#FF5C35' : 'var(--dax-surface-2)', color: categoryFilter === cat ? '#fff' : 'var(--dax-text-muted)', transition: 'all .15s' }}>
-                {cat || 'Todas'}
-              </button>
-            ))}
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', marginBottom: '20px' }}>
+        {[
+          { label: 'Total',       value: stats.total,    color: '#FF5C35' },
+          { label: 'Activos',     value: stats.active,   color: '#3DBF7F' },
+          { label: 'Stock bajo',  value: stats.lowStock, color: '#F0A030' },
+          { label: 'Agotados',    value: stats.outStock, color: '#E05050' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ padding: '14px 16px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px' }}>
+            <p style={{ fontSize: '22px', fontWeight: 900, color, letterSpacing: '-.02em' }}>{value}</p>
+            <p style={{ fontSize: '11px', color: S.muted, marginTop: '2px' }}>{label}</p>
           </div>
-        )}
-        {(search || categoryFilter) && (
-          <button onClick={() => { setSearch(''); setCategoryFilter(''); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-muted)', fontSize: '11px', cursor: 'pointer' }}>
-            <X size={11} /> Limpiar
-          </button>
-        )}
+        ))}
       </div>
 
-      <div className="dax-card" style={{ overflow: 'hidden' }}>
-        <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--dax-border)' }}>
-          <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
-            {isLoading ? 'Cargando...' : `${filtered.length} producto${filtered.length !== 1 ? 's' : ''}${categoryFilter ? ` en "${categoryFilter}"` : ''}`}
+      {/* Filtros */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+          <Search size={13} color="rgba(255,255,255,0.25)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nombre, SKU o código de barras..."
+            style={{ width: '100%', padding: '9px 14px 9px 34px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${S.border}`, borderRadius: '10px', color: '#F0F4FF', fontSize: '13px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(255,92,53,0.4)'; }}
+            onBlur={e => { e.target.style.borderColor = S.border; }}/>
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
+            style={{ padding: '9px 28px 9px 12px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${S.border}`, borderRadius: '10px', color: categoryFilter ? '#FF5C35' : S.muted, fontSize: '12px', fontFamily: 'inherit', outline: 'none', appearance: 'none', cursor: 'pointer' }}>
+            <option value="">Todas las categorías</option>
+            {(categories as string[]).map(c => <option key={c} value={c} style={{ background: '#080C14' }}>{c}</option>)}
+          </select>
+          <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+        </div>
+
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {(['all','active','inactive'] as const).map(f => (
+            <button key={f} onClick={() => setActiveFilter(f)}
+              style={{ padding: '8px 12px', borderRadius: '9px', border: `1px solid ${activeFilter === f ? 'rgba(255,92,53,0.35)' : S.border}`, background: activeFilter === f ? 'rgba(255,92,53,0.1)' : 'transparent', color: activeFilter === f ? '#FF5C35' : S.muted, fontSize: '11px', fontWeight: activeFilter === f ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+              {f === 'all' ? 'Todos' : f === 'active' ? 'Activos' : 'Inactivos'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid de productos */}
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '60px' }}>
+          <Loader2 size={28} color="rgba(255,92,53,0.5)" style={{ animation: 'spin .7s linear infinite', margin: '0 auto 12px', display: 'block' }}/>
+          <p style={{ fontSize: '13px', color: S.muted }}>Cargando productos...</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '60px' }}>
+          <Package size={40} color="rgba(255,255,255,0.1)" style={{ margin: '0 auto 16px', display: 'block' }}/>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', marginBottom: '8px' }}>
+            {search || categoryFilter ? 'Sin resultados' : 'Sin productos'}
+          </p>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.2)' }}>
+            {search || categoryFilter ? 'Prueba con otros filtros' : 'Crea tu primer producto'}
           </p>
         </div>
-        <div className="dax-table-wrap">
-          <table className="dax-table">
-            <thead>
-              <tr>
-                <th style={{ width: '56px' }}>Img</th>
-                <th>Nombre</th>
-                <th>SKU</th>
-                <th>Categoria</th>
-                <th style={{ textAlign: 'right' }}>Costo</th>
-                <th style={{ textAlign: 'right' }}>Precio</th>
-                <th style={{ textAlign: 'center' }}>Margen</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px' }}><Loader2 size={20} style={{ animation: 'spin .7s linear infinite', margin: '0 auto', display: 'block', color: 'var(--dax-text-muted)' }} /></td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '48px' }}>
-                  <Package size={32} style={{ margin: '0 auto 12px', display: 'block', opacity: .15, color: 'var(--dax-text-muted)' }} />
-                  <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)' }}>{search ? `Sin resultados para "${search}"` : 'No hay productos. Crea el primero.'}</p>
-                </td></tr>
-              ) : filtered.map((product: Product) => {
-                const price = Number(product.price);
-                const cost  = Number(product.cost);
-                const margin = cost > 0 ? ((price - cost) / price * 100) : null;
-                return (
-                  <tr key={product.id}>
-                    <td><ProductImage src={product.imageUrl} alt={product.name} size={42} radius={8} /></td>
-                    <td>
-                      <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '1px' }}>{product.name}</p>
-                      {product.barcode && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', fontFamily: 'monospace' }}>{product.barcode}</p>}
-                    </td>
-                    <td style={{ color: 'var(--dax-text-muted)', fontSize: '12px', fontFamily: 'monospace' }}>{product.sku || '—'}</td>
-                    <td>
-                      {product.category
-                        ? <span style={{ fontSize: '11px', fontWeight: 600, color: '#5AAAF0', background: 'rgba(90,170,240,.1)', padding: '2px 8px', borderRadius: '6px' }}>{product.category}</span>
-                        : <span style={{ color: 'var(--dax-text-muted)', fontSize: '12px' }}>—</span>
-                      }
-                    </td>
-                    <td style={{ textAlign: 'right', color: 'var(--dax-text-muted)', fontSize: '12px' }}>{cost > 0 ? formatCurrency(cost) : '—'}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 700, color: '#FF5C35', fontSize: '13px' }}>{formatCurrency(price)}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      {margin !== null
-                        ? <span style={{ fontSize: '11px', fontWeight: 700, color: margin > 30 ? '#3DBF7F' : margin > 10 ? '#F0A030' : '#E05050', background: margin > 30 ? 'rgba(61,191,127,.1)' : margin > 10 ? 'rgba(240,160,48,.1)' : 'rgba(224,80,80,.1)', padding: '2px 8px', borderRadius: '6px' }}>{margin.toFixed(0)}%</span>
-                        : <span style={{ color: 'var(--dax-text-muted)', fontSize: '12px' }}>—</span>
-                      }
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button onClick={() => handleEdit(product)} style={{ width: '28px', height: '28px', borderRadius: '7px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '4px', transition: 'all .15s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor='#5AAAF0'; (e.currentTarget as HTMLElement).style.color='#5AAAF0'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor='var(--dax-border)'; (e.currentTarget as HTMLElement).style.color='var(--dax-text-muted)'; }}>
-                        <Pencil size={12} />
-                      </button>
-                      <button onClick={() => setConfirmDelete(product)} style={{ width: '28px', height: '28px', borderRadius: '7px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor='#E05050'; (e.currentTarget as HTMLElement).style.color='#E05050'; (e.currentTarget as HTMLElement).style.background='rgba(224,80,80,.06)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor='var(--dax-border)'; (e.currentTarget as HTMLElement).style.color='var(--dax-text-muted)'; (e.currentTarget as HTMLElement).style.background='var(--dax-surface-2)'; }}>
-                        <Trash2 size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {confirmDelete && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div className="dax-card" style={{ width: '100%', maxWidth: '360px', padding: '28px' }}>
-            <div style={{ width: '46px', height: '46px', borderRadius: '13px', background: 'rgba(224,80,80,.1)', border: '1px solid rgba(224,80,80,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Trash2 size={20} color="#E05050" />
-            </div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, textAlign: 'center', marginBottom: '8px' }}>Eliminar producto?</h3>
-            <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', textAlign: 'center', marginBottom: '20px', lineHeight: 1.6 }}>
-              Se eliminara <strong style={{ color: 'var(--dax-text-primary)' }}>"{confirmDelete.name}"</strong>. Esta accion no se puede deshacer.
-            </p>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={() => deleteMutation.mutate(confirmDelete.id)} disabled={deleteMutation.isPending} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#E05050', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                {deleteMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <Trash2 size={13} />} Eliminar
-              </button>
-            </div>
-          </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '12px' }}>
+          {products.map((p: Product) => (
+            <ProductCard key={p.id} product={p} onEdit={() => openEdit(p)} onDelete={() => setConfirmDelete(p)}/>
+          ))}
         </div>
       )}
 
+      {/* Modal form */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div className="dax-card" style={{ width: '100%', maxWidth: '560px', maxHeight: '92vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(255,92,53,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Package size={15} color="#FF5C35" />
-                </div>
-                <div>
-                  <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '2px' }}>{editId ? 'Editar producto' : 'Nuevo producto'}</p>
-                  <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{editId ? 'Actualiza la informacion' : 'Completa los datos'}</p>
-                </div>
-              </div>
-              <button onClick={() => { setShowForm(false); setError(''); }} style={{ background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer', color: 'var(--dax-text-muted)', padding: '6px', borderRadius: '8px', display: 'flex' }}><X size={16} /></button>
+        <ProductFormModal
+          form={form} setForm={setForm} editId={editId}
+          onSave={handleSave} onClose={() => setShowForm(false)}
+          saving={saveMutation.isPending} error={error}
+          categories={categories}
+        />
+      )}
+
+      {/* Modal confirmar borrar */}
+      {confirmDelete && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div style={{ width: '100%', maxWidth: '360px', background: '#080C14', border: '1px solid rgba(224,80,80,0.25)', borderRadius: '16px', padding: '24px', animation: 'modalOpen .2s ease' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(224,80,80,0.1)', border: '1px solid rgba(224,80,80,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 0 16px' }}>
+              <Trash2 size={20} color="#E07070"/>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div><Label>Nombre del producto *</Label><input className="dax-input" value={form.name} onChange={e => f('name', e.target.value)} placeholder="Ej: Coca Cola 350ml" required style={{ margin: 0 }} /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div><Label>Precio de venta *</Label><input className="dax-input" type="number" step="0.01" min="0" value={form.price} onChange={e => f('price', e.target.value)} placeholder="0.00" required style={{ margin: 0 }} /></div>
-                <div><Label>Costo</Label><input className="dax-input" type="number" step="0.01" min="0" value={form.cost} onChange={e => f('cost', e.target.value)} placeholder="0.00" style={{ margin: 0 }} /></div>
-                <div><Label>SKU</Label><input className="dax-input" value={form.sku} onChange={e => f('sku', e.target.value)} placeholder="CC-350" style={{ margin: 0 }} /></div>
-                <div><Label>Codigo de barras</Label><input className="dax-input" value={form.barcode} onChange={e => f('barcode', e.target.value)} placeholder="7501055300057" style={{ margin: 0 }} /></div>
-              </div>
-              <div><Label>Categoria</Label><input className="dax-input" value={form.category} onChange={e => f('category', e.target.value)} placeholder="Ej: Bebidas, Panaderia..." style={{ margin: 0 }} /></div>
-              <div><Label>Imagen del producto</Label><ImageUploader value={form.imageUrl} onChange={url => f('imageUrl', url)} onUploading={setUploadingImage} /></div>
-              {error && <div style={{ padding: '10px 14px', background: 'rgba(224,80,80,.08)', borderRadius: '8px', border: '1px solid rgba(224,80,80,.2)' }}><p style={{ fontSize: '12px', color: '#E05050', fontWeight: 600 }}>* {error}</p></div>}
-            </div>
-            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--dax-border)', flexShrink: 0, display: 'flex', gap: '10px' }}>
-              <button type="button" onClick={() => { setShowForm(false); setError(''); }} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={() => handleSubmit()} disabled={saveMutation.isPending || uploadingImage} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: saveMutation.isPending || uploadingImage ? 'var(--dax-surface-3)' : 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: saveMutation.isPending || uploadingImage ? 'var(--dax-text-muted)' : '#fff', fontSize: '13px', fontWeight: 700, cursor: saveMutation.isPending || uploadingImage ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: saveMutation.isPending || uploadingImage ? 'none' : '0 3px 12px rgba(255,92,53,.3)' }}>
-                {saveMutation.isPending ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Guardando...</> : uploadingImage ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Subiendo imagen...</> : editId ? 'Actualizar producto' : 'Crear producto'}
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', marginBottom: '6px' }}>¿Eliminar producto?</h3>
+            <p style={{ fontSize: '13px', color: S.muted, lineHeight: 1.6, marginBottom: '20px' }}>
+              <strong style={{ color: '#fff' }}>{confirmDelete.name}</strong> será eliminado permanentemente. Esta acción no se puede deshacer.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: `1px solid ${S.border}`, background: 'transparent', color: S.muted, fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
+              <button onClick={() => deleteMutation.mutate(confirmDelete.id)} disabled={deleteMutation.isPending}
+                style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#E05050', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: deleteMutation.isPending ? .6 : 1 }}>
+                {deleteMutation.isPending ? 'Eliminando...' : 'Sí, eliminar'}
               </button>
             </div>
           </div>
         </div>
       )}
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
+      <style>{`
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes modalOpen { from{opacity:0;transform:scale(.97) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+      `}</style>
     </div>
   );
 }
