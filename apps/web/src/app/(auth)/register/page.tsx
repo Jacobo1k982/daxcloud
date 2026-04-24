@@ -113,6 +113,18 @@ function RegisterInner() {
   const params = useSearchParams();
   const { login } = useAuth();
 
+  const COUNTRY_CURRENCY: Record<string, { currency: string; locale: string }> = {
+    CR: { currency: 'CRC', locale: 'es-CR' },
+    MX: { currency: 'MXN', locale: 'es-MX' },
+    GT: { currency: 'GTQ', locale: 'es-GT' },
+    HN: { currency: 'HNL', locale: 'es-HN' },
+    SV: { currency: 'USD', locale: 'es-SV' },
+    NI: { currency: 'NIO', locale: 'es-NI' },
+    PA: { currency: 'USD', locale: 'es-PA' },
+    CO: { currency: 'COP', locale: 'es-CO' },
+    PE: { currency: 'PEN', locale: 'es-PE' },
+  };
+
   const [form, setForm] = useState({
     businessName: '', tenantSlug: '', ownerName: '', email: '', password: '', industry: 'general', country: 'CR',
   });
@@ -145,6 +157,8 @@ function RegisterInner() {
     if (form.password.length < 8) return setError('La contraseña debe tener mínimo 8 caracteres');
     setLoading(true);
     try {
+      const { currency, locale } = COUNTRY_CURRENCY[form.country] ?? { currency: 'CRC', locale: 'es-CR' };
+
       await api.post('/auth/register', {
         tenantName: form.businessName,
         tenantSlug: form.tenantSlug,
@@ -154,6 +168,8 @@ function RegisterInner() {
         password: form.password,
         industry: form.industry,
         country: form.country,
+        currency,
+        locale,
       });
       await login(form.email, form.password, form.tenantSlug);
     } catch (e: any) { setError(e.response?.data?.message ?? 'Error al crear la cuenta'); setLoading(false); }
