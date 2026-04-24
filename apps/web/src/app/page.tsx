@@ -124,20 +124,45 @@ export default function LandingPage() {
         @keyframes shimmer { 0%{transform:translateX(-100%)}     100%{transform:translateX(100%)}   }
         @keyframes pulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }
         input:-webkit-autofill { -webkit-box-shadow:0 0 0 100px #080C14 inset!important; -webkit-text-fill-color:#fff!important; }
+        /* ── RESPONSIVE MOBILE S24 ── */
         @media(max-width:768px){
-          .nav-links   { display:none!important }
-          .nav-login   { display:none!important }
-          .stats-grid  { grid-template-columns:repeat(2,1fr)!important }
-          .feat-grid   { grid-template-columns:1fr!important }
-          .hero-btns   { flex-direction:column!important; align-items:stretch!important }
-          .hero-btns a, .hero-btns button { justify-content:center!important }
+          /* Nav */
+          .nav-links            { display:none!important }
+          .nav-login            { display:none!important }
+
+          /* Hero */
+          .hero-btns            { flex-direction:column!important; align-items:stretch!important }
+          .hero-btns a,
+          .hero-btns button     { justify-content:center!important }
+
+          /* POS Mockup — ocultar sidebar y carrito, solo productos */
+          .pos-sidebar          { display:none!important }
+          .pos-cart             { display:none!important }
+          .pos-body             { grid-template-columns:1fr!important }
+
+          /* Stats */
+          .stats-grid           { grid-template-columns:repeat(2,1fr)!important; margin:40px auto!important }
+
+          /* Features */
+          .feat-grid            { grid-template-columns:1fr!important }
+
+          /* Pricing grid — apilar verticalmente */
+          .pricing-grid         { grid-template-columns:1fr!important; border-radius:6px!important }
+
+          /* Footer */
+          .footer-links         { display:none!important }
+        }
+
+        @media(max-width:480px){
+          .stats-grid           { grid-template-columns:repeat(2,1fr)!important }
+          .industries-wrap      { gap:7px!important }
         }
       `}</style>
 
       <StructuredData/>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 50, height: '62px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(20px,5vw,72px)', background: 'rgba(8,12,20,0.94)', backdropFilter: 'blur(24px)', borderBottom: `1px solid ${C.border}`, gap: '16px' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 50, height: '62px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(16px,5vw,72px)', background: 'rgba(8,12,20,0.94)', backdropFilter: 'blur(24px)', borderBottom: `1px solid ${C.border}`, gap: '16px' }}>
 
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '11px', textDecoration: 'none', flexShrink: 0 }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,92,53,0.1)', border: '1px solid rgba(255,92,53,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -177,7 +202,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(80px,13vh,130px) clamp(20px,5vw,72px) 0', textAlign: 'center', minHeight: '85vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', padding: 'clamp(48px,10vh,130px) clamp(16px,5vw,72px) 0', textAlign: 'center', minHeight: 'clamp(60vh,85vh,100vh)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <AtmosphericCanvas/>
 
         {/* Ruido de grano sutil */}
@@ -236,9 +261,9 @@ export default function LandingPage() {
                 <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#3DBF7F', boxShadow:'0 0 5px #3DBF7F' }}/>
               </div>
               {/* POS grid */}
-              <div style={{ display:'grid', gridTemplateColumns:'180px 1fr 240px', minHeight:'320px' }}>
+              <div className="pos-body" style={{ display:'grid', gridTemplateColumns:'180px 1fr 240px', minHeight:'320px' }}>
                 {/* Sidebar */}
-                <div style={{ background:'rgba(7,11,19,0.99)', borderRight:`1px solid ${C.border}`, padding:'12px 8px', display:'flex', flexDirection:'column', gap:'3px' }}>
+                <div className="pos-sidebar" style={{ background:'rgba(7,11,19,0.99)', borderRight:`1px solid ${C.border}`, padding:'12px 8px', display:'flex', flexDirection:'column', gap:'3px' }}>
                   <div style={{ padding:'9px 10px', marginBottom:'6px', display:'flex', alignItems:'center', gap:'8px' }}>
                     <div style={{ width:'24px', height:'24px', borderRadius:'6px', background:'rgba(255,92,53,0.12)', border:'1px solid rgba(255,92,53,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                       <svg width="11" height="8" viewBox="0 0 64 48" fill="none"><path d="M10 38Q2 38 2 29Q2 20 10 19Q11 11 20 10Q25 3 33 4Q43 2 46 12Q53 12 56 20Q62 21 61 30Q61 39 53 39L10 39Z" fill="none" stroke="#FF5C35" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round"/></svg>
@@ -276,7 +301,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 {/* Carrito */}
-                <div style={{ background:'rgba(7,11,19,0.99)', borderLeft:`1px solid ${C.border}`, padding:'12px', display:'flex', flexDirection:'column', gap:'7px' }}>
+                <div className="pos-cart" style={{ background:'rgba(7,11,19,0.99)', borderLeft:`1px solid ${C.border}`, padding:'12px', display:'flex', flexDirection:'column', gap:'7px' }}>
                   <p style={{ fontSize:'9px', fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase' as const, color:'rgba(255,255,255,0.3)', marginBottom:'2px' }}>Orden actual</p>
                   {[{q:2,n:'Café Americano',a:'₡2,400'},{q:1,n:'Croissant',a:'₡1,800'},{q:3,n:'Agua 500ml',a:'₡2,400'}].map((item,i) => (
                     <div key={i} style={{ display:'flex', alignItems:'center', gap:'6px', padding:'6px 8px', background:'rgba(255,255,255,0.025)', borderRadius:'6px', border:`1px solid ${C.border}` }}>
@@ -300,7 +325,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS ── */}
-      <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'1px', maxWidth:'960px', margin:'80px auto', padding:'0 clamp(20px,5vw,72px)', background:C.border, borderRadius:'6px', overflow:'hidden', border:`1px solid ${C.border}` }}>
+      <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'1px', maxWidth:'960px', margin:'80px auto', padding:'0 clamp(16px,5vw,72px)', background:C.border, borderRadius:'6px', overflow:'hidden', border:`1px solid ${C.border}` }}>
         {[
           { n:'8+',    l:'Industrias soportadas',         c:C.coral },
           { n:'14 días',l:'Prueba gratis · sin tarjeta',  c:'#F5EEE6' },
@@ -347,7 +372,7 @@ export default function LandingPage() {
         <h2 className="serif" style={{ fontSize:'clamp(24px,3vw,44px)', fontWeight:700, letterSpacing:'-.02em', color:'#F5EEE6', marginBottom:'40px', lineHeight:1.1 }}>
           Una plataforma. <em style={{ fontStyle:'italic', fontWeight:400, color:C.coral }}>Cada negocio.</em>
         </h2>
-        <div style={{ display:'flex', gap:'10px', justifyContent:'center', flexWrap:'wrap' }}>
+        <div className="industries-wrap" style={{ display:'flex', gap:'10px', justifyContent:'center', flexWrap:'wrap' }}>
           {INDUSTRIES.map(ind => (
             <div key={ind} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', borderRadius:'3px', background:C.surf, border:`1px solid ${C.border}`, fontSize:'13px', fontWeight:400, color:'rgba(255,255,255,0.45)', transition:'all .2s', cursor:'default' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background='rgba(255,92,53,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(255,92,53,0.22)'; (e.currentTarget as HTMLElement).style.color='rgba(255,92,53,0.9)'; }}
@@ -378,7 +403,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'1px', maxWidth:'960px', margin:'0 auto', background:C.border, borderRadius:'6px', overflow:'hidden', border:`1px solid ${C.border}` }}>
+        <div className="pricing-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'1px', maxWidth:'960px', margin:'0 auto', background:C.border, borderRadius:'6px', overflow:'hidden', border:`1px solid ${C.border}` }}>
           {PLANS.map(plan => {
             const price = annual ? plan.annualMonthly : plan.monthlyPrice;
             return (
@@ -487,7 +512,7 @@ export default function LandingPage() {
             <span style={{ marginLeft:'8px', fontSize:'11px' }}>· by <a href="https://jacana-dev.com" target="_blank" rel="noopener noreferrer" style={{ color:'rgba(255,92,53,0.35)', textDecoration:'none' }}>jacana-dev.com</a></span>
           </span>
         </div>
-        <div style={{ display:'flex', gap:'20px' }}>
+        <div className="footer-links" style={{ display:'flex', gap:'20px' }}>
           {[['/', 'Inicio'], ['/pricing', 'Precios'], ['/login', 'Login'], ['/register', 'Registro']].map(([href, label]) => (
             <a key={label} href={href} style={{ fontSize:'12px', color:C.dim, textDecoration:'none', fontWeight:300, transition:'color .15s' }}
               onMouseEnter={e => (e.currentTarget.style.color='rgba(255,255,255,0.45)')}
