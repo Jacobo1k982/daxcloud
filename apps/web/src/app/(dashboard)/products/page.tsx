@@ -50,13 +50,13 @@ const emptyForm: ProductForm = {
   active: true,
 };
 
-const UNITS = ['unidad','kg','g','lb','oz','litro','ml','caja','paquete','docena','par','metro','cm'];
+const UNITS = ['unidad', 'kg', 'g', 'lb', 'oz', 'litro', 'ml', 'caja', 'paquete', 'docena', 'par', 'metro', 'cm'];
 const TAX_RATES = [
-  { value: '0',   label: 'Exento (0%)' },
-  { value: '1',   label: 'Canasta básica (1%)' },
-  { value: '2',   label: 'Medicamentos (2%)' },
-  { value: '4',   label: 'Reducido (4%)' },
-  { value: '13',  label: 'Estándar (13%)' },
+  { value: '0', label: 'Exento (0%)' },
+  { value: '1', label: 'Canasta básica (1%)' },
+  { value: '2', label: 'Medicamentos (2%)' },
+  { value: '4', label: 'Reducido (4%)' },
+  { value: '13', label: 'Estándar (13%)' },
   { value: 'custom', label: 'Personalizado' },
 ];
 
@@ -83,7 +83,7 @@ function calcTaxAmount(price: string, taxRate: string, taxIncluded: boolean) {
 
 // ── Image Uploader ────────────────────────────────────────────────────────────
 function ImageUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
-  const [tab, setTab] = useState<'upload'|'url'>('upload');
+  const [tab, setTab] = useState<'upload' | 'url'>('upload');
   const [loading, setLoading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [drag, setDrag] = useState(false);
@@ -91,20 +91,30 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
 
   const uploadFile = async (file: File) => {
     setLoading(true);
-    const fd = new FormData(); fd.append('file', file);
+    const fd = new FormData();
+    fd.append('file', file);
     try {
-      const { data } = await api.post('/uploads/product-image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      onChange(data.url ?? data.imageUrl ?? '');
-    } catch { alert('Error al subir imagen'); }
-    finally { setLoading(false); }
+      const { data } = await api.post('/uploads/product-image', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('Upload response:', data);
+      const url = data.url ?? data.imageUrl ?? '';
+      console.log('URL obtenida:', url);
+      onChange(url);
+    } catch (e: any) {
+      console.error('Upload error:', e?.response?.data ?? e?.message ?? e);
+      alert('Error al subir imagen: ' + (e?.response?.data?.message ?? e?.message ?? 'Error desconocido'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <div style={{ display: 'flex', gap: '6px', marginBottom: '2px' }}>
-        {['upload','url'].map(t => (
+        {['upload', 'url'].map(t => (
           <button key={t} type="button" onClick={() => setTab(t as any)}
-            style={{ padding: '5px 12px', borderRadius: '8px', border: `1px solid ${tab===t ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, background: tab===t ? 'var(--dax-coral-soft)' : 'transparent', color: tab===t ? '#FF5C35' : 'var(--dax-white-35)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+            style={{ padding: '5px 12px', borderRadius: '8px', border: `1px solid ${tab === t ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, background: tab === t ? 'var(--dax-coral-soft)' : 'transparent', color: tab === t ? '#FF5C35' : 'var(--dax-white-35)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
             {t === 'upload' ? 'Subir archivo' : 'URL'}
           </button>
         ))}
@@ -113,9 +123,9 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
       {/* Preview */}
       {value && (
         <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,92,53,0.25)' }}>
-          <img src={getImageUrl(value) ?? value} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+          <img src={getImageUrl(value) ?? value} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <button type="button" onClick={() => onChange('')} style={{ position: 'absolute', top: '6px', right: '6px', width: '24px', height: '24px', borderRadius: '6px', background: 'var(--dax-overlay)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <X size={12} color="#fff"/>
+            <X size={12} color="#fff" />
           </button>
         </div>
       )}
@@ -127,17 +137,17 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
           onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) uploadFile(f); }}
           onClick={() => inputRef.current?.click()}
           style={{ height: '100px', border: `2px dashed ${drag ? 'rgba(255,92,53,0.6)' : 'var(--dax-border)'}`, borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '8px', background: drag ? 'var(--dax-coral-soft)' : 'transparent', transition: 'all .2s' }}>
-          {loading ? <Loader2 size={22} color="rgba(255,92,53,0.7)" style={{ animation: 'spin .7s linear infinite' }}/> : <Upload size={22} color="rgba(255,255,255,0.25)"/>}
+          {loading ? <Loader2 size={22} color="rgba(255,92,53,0.7)" style={{ animation: 'spin .7s linear infinite' }} /> : <Upload size={22} color="rgba(255,255,255,0.25)" />}
           <p style={{ fontSize: '11px', color: 'var(--dax-white-35)' }}>{loading ? 'Subiendo...' : 'Arrastra o haz clic · JPG, PNG, WebP · máx 2MB'}</p>
-          <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}/>
+          <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }} />
         </div>
       )}
 
       {tab === 'url' && !value && (
         <div style={{ display: 'flex', gap: '8px' }}>
           <input value={urlInput} onChange={e => setUrlInput(e.target.value)} placeholder="https://..." type="url"
-            style={{ flex: 1, padding: '9px 12px', background: 'var(--dax-surface-2)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '12px', fontFamily: 'inherit', outline: 'none' }}/>
-          <button type="button" onClick={() => { if (urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); }}}
+            style={{ flex: 1, padding: '9px 12px', background: 'var(--dax-surface-2)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '12px', fontFamily: 'inherit', outline: 'none' }} />
+          <button type="button" onClick={() => { if (urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); } }}
             style={{ padding: '9px 14px', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,0.25)', borderRadius: '9px', color: 'var(--dax-coral)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
             Aplicar
           </button>
@@ -157,11 +167,11 @@ function Field({ label, value, onChange, type = 'text', placeholder, icon: Icon,
         {hint && <span style={{ fontSize: '9px', fontWeight: 500, letterSpacing: 0, textTransform: 'none' as const, color: 'var(--dax-white-25)' }}>{hint}</span>}
       </label>
       <div style={{ position: 'relative' }}>
-        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'var(--dax-text-muted)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', transition: 'color .2s' }}/>}
+        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'var(--dax-text-muted)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', transition: 'color .2s' }} />}
         {prefix && <span style={{ position: 'absolute', left: Icon ? '32px' : '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'var(--dax-text-muted)', pointerEvents: 'none' }}>{prefix}</span>}
         <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          style={{ width: '100%', padding: `10px ${suffix ? '60px' : '14px'} 10px ${prefix ? (Icon ? '48px' : '30px') : Icon ? '34px' : '14px'}`, background: focused ? 'var(--dax-coral-soft)' : 'var(--dax-surface)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const, transition: 'all .2s', boxShadow: focused ? '0 0 0 3px rgba(255,92,53,0.07)' : 'none' }}/>
+          style={{ width: '100%', padding: `10px ${suffix ? '60px' : '14px'} 10px ${prefix ? (Icon ? '48px' : '30px') : Icon ? '34px' : '14px'}`, background: focused ? 'var(--dax-coral-soft)' : 'var(--dax-surface)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const, transition: 'all .2s', boxShadow: focused ? '0 0 0 3px rgba(255,92,53,0.07)' : 'none' }} />
         {suffix && <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}>{suffix}</div>}
       </div>
     </div>
@@ -174,12 +184,12 @@ function SelectField({ label, value, onChange, options, icon: Icon }: any) {
     <div>
       <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: focused ? '#FF5C35' : 'var(--dax-text-muted)', marginBottom: '6px', transition: 'color .2s' }}>{label}</label>
       <div style={{ position: 'relative' }}>
-        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'var(--dax-text-muted)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>}
+        {Icon && <Icon size={13} color={focused ? '#FF5C35' : 'var(--dax-text-muted)'} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />}
         <select value={value} onChange={e => onChange(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{ width: '100%', padding: `10px 32px 10px ${Icon ? '34px' : '14px'}`, background: focused ? 'var(--dax-coral-soft)' : 'var(--dax-surface)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', appearance: 'none', cursor: 'pointer', boxSizing: 'border-box' as const, transition: 'all .2s' }}>
           {options.map((o: any) => <option key={o.value} value={o.value} style={{ background: 'var(--dax-bg)' }}>{o.label}</option>)}
         </select>
-        <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+        <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
       </div>
     </div>
   );
@@ -192,7 +202,7 @@ function TextareaField({ label, value, onChange, placeholder, rows = 2 }: any) {
       <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: focused ? '#FF5C35' : 'var(--dax-text-muted)', marginBottom: '6px', transition: 'color .2s' }}>{label}</label>
       <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows}
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-        style={{ width: '100%', padding: '10px 14px', background: focused ? 'var(--dax-coral-soft)' : 'var(--dax-surface)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' as const, boxSizing: 'border-box' as const, transition: 'all .2s' }}/>
+        style={{ width: '100%', padding: '10px 14px', background: focused ? 'var(--dax-coral-soft)' : 'var(--dax-surface)', border: `1px solid ${focused ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-3)'}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', resize: 'vertical' as const, boxSizing: 'border-box' as const, transition: 'all .2s' }} />
     </div>
   );
 }
@@ -205,7 +215,7 @@ function Toggle({ label, desc, checked, onChange }: any) {
         {desc && <p style={{ fontSize: '11px', color: 'var(--dax-white-35)' }}>{desc}</p>}
       </div>
       <div onClick={() => onChange(!checked)} style={{ width: '38px', height: '21px', borderRadius: '12px', background: checked ? '#FF5C35' : 'var(--dax-border)', position: 'relative', cursor: 'pointer', transition: 'background .2s', flexShrink: 0 }}>
-        <div style={{ position: 'absolute', top: '2.5px', left: checked ? '19px' : '2.5px', width: '16px', height: '16px', borderRadius: '50%', background: 'var(--dax-surface)', transition: 'left .2s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }}/>
+        <div style={{ position: 'absolute', top: '2.5px', left: checked ? '19px' : '2.5px', width: '16px', height: '16px', borderRadius: '50%', background: 'var(--dax-surface)', transition: 'left .2s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
       </div>
     </div>
   );
@@ -225,16 +235,16 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
   const [customTax, setCustomTax] = useState('');
   const [activeTab, setActiveTab] = useState('basic');
 
-  const margin  = calcMargin(form.price, form.cost);
+  const margin = calcMargin(form.price, form.cost);
   const taxRate = form.taxRate === 'custom' ? customTax : form.taxRate;
   const taxCalc = calcTaxAmount(form.price, taxRate, form.taxIncluded);
   const priceWithTax = form.taxIncluded ? parseFloat(form.price || '0') : taxCalc.base + taxCalc.tax;
 
   const TABS = [
-    { id: 'basic',     label: 'General' },
-    { id: 'pricing',   label: 'Precio e IVA' },
+    { id: 'basic', label: 'General' },
+    { id: 'pricing', label: 'Precio e IVA' },
     { id: 'inventory', label: 'Inventario' },
-    { id: 'extra',     label: 'Más info' },
+    { id: 'extra', label: 'Más info' },
   ];
 
   const f = (key: keyof ProductForm) => (v: any) => setForm((p: ProductForm) => ({ ...p, [key]: v }));
@@ -243,14 +253,14 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', overflow: 'auto', background: 'var(--dax-overlay)', backdropFilter: 'blur(8px)' }}>
       <div style={{ width: '100%', maxWidth: '680px', background: 'var(--dax-bg)', border: '1px solid rgba(255,92,53,0.18)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)', animation: 'modalOpen .25s cubic-bezier(.22,1,.36,1)', marginTop: '20px' }}>
         <div style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(255,92,53,0.4),transparent)' }}/>
+          <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(255,92,53,0.4),transparent)' }} />
         </div>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Package size={17} color="#FF5C35"/>
+              <Package size={17} color="#FF5C35" />
             </div>
             <div>
               <h2 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--dax-text-primary)', letterSpacing: '-.02em', margin: 0 }}>
@@ -262,7 +272,7 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
             </div>
           </div>
           <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--dax-surface-2)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            <X size={14} color="rgba(255,255,255,0.5)"/>
+            <X size={14} color="rgba(255,255,255,0.5)" />
           </button>
         </div>
 
@@ -284,21 +294,21 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '16px', alignItems: 'start' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <Field label="Nombre del producto" value={form.name} onChange={f('name')} placeholder="Ej: Coca Cola 350ml" required icon={Package}/>
-                  <TextareaField label="Descripción" value={form.description} onChange={f('description')} placeholder="Descripción visible en el catálogo online..."/>
+                  <Field label="Nombre del producto" value={form.name} onChange={f('name')} placeholder="Ej: Coca Cola 350ml" required icon={Package} />
+                  <TextareaField label="Descripción" value={form.description} onChange={f('description')} placeholder="Descripción visible en el catálogo online..." />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <Field label="Categoría" value={form.category} onChange={f('category')} placeholder="Bebidas, Lácteos..." icon={Tag}/>
+                    <Field label="Categoría" value={form.category} onChange={f('category')} placeholder="Bebidas, Lácteos..." icon={Tag} />
                     <SelectField label="Unidad de medida" value={form.unit} onChange={f('unit')} icon={Scale}
-                      options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))}/>
+                      options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))} />
                   </div>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'var(--dax-text-muted)', marginBottom: '8px' }}>Imagen</label>
-                  <ImageUploader value={form.imageUrl} onChange={f('imageUrl')}/>
+                  <ImageUploader value={form.imageUrl} onChange={f('imageUrl')} />
                 </div>
               </div>
 
-              <SectionTitle title="Identificación" desc="Códigos para búsqueda y escaneo"/>
+              <SectionTitle title="Identificación" desc="Códigos para búsqueda y escaneo" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <Field label="SKU / Código interno" value={form.sku} onChange={f('sku')} placeholder="CC-231" icon={Hash}
                   suffix={
@@ -306,31 +316,31 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
                       style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,92,53,0.7)', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '5px', padding: '3px 7px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' as const }}>
                       Generar
                     </button>
-                  }/>
-                <Field label="Código de barras" value={form.barcode} onChange={f('barcode')} placeholder="7501234567890" icon={Barcode}/>
+                  } />
+                <Field label="Código de barras" value={form.barcode} onChange={f('barcode')} placeholder="7501234567890" icon={Barcode} />
               </div>
 
               <Toggle label="Producto activo"
                 desc="Visible en el POS y catálogo online"
-                checked={form.active} onChange={f('active')}/>
+                checked={form.active} onChange={f('active')} />
             </div>
           )}
 
           {/* ── PRECIO E IVA ── */}
           {activeTab === 'pricing' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <SectionTitle title="Precios" desc="Configura precio de venta, costo y margen"/>
+              <SectionTitle title="Precios" desc="Configura precio de venta, costo y margen" />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <Field label="Precio de venta" value={form.price} onChange={f('price')} type="number" placeholder="0" icon={DollarSign}
-                  hint={form.taxIncluded ? 'IVA incluido' : 'Sin IVA'}/>
-                <Field label="Costo / Precio compra" value={form.cost} onChange={f('cost')} type="number" placeholder="0" icon={TrendingUp}/>
+                  hint={form.taxIncluded ? 'IVA incluido' : 'Sin IVA'} />
+                <Field label="Costo / Precio compra" value={form.cost} onChange={f('cost')} type="number" placeholder="0" icon={TrendingUp} />
               </div>
 
               {/* Margen */}
               {margin && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: parseFloat(margin) >= 20 ? 'var(--dax-success-bg)' : parseFloat(margin) >= 10 ? 'var(--dax-warning-bg)' : 'var(--dax-danger-bg)', border: `1px solid ${parseFloat(margin) >= 20 ? 'rgba(61,191,127,0.2)' : parseFloat(margin) >= 10 ? 'rgba(240,160,48,0.2)' : 'rgba(224,80,80,0.2)'}`, borderRadius: '10px' }}>
-                  <TrendingUp size={14} color={parseFloat(margin) >= 20 ? '#3DBF7F' : parseFloat(margin) >= 10 ? '#F0A030' : '#E05050'}/>
+                  <TrendingUp size={14} color={parseFloat(margin) >= 20 ? '#3DBF7F' : parseFloat(margin) >= 10 ? '#F0A030' : '#E05050'} />
                   <span style={{ fontSize: '12px', color: 'var(--dax-white-60)' }}>Margen de ganancia:</span>
                   <span style={{ fontSize: '15px', fontWeight: 800, color: parseFloat(margin) >= 20 ? '#3DBF7F' : parseFloat(margin) >= 10 ? '#F0A030' : '#E05050' }}>{margin}%</span>
                   <span style={{ fontSize: '11px', color: 'var(--dax-white-35)', marginLeft: 'auto' }}>
@@ -339,17 +349,17 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
                 </div>
               )}
 
-              <SectionTitle title="Configuración de IVA" desc="Impuesto al Valor Agregado"/>
+              <SectionTitle title="Configuración de IVA" desc="Impuesto al Valor Agregado" />
 
               <Toggle label="Precio incluye IVA"
                 desc={form.taxIncluded ? 'El precio ya tiene el IVA incluido' : 'El IVA se suma al precio de venta'}
-                checked={form.taxIncluded} onChange={f('taxIncluded')}/>
+                checked={form.taxIncluded} onChange={f('taxIncluded')} />
 
               <SelectField label="Tasa de IVA" value={form.taxRate} onChange={f('taxRate')} icon={Percent}
-                options={TAX_RATES}/>
+                options={TAX_RATES} />
 
               {form.taxRate === 'custom' && (
-                <Field label="Tasa personalizada (%)" value={customTax} onChange={setCustomTax} type="number" placeholder="0" icon={Percent}/>
+                <Field label="Tasa personalizada (%)" value={customTax} onChange={setCustomTax} type="number" placeholder="0" icon={Percent} />
               )}
 
               {/* Desglose IVA */}
@@ -376,12 +386,12 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
           {/* ── INVENTARIO ── */}
           {activeTab === 'inventory' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <SectionTitle title="Control de inventario" desc="Stock mínimo y alertas"/>
+              <SectionTitle title="Control de inventario" desc="Stock mínimo y alertas" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <Field label="Stock mínimo (alerta)" value={form.minStock} onChange={f('minStock')} type="number" placeholder="5" icon={AlertCircle}
-                  hint="Alerta cuando llegue a este nivel"/>
+                  hint="Alerta cuando llegue a este nivel" />
                 <SelectField label="Unidad de medida" value={form.unit} onChange={f('unit')} icon={Scale}
-                  options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))}/>
+                  options={UNITS.map(u => ({ value: u, label: u.charAt(0).toUpperCase() + u.slice(1) }))} />
               </div>
               <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px' }}>
                 <p style={{ fontSize: '12px', color: 'var(--dax-white-35)', lineHeight: 1.6 }}>
@@ -394,19 +404,19 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
           {/* ── EXTRA ── */}
           {activeTab === 'extra' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <SectionTitle title="Información adicional" desc="Marca, proveedor y notas internas"/>
+              <SectionTitle title="Información adicional" desc="Marca, proveedor y notas internas" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <Field label="Marca" value={form.brand} onChange={f('brand')} placeholder="Coca Cola, Nike..." icon={Star}/>
-                <Field label="Proveedor" value={form.supplier} onChange={f('supplier')} placeholder="Distribuidora..." icon={Truck}/>
+                <Field label="Marca" value={form.brand} onChange={f('brand')} placeholder="Coca Cola, Nike..." icon={Star} />
+                <Field label="Proveedor" value={form.supplier} onChange={f('supplier')} placeholder="Distribuidora..." icon={Truck} />
               </div>
-              <TextareaField label="Notas internas" value={form.notes} onChange={f('notes')} placeholder="Notas para el equipo (no visibles para clientes)..." rows={3}/>
+              <TextareaField label="Notas internas" value={form.notes} onChange={f('notes')} placeholder="Notas para el equipo (no visibles para clientes)..." rows={3} />
             </div>
           )}
 
           {/* Error */}
           {error && (
             <div style={{ display: 'flex', gap: '8px', padding: '10px 14px', background: 'var(--dax-danger-bg)', border: '1px solid rgba(224,80,80,0.2)', borderRadius: '10px', marginTop: '14px', animation: 'shake .3s ease' }}>
-              <AlertCircle size={14} color="#E07070" style={{ flexShrink: 0, marginTop: '1px' }}/>
+              <AlertCircle size={14} color="#E07070" style={{ flexShrink: 0, marginTop: '1px' }} />
               <p style={{ fontSize: '12px', color: '#E07070' }}>{error}</p>
             </div>
           )}
@@ -419,7 +429,7 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
           </button>
           <button type="button" onClick={onSave} disabled={saving}
             style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', background: saving ? 'var(--dax-coral-border)' : 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: saving ? 'rgba(255,92,53,0.5)' : '#fff', fontSize: '13px', fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px', boxShadow: saving ? 'none' : '0 4px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}>
-            {saving ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }}/> Guardando...</> : <><Check size={13}/> {editId ? 'Guardar cambios' : 'Crear producto'}</>}
+            {saving ? <><Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> Guardando...</> : <><Check size={13} /> {editId ? 'Guardar cambios' : 'Crear producto'}</>}
           </button>
         </div>
       </div>
@@ -430,7 +440,7 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
 // ── Product Card ──────────────────────────────────────────────────────────────
 function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: () => void; onDelete: () => void }) {
   const stock = product.inventory?.[0]?.quantity ?? null;
-  const meta  = product.metadata ?? {};
+  const meta = product.metadata ?? {};
   const taxRate = meta.taxRate ?? 0;
 
   return (
@@ -441,8 +451,8 @@ function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: 
       {/* Imagen */}
       <div style={{ position: 'relative', height: '120px', background: 'var(--dax-surface)' }}>
         {product.imageUrl
-          ? <img src={getImageUrl(product.imageUrl) ?? product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={32} color="rgba(255,255,255,0.1)"/></div>
+          ? <img src={getImageUrl(product.imageUrl) ?? product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={32} color="rgba(255,255,255,0.1)" /></div>
         }
         {!product.active && <div style={{ position: 'absolute', inset: 0, background: 'var(--dax-overlay-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-primary)', background: 'var(--dax-overlay)', padding: '3px 8px', borderRadius: '6px' }}>INACTIVO</span></div>}
         {stock !== null && stock <= (meta.minStock ?? 5) && stock > 0 && (
@@ -478,12 +488,12 @@ function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: 
           <button onClick={onEdit} style={{ flex: 1, padding: '7px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'var(--dax-white-60)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', transition: 'all .15s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--dax-coral-border)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--dax-surface-3)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-white-60)'; }}>
-            <Pencil size={11}/> Editar
+            <Pencil size={11} /> Editar
           </button>
           <button onClick={onDelete} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(224,80,80,0.15)', background: 'transparent', color: 'rgba(224,80,80,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(224,80,80,0.4)'; (e.currentTarget as HTMLElement).style.color = '#E07070'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(224,80,80,0.15)'; (e.currentTarget as HTMLElement).style.color = 'rgba(224,80,80,0.4)'; }}>
-            <Trash2 size={13}/>
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
@@ -496,15 +506,15 @@ export default function ProductsPage() {
   const { industry } = useAuth();
   const qc = useQueryClient();
 
-  const [showForm,       setShowForm]       = useState(false);
-  const [search,         setSearch]         = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [activeFilter,   setActiveFilter]   = useState<'all'|'active'|'inactive'>('all');
-  const [form,           setForm]           = useState<ProductForm>(emptyForm);
-  const [editId,         setEditId]         = useState<string | null>(null);
-  const [error,          setError]          = useState('');
-  const [confirmDelete,  setConfirmDelete]  = useState<Product | null>(null);
-  const [viewMode,       setViewMode]       = useState<'grid'|'list'>('grid');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: rawProducts = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -535,23 +545,23 @@ export default function ProductsPage() {
     if (!form.price || parseFloat(form.price) <= 0) return setError('El precio es requerido');
     const taxRate = form.taxRate === 'custom' ? '0' : form.taxRate;
     const payload = {
-      name:        form.name.trim(),
+      name: form.name.trim(),
       description: form.description || undefined,
-      category:    form.category    || undefined,
-      sku:         form.sku         || undefined,
-      barcode:     form.barcode     || undefined,
-      price:       parseFloat(form.price),
-      cost:        form.cost ? parseFloat(form.cost) : undefined,
-      imageUrl:    form.imageUrl    || undefined,
-      active:      form.active,
+      category: form.category || undefined,
+      sku: form.sku || undefined,
+      barcode: form.barcode || undefined,
+      price: parseFloat(form.price),
+      cost: form.cost ? parseFloat(form.cost) : undefined,
+      imageUrl: form.imageUrl || undefined,
+      active: form.active,
       metadata: {
-        taxRate:     parseFloat(taxRate),
+        taxRate: parseFloat(taxRate),
         taxIncluded: form.taxIncluded,
-        minStock:    parseInt(form.minStock) || 5,
-        unit:        form.unit,
-        brand:       form.brand    || undefined,
-        supplier:    form.supplier || undefined,
-        notes:       form.notes    || undefined,
+        minStock: parseInt(form.minStock) || 5,
+        unit: form.unit,
+        brand: form.brand || undefined,
+        supplier: form.supplier || undefined,
+        notes: form.notes || undefined,
       },
     };
     saveMutation.mutate(payload);
@@ -573,14 +583,14 @@ export default function ProductsPage() {
 
   const products = (rawProducts as Product[]).filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase()) || p.barcode?.includes(search);
-    const matchCat    = !categoryFilter || p.category === categoryFilter;
+    const matchCat = !categoryFilter || p.category === categoryFilter;
     const matchActive = activeFilter === 'all' || (activeFilter === 'active' ? p.active : !p.active);
     return matchSearch && matchCat && matchActive;
   });
 
   const stats = {
-    total:    (rawProducts as Product[]).length,
-    active:   (rawProducts as Product[]).filter((p: Product) => p.active).length,
+    total: (rawProducts as Product[]).length,
+    active: (rawProducts as Product[]).filter((p: Product) => p.active).length,
     lowStock: (rawProducts as Product[]).filter((p: Product) => { const s = p.inventory?.[0]?.quantity ?? 99; return s <= ((p.metadata as any)?.minStock ?? 5) && s > 0; }).length,
     outStock: (rawProducts as Product[]).filter((p: Product) => (p.inventory?.[0]?.quantity ?? 1) === 0).length,
   };
@@ -598,17 +608,17 @@ export default function ProductsPage() {
         </div>
         <button onClick={() => { setForm(emptyForm); setEditId(null); setError(''); setShowForm(true); }}
           style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', border: 'none', borderRadius: '11px', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}>
-          <Plus size={15}/> Nuevo producto
+          <Plus size={15} /> Nuevo producto
         </button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px', marginBottom: '20px' }}>
         {[
-          { label: 'Total',       value: stats.total,    color: 'var(--dax-coral)' },
-          { label: 'Activos',     value: stats.active,   color: 'var(--dax-success)' },
-          { label: 'Stock bajo',  value: stats.lowStock, color: 'var(--dax-amber)' },
-          { label: 'Agotados',    value: stats.outStock, color: 'var(--dax-danger)' },
+          { label: 'Total', value: stats.total, color: 'var(--dax-coral)' },
+          { label: 'Activos', value: stats.active, color: 'var(--dax-success)' },
+          { label: 'Stock bajo', value: stats.lowStock, color: 'var(--dax-amber)' },
+          { label: 'Agotados', value: stats.outStock, color: 'var(--dax-danger)' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ padding: '14px 16px', background: 'var(--dax-surface)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px' }}>
             <p style={{ fontSize: '22px', fontWeight: 900, color, letterSpacing: '-.02em' }}>{value}</p>
@@ -620,11 +630,11 @@ export default function ProductsPage() {
       {/* Filtros */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-          <Search size={13} color="rgba(255,255,255,0.25)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+          <Search size={13} color="rgba(255,255,255,0.25)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nombre, SKU o código de barras..."
             style={{ width: '100%', padding: '9px 14px 9px 34px', background: 'var(--dax-surface-2)', border: `1px solid ${S.border}`, borderRadius: '10px', color: 'var(--dax-text-primary)', fontSize: '13px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const }}
             onFocus={e => { e.target.style.borderColor = 'rgba(255,92,53,0.4)'; }}
-            onBlur={e => { e.target.style.borderColor = S.border; }}/>
+            onBlur={e => { e.target.style.borderColor = S.border; }} />
         </div>
 
         <div style={{ position: 'relative' }}>
@@ -633,11 +643,11 @@ export default function ProductsPage() {
             <option value="">Todas las categorías</option>
             {(categories as string[]).map(c => <option key={c} value={c} style={{ background: 'var(--dax-bg)' }}>{c}</option>)}
           </select>
-          <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}/>
+          <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
         </div>
 
         <div style={{ display: 'flex', gap: '4px' }}>
-          {(['all','active','inactive'] as const).map(f => (
+          {(['all', 'active', 'inactive'] as const).map(f => (
             <button key={f} onClick={() => setActiveFilter(f)}
               style={{ padding: '8px 12px', borderRadius: '9px', border: `1px solid ${activeFilter === f ? 'rgba(255,92,53,0.35)' : S.border}`, background: activeFilter === f ? 'var(--dax-coral-soft)' : 'transparent', color: activeFilter === f ? '#FF5C35' : S.muted, fontSize: '11px', fontWeight: activeFilter === f ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
               {f === 'all' ? 'Todos' : f === 'active' ? 'Activos' : 'Inactivos'}
@@ -649,12 +659,12 @@ export default function ProductsPage() {
       {/* Grid de productos */}
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '60px' }}>
-          <Loader2 size={28} color="rgba(255,92,53,0.5)" style={{ animation: 'spin .7s linear infinite', margin: '0 auto 12px', display: 'block' }}/>
+          <Loader2 size={28} color="rgba(255,92,53,0.5)" style={{ animation: 'spin .7s linear infinite', margin: '0 auto 12px', display: 'block' }} />
           <p style={{ fontSize: '13px', color: S.muted }}>Cargando productos...</p>
         </div>
       ) : products.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px' }}>
-          <Package size={40} color="rgba(255,255,255,0.1)" style={{ margin: '0 auto 16px', display: 'block' }}/>
+          <Package size={40} color="rgba(255,255,255,0.1)" style={{ margin: '0 auto 16px', display: 'block' }} />
           <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-white-35)', marginBottom: '8px' }}>
             {search || categoryFilter ? 'Sin resultados' : 'Sin productos'}
           </p>
@@ -665,7 +675,7 @@ export default function ProductsPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '12px' }}>
           {products.map((p: Product) => (
-            <ProductCard key={p.id} product={p} onEdit={() => openEdit(p)} onDelete={() => setConfirmDelete(p)}/>
+            <ProductCard key={p.id} product={p} onEdit={() => openEdit(p)} onDelete={() => setConfirmDelete(p)} />
           ))}
         </div>
       )}
@@ -685,7 +695,7 @@ export default function ProductsPage() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: 'var(--dax-overlay)', backdropFilter: 'blur(8px)' }}>
           <div style={{ width: '100%', maxWidth: '360px', background: 'var(--dax-bg)', border: '1px solid rgba(224,80,80,0.25)', borderRadius: '16px', padding: '24px', animation: 'modalOpen .2s ease' }}>
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--dax-danger-bg)', border: '1px solid rgba(224,80,80,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 0 16px' }}>
-              <Trash2 size={20} color="#E07070"/>
+              <Trash2 size={20} color="#E07070" />
             </div>
             <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--dax-text-primary)', marginBottom: '6px' }}>¿Eliminar producto?</h3>
             <p style={{ fontSize: '13px', color: S.muted, lineHeight: 1.6, marginBottom: '20px' }}>
