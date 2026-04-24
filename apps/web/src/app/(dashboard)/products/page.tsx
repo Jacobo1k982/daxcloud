@@ -413,7 +413,7 @@ function ProductFormModal({ form, setForm, editId, onSave, onClose, saving, erro
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(8,12,20,0.8)' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'var(--dax-surface)' }}>
           <button type="button" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'var(--dax-white-35)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
             Cancelar
           </button>
@@ -434,7 +434,7 @@ function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: 
   const taxRate = meta.taxRate ?? 0;
 
   return (
-    <div style={{ background: 'rgba(10,18,32,0.95)', border: `1px solid ${!product.active ? 'var(--dax-surface-2)' : 'var(--dax-surface-2)'}`, borderRadius: '14px', overflow: 'hidden', transition: 'all .2s', opacity: product.active ? 1 : .5 }}
+    <div style={{ background: 'var(--dax-surface)', border: `1px solid ${!product.active ? 'var(--dax-surface-2)' : 'var(--dax-surface-2)'}`, borderRadius: '14px', overflow: 'hidden', transition: 'all .2s', opacity: product.active ? 1 : .5 }}
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--dax-coral-border)'; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = !product.active ? 'var(--dax-surface-2)' : 'var(--dax-surface-2)'; }}>
 

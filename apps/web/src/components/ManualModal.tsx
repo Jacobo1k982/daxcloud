@@ -940,7 +940,7 @@ export function ManualModal({ onClose }: { onClose:() => void }) {
         <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,92,53,0.4),transparent)', zIndex:1 }}/>
 
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 22px', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0, background:'rgba(8,12,20,0.95)', backdropFilter:'blur(20px)', position:'relative', zIndex:2 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 22px', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0, background:'var(--dax-surface)', backdropFilter:'blur(20px)', position:'relative', zIndex:2 }}>
           <div style={{ display:'flex', alignItems:'center', gap:'10px', flex:1 }}>
             <div style={{ width:'34px', height:'34px', borderRadius:'9px', background: 'var(--dax-coral-soft)', border:'1px solid rgba(255,92,53,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
               <BookOpen size={15} color="#FF5C35"/>
@@ -997,7 +997,7 @@ export function ManualModal({ onClose }: { onClose:() => void }) {
         <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
 
           {/* Sidebar */}
-          <div className={`manual-sidebar ${mobileNav?'mobile-open':''}`} style={{ width:'220px', borderRight:'1px solid rgba(255,255,255,0.06)', overflowY:'auto', padding:'14px 8px', flexShrink:0, background:'rgba(6,10,18,0.98)' }}>
+          <div className={`manual-sidebar ${mobileNav?'mobile-open':''}`} style={{ width:'220px', borderRight:'1px solid rgba(255,255,255,0.06)', overflowY:'auto', padding:'14px 8px', flexShrink:0, background:'var(--dax-surface)' }}>
             {SECTIONS.map(section => {
               const Icon = section.icon;
               const isActive = section.id===activeSection;

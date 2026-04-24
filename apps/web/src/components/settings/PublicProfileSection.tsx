@@ -273,7 +273,7 @@ export function PublicProfileSection() {
             <p style={{ fontSize: '12px', color: 'var(--dax-white-35)', marginTop: '2px' }}>Así lo verán tus clientes en el catálogo online</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'rgba(8,12,20,0.5)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '10px', flexWrap: 'wrap' as const }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'var(--dax-surface)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '10px', flexWrap: 'wrap' as const }}>
           <Globe size={13} color="rgba(255,92,53,0.6)" />
           <span style={{ flex: 1, fontSize: '12px', color: 'var(--dax-white-60)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{publicUrl}</span>
           <button onClick={handleCopyLink} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,92,53,0.2)', background: 'var(--dax-coral-soft)', color: 'var(--dax-coral)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -379,7 +379,7 @@ export function PublicProfileSection() {
       </Section>
 
       {/* Save bar fija */}
-      <div style={{ position: 'sticky', bottom: '16px', display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '12px 16px', background: 'rgba(8,12,20,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+      <div style={{ position: 'sticky', bottom: '16px', display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '12px 16px', background: 'var(--dax-surface)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,92,53,0.2)', borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
         <button onClick={handleSaveAll} disabled={saving}
           style={{ padding: '11px 24px', background: saving ? 'var(--dax-coral-border)' : 'linear-gradient(135deg,#FF5C35,#FF3D1F)', border: 'none', borderRadius: '10px', color: saving ? 'rgba(255,92,53,0.5)' : '#fff', fontSize: '13px', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '7px', boxShadow: saving ? 'none' : '0 4px 16px rgba(255,92,53,0.3)', transition: 'all .2s' }}>
           {saving

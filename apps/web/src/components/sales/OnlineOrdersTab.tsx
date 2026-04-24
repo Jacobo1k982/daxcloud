@@ -60,7 +60,7 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
 
   return (
     <div style={{
-      background: 'rgba(10,18,32,0.95)',
+      background: 'var(--dax-surface)',
       border: `1px solid ${order.status === 'new' ? 'var(--dax-coral-border)' : 'var(--dax-surface-2)'}`,
       borderRadius: '14px',
       overflow: 'hidden',
