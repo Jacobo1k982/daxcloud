@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { OnlineOrdersService } from './online-orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('online-orders')
 @UseGuards(JwtAuthGuard)
