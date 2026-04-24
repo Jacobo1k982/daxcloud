@@ -106,10 +106,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div style={{
               width: '32px', height: '32px', borderRadius: '9px',
-              background: 'rgba(255,92,53,0.15)', border: '1px solid rgba(255,92,53,0.25)',
+              background: 'var(--dax-coral-border)', border: '1px solid rgba(255,92,53,0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-coral)' }}>
                 {user?.firstName?.[0]?.toUpperCase() ?? '?'}
               </span>
             </div>

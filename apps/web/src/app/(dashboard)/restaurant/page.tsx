@@ -15,32 +15,32 @@ type Tab = 'tables' | 'orders' | 'kitchen' | 'reservations' | 'combos' | 'modifi
 
 const TABLE_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   available: { label: 'Disponible', color: 'var(--dax-success)', bg: 'var(--dax-success-bg)' },
-  occupied:  { label: 'Ocupada',    color: '#F97316',            bg: 'rgba(249,115,22,.12)' },
-  reserved:  { label: 'Reservada',  color: '#F0A030',            bg: 'rgba(240,160,48,.12)' },
-  cleaning:  { label: 'Limpieza',   color: '#5AAAF0',            bg: 'rgba(90,170,240,.12)' },
+  occupied:  { label: 'Ocupada',    color: 'var(--dax-amber)',            bg: 'rgba(249,115,22,.12)' },
+  reserved:  { label: 'Reservada',  color: 'var(--dax-amber)',            bg: 'rgba(240,160,48,.12)' },
+  cleaning:  { label: 'Limpieza',   color: 'var(--dax-blue)',            bg: 'rgba(90,170,240,.12)' },
 };
 
 const ORDER_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  open:        { label: 'Abierta',   color: '#5AAAF0',            bg: 'rgba(90,170,240,.12)' },
-  in_progress: { label: 'En cocina', color: '#F0A030',            bg: 'rgba(240,160,48,.12)' },
+  open:        { label: 'Abierta',   color: 'var(--dax-blue)',            bg: 'rgba(90,170,240,.12)' },
+  in_progress: { label: 'En cocina', color: 'var(--dax-amber)',            bg: 'rgba(240,160,48,.12)' },
   ready:       { label: 'Lista',     color: 'var(--dax-success)', bg: 'var(--dax-success-bg)' },
   completed:   { label: 'Cerrada',   color: 'var(--dax-text-muted)', bg: 'var(--dax-surface-2)' },
   cancelled:   { label: 'Cancelada', color: 'var(--dax-danger)',  bg: 'var(--dax-danger-bg)' },
 };
 
 const RESERVATION_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Pendiente',  color: '#F0A030',            bg: 'rgba(240,160,48,.12)' },
+  pending:   { label: 'Pendiente',  color: 'var(--dax-amber)',            bg: 'rgba(240,160,48,.12)' },
   confirmed: { label: 'Confirmada', color: 'var(--dax-success)', bg: 'var(--dax-success-bg)' },
-  seated:    { label: 'Sentada',    color: '#F97316',            bg: 'rgba(249,115,22,.12)' },
+  seated:    { label: 'Sentada',    color: 'var(--dax-amber)',            bg: 'rgba(249,115,22,.12)' },
   completed: { label: 'Completada', color: 'var(--dax-text-muted)', bg: 'var(--dax-surface-2)' },
   cancelled: { label: 'Cancelada',  color: 'var(--dax-danger)',  bg: 'var(--dax-danger-bg)' },
   no_show:   { label: 'No asistió', color: 'var(--dax-danger)',  bg: 'var(--dax-danger-bg)' },
 };
 
 const DELIVERY_STATUS: Record<string, { label: string; color: string }> = {
-  pending:           { label: 'Pendiente',      color: '#F0A030' },
-  preparing:         { label: 'Preparando',     color: '#5AAAF0' },
-  out_for_delivery:  { label: 'En camino',      color: '#F97316' },
+  pending:           { label: 'Pendiente',      color: 'var(--dax-amber)' },
+  preparing:         { label: 'Preparando',     color: 'var(--dax-blue)' },
+  out_for_delivery:  { label: 'En camino',      color: 'var(--dax-amber)' },
   delivered:         { label: 'Entregado',      color: 'var(--dax-success)' },
   cancelled:         { label: 'Cancelado',      color: 'var(--dax-danger)' },
 };
@@ -103,7 +103,7 @@ export default function RestaurantPage() {
   const [reservationForm, setReservationForm] = useState({ clientName: '', clientPhone: '', clientEmail: '', tableId: '', partySize: 2, date: '', duration: 90, notes: '', source: 'direct' });
   const [comboForm, setComboForm] = useState({ name: '', description: '', price: 0, availableFrom: '', availableTo: '', daysOfWeek: [] as string[], items: [] as any[] });
   const [modifierForm, setModifierForm] = useState({ name: '', description: '', required: false, multiple: false, minSelect: 0, maxSelect: 1, options: [] as any[] });
-  const [stationForm, setStationForm] = useState({ name: '', description: '', color: '#F97316' });
+  const [stationForm, setStationForm] = useState({ name: '', description: '', color: 'var(--dax-amber)' });
   const [happyHourForm, setHappyHourForm] = useState({ name: '', discount: 0, discountType: 'percentage', startTime: '', endTime: '', daysOfWeek: [] as string[] });
   const [registerForm, setRegisterForm] = useState({ amount: 0, notes: '' });
 
@@ -369,10 +369,10 @@ export default function RestaurantPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px', marginBottom: '16px' }}>
         {[
           { label: 'Mesas ocupadas', value: `${stats?.tablesOccupied ?? 0}/${stats?.tablesTotal ?? 0}`, color: ORANGE },
-          { label: 'Órdenes activas', value: stats?.activeOrders ?? 0, color: '#5AAAF0' },
+          { label: 'Órdenes activas', value: stats?.activeOrders ?? 0, color: 'var(--dax-blue)' },
           { label: 'Listas servir', value: stats?.ordersReady ?? 0, color: 'var(--dax-success)' },
-          { label: 'Delivery activo', value: stats?.pendingDeliveries ?? 0, color: '#A78BFA' },
-          { label: 'Reservas hoy', value: stats?.todayReservations ?? 0, color: '#F0A030' },
+          { label: 'Delivery activo', value: stats?.pendingDeliveries ?? 0, color: 'var(--dax-purple)' },
+          { label: 'Reservas hoy', value: stats?.todayReservations ?? 0, color: 'var(--dax-amber)' },
           { label: 'Ventas hoy', value: formatCurrency(stats?.todayRevenue ?? 0), color: ORANGE, isText: true },
           { label: 'Propinas hoy', value: formatCurrency(stats?.todayTips ?? 0), color: 'var(--dax-success)', isText: true },
         ].map((s, i) => (
@@ -393,7 +393,7 @@ export default function RestaurantPage() {
       )}
 
       {activeHappyHour?.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', background: 'rgba(249,115,22,.08)', border: '1px solid rgba(249,115,22,.2)', borderRadius: 'var(--dax-radius-md)', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', background: 'var(--dax-amber-bg)', border: '1px solid rgba(249,115,22,.2)', borderRadius: 'var(--dax-radius-md)', marginBottom: '14px' }}>
           <Zap size={14} color={ORANGE} />
           <p style={{ fontSize: '13px', fontWeight: 600, color: ORANGE }}>⚡ Happy Hour activo: {activeHappyHour.map((hh: any) => hh.name).join(', ')}</p>
         </div>
@@ -408,8 +408,8 @@ export default function RestaurantPage() {
             <button key={t.id} onClick={() => setTab(t.id)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: 'var(--dax-radius-md)', fontSize: '11px', fontWeight: 600, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .15s', background: active ? ORANGE : 'var(--dax-surface)', color: active ? '#fff' : 'var(--dax-text-muted)', flexShrink: 0 }}>
               <Icon size={12} />
               {t.label}
-              {t.id === 'kitchen' && kitchenOrders.length > 0 && <span style={{ background: '#fff', color: ORANGE, borderRadius: '10px', padding: '1px 5px', fontSize: '9px', fontWeight: 700 }}>{kitchenOrders.length}</span>}
-              {t.id === 'delivery' && stats?.pendingDeliveries > 0 && <span style={{ background: '#fff', color: ORANGE, borderRadius: '10px', padding: '1px 5px', fontSize: '9px', fontWeight: 700 }}>{stats.pendingDeliveries}</span>}
+              {t.id === 'kitchen' && kitchenOrders.length > 0 && <span style={{ background: 'var(--dax-surface)', color: ORANGE, borderRadius: '10px', padding: '1px 5px', fontSize: '9px', fontWeight: 700 }}>{kitchenOrders.length}</span>}
+              {t.id === 'delivery' && stats?.pendingDeliveries > 0 && <span style={{ background: 'var(--dax-surface)', color: ORANGE, borderRadius: '10px', padding: '1px 5px', fontSize: '9px', fontWeight: 700 }}>{stats.pendingDeliveries}</span>}
             </button>
           );
         })}
@@ -426,9 +426,9 @@ export default function RestaurantPage() {
               </div>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {upcomingReservations.slice(0, 5).map((r: any) => (
-                  <div key={r.id} style={{ padding: '8px 12px', background: 'rgba(240,160,48,.08)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(240,160,48,.2)' }}>
+                  <div key={r.id} style={{ padding: '8px 12px', background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(240,160,48,.2)' }}>
                     <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{r.clientName}</p>
-                    <p style={{ fontSize: '11px', color: '#F0A030' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--dax-amber)' }}>
                       {new Date(r.date).toLocaleDateString('es-CR', { day: '2-digit', month: 'short' })} {new Date(r.date).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })} · {r.partySize} personas
                       {r.table && ` · Mesa ${r.table.number}`}
                     </p>
@@ -460,32 +460,32 @@ export default function RestaurantPage() {
                         </div>
                       )}
                       {nextReservation && !activeOrder && (
-                        <div style={{ background: 'rgba(240,160,48,.08)', borderRadius: 'var(--dax-radius-sm)', padding: '6px 8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '10px', color: '#F0A030', fontWeight: 600 }}>
+                        <div style={{ background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-sm)', padding: '6px 8px', marginBottom: '8px' }}>
+                          <p style={{ fontSize: '10px', color: 'var(--dax-amber)', fontWeight: 600 }}>
                             📅 {new Date(nextReservation.date).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })} — {nextReservation.clientName}
                           </p>
                         </div>
                       )}
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                         {table.status === 'available' && (
-                          <button onClick={() => setShowOrderModal({ tableId: table.id })} style={{ flex: 1, padding: '5px', background: ORANGE, color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
+                          <button onClick={() => setShowOrderModal({ tableId: table.id })} style={{ flex: 1, padding: '5px', background: ORANGE, color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
                             Abrir
                           </button>
                         )}
                         {table.status === 'occupied' && activeOrder && (
                           <>
-                            <button onClick={() => setShowCloseModal(activeOrder)} style={{ flex: 1, padding: '5px', background: 'var(--dax-success)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>Cobrar</button>
+                            <button onClick={() => setShowCloseModal(activeOrder)} style={{ flex: 1, padding: '5px', background: 'var(--dax-success)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>Cobrar</button>
                             <button onClick={() => setShowAddItemModal(activeOrder)} style={{ padding: '5px 7px', background: 'var(--dax-surface-2)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', color: 'var(--dax-text-muted)', cursor: 'pointer' }}>+</button>
                             <button onClick={() => tableStatusMutation.mutate({ id: table.id, status: 'cleaning' })} style={{ padding: '5px 7px', background: 'var(--dax-surface-2)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', cursor: 'pointer' }}>🧹</button>
                           </>
                         )}
                         {table.status === 'reserved' && (
-                          <button onClick={() => reservationStatusMutation.mutate({ id: table.reservations[0]?.id, status: 'seated' })} style={{ flex: 1, padding: '5px', background: '#F0A030', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
+                          <button onClick={() => reservationStatusMutation.mutate({ id: table.reservations[0]?.id, status: 'seated' })} style={{ flex: 1, padding: '5px', background: 'var(--dax-amber)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>
                             Sentar
                           </button>
                         )}
                         {table.status === 'cleaning' && (
-                          <button onClick={() => tableStatusMutation.mutate({ id: table.id, status: 'available' })} style={{ flex: 1, padding: '5px', background: 'var(--dax-success)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>Lista ✓</button>
+                          <button onClick={() => tableStatusMutation.mutate({ id: table.id, status: 'available' })} style={{ flex: 1, padding: '5px', background: 'var(--dax-success)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-sm)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}>Lista ✓</button>
                         )}
                       </div>
                     </div>
@@ -499,7 +499,7 @@ export default function RestaurantPage() {
                 <div className="dax-card" style={{ padding: '48px', textAlign: 'center', gridColumn: '1/-1' }}>
                   <Utensils size={36} color="var(--dax-text-muted)" style={{ margin: '0 auto 12px', display: 'block', opacity: .4 }} />
                   <p style={{ color: 'var(--dax-text-muted)', fontSize: '13px', marginBottom: '12px' }}>No hay mesas. Crea la primera.</p>
-                  <button onClick={() => setShowTableModal(true)} style={{ background: ORANGE, color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                  <button onClick={() => setShowTableModal(true)} style={{ background: ORANGE, color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
                     + Agregar mesa
                   </button>
                 </div>
@@ -541,7 +541,7 @@ export default function RestaurantPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                       <span style={{ fontSize: '11px', fontWeight: 600, color: sc.color, background: sc.bg, padding: '2px 8px', borderRadius: '8px' }}>{sc.label}</span>
                       <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{order.table ? `Mesa ${order.table.number}` : 'Sin mesa'}</p>
-                      {order.delivery && <span style={{ fontSize: '11px', background: 'rgba(167,139,250,.12)', color: '#A78BFA', padding: '2px 8px', borderRadius: '8px', fontWeight: 600 }}>🛵 Delivery</span>}
+                      {order.delivery && <span style={{ fontSize: '11px', background: 'rgba(167,139,250,.12)', color: 'var(--dax-purple)', padding: '2px 8px', borderRadius: '8px', fontWeight: 600 }}>🛵 Delivery</span>}
                       <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}><Clock size={10} style={{ display: 'inline' }} /> {elapsed(order.createdAt)}</p>
                     </div>
                     <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{order.user?.firstName} · {order.items?.length} items</p>
@@ -560,13 +560,13 @@ export default function RestaurantPage() {
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {order.status === 'open' && (
                     <>
-                      <button onClick={() => orderStatusMutation.mutate({ id: order.id, status: 'in_progress' })} style={{ background: '#F0A030', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Enviar cocina</button>
+                      <button onClick={() => orderStatusMutation.mutate({ id: order.id, status: 'in_progress' })} style={{ background: 'var(--dax-amber)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Enviar cocina</button>
                       <button onClick={() => setShowAddItemModal(order)} className="dax-btn-secondary" style={{ fontSize: '11px', padding: '6px 12px' }}>+ Items</button>
                     </>
                   )}
                   {order.status === 'ready' && (
                     <>
-                      <button onClick={() => setShowCloseModal(order)} style={{ background: 'var(--dax-success)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <button onClick={() => setShowCloseModal(order)} style={{ background: 'var(--dax-success)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <CheckCircle size={12} /> Cobrar
                       </button>
                       <button onClick={() => { setShowSplitModal(order); setSplitPayments([{ amount: 0, tip: 0, paymentMethod: 'cash', guestName: '' }]); }} style={{ background: 'none', border: '1px solid var(--dax-success)', color: 'var(--dax-success)', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>
@@ -587,7 +587,7 @@ export default function RestaurantPage() {
       {/* ── TAB: COCINA ── */}
       {tab === 'kitchen' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', background: 'rgba(249,115,22,.08)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(249,115,22,.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(249,115,22,.2)' }}>
             <ChefHat size={15} color={ORANGE} />
             <p style={{ fontSize: '13px', fontWeight: 600, color: ORANGE }}>{kitchenOrders.length} orden{kitchenOrders.length !== 1 ? 'es' : ''} activa{kitchenOrders.length !== 1 ? 's' : ''}</p>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -635,10 +635,10 @@ export default function RestaurantPage() {
                                 {item.modifiers.map((m: any) => m.option?.name).join(', ')}
                               </p>
                             )}
-                            {item.notes && <p style={{ fontSize: '10px', color: '#F0A030', fontStyle: 'italic' }}>📝 {item.notes}</p>}
+                            {item.notes && <p style={{ fontSize: '10px', color: 'var(--dax-amber)', fontStyle: 'italic' }}>📝 {item.notes}</p>}
                           </div>
                           {nextMap[item.status] && (
-                            <button onClick={() => itemStatusMutation.mutate({ orderId: order.id, itemId: item.id, status: nextMap[item.status] })} style={{ background: item.status === 'preparing' ? 'var(--dax-success)' : ORANGE, color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-sm)', padding: '4px 8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+                            <button onClick={() => itemStatusMutation.mutate({ orderId: order.id, itemId: item.id, status: nextMap[item.status] })} style={{ background: item.status === 'preparing' ? 'var(--dax-success)' : ORANGE, color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-sm)', padding: '4px 8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
                               {nextLabel[item.status]}
                             </button>
                           )}
@@ -646,7 +646,7 @@ export default function RestaurantPage() {
                       );
                     })}
                   </div>
-                  {order.notes && <div style={{ marginTop: '8px', padding: '6px 10px', background: 'rgba(249,115,22,.08)', borderRadius: 'var(--dax-radius-sm)' }}><p style={{ fontSize: '11px', color: ORANGE }}>📝 {order.notes}</p></div>}
+                  {order.notes && <div style={{ marginTop: '8px', padding: '6px 10px', background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-sm)' }}><p style={{ fontSize: '11px', color: ORANGE }}>📝 {order.notes}</p></div>}
                 </div>
               ))}
             </div>
@@ -690,12 +690,12 @@ export default function RestaurantPage() {
                         {r.notes && <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginTop: '4px', fontStyle: 'italic' }}>{r.notes}</p>}
                       </div>
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                        {r.status === 'pending' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'confirmed' })} style={{ background: 'var(--dax-success)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Confirmar</button>}
-                        {r.status === 'confirmed' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'seated' })} style={{ background: ORANGE, color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Sentar</button>}
-                        {r.status === 'seated' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'completed' })} style={{ background: 'var(--dax-success)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Completar</button>}
+                        {r.status === 'pending' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'confirmed' })} style={{ background: 'var(--dax-success)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Confirmar</button>}
+                        {r.status === 'confirmed' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'seated' })} style={{ background: ORANGE, color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Sentar</button>}
+                        {r.status === 'seated' && <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'completed' })} style={{ background: 'var(--dax-success)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Completar</button>}
                         {['pending', 'confirmed'].includes(r.status) && (
                           <>
-                            <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'no_show' })} style={{ background: 'none', border: '1px solid #F0A030', color: '#F0A030', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>No asistió</button>
+                            <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'no_show' })} style={{ background: 'none', border: '1px solid #F0A030', color: 'var(--dax-amber)', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>No asistió</button>
                             <button onClick={() => reservationStatusMutation.mutate({ id: r.id, status: 'cancelled' })} style={{ background: 'none', border: '1px solid var(--dax-danger)', color: 'var(--dax-danger)', borderRadius: 'var(--dax-radius-md)', padding: '6px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
                           </>
                         )}
@@ -746,7 +746,7 @@ export default function RestaurantPage() {
                   </div>
                 </div>
                 {nextMap[d.status] && (
-                  <button onClick={() => deliveryStatusMutation.mutate({ id: d.id, status: nextMap[d.status] })} style={{ background: ORANGE, color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                  <button onClick={() => deliveryStatusMutation.mutate({ id: d.id, status: nextMap[d.status] })} style={{ background: ORANGE, color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
                     → {nextLabel[d.status]}
                   </button>
                 )}
@@ -803,7 +803,7 @@ export default function RestaurantPage() {
                   <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '3px' }}>{group.name}</p>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     {group.required && <span style={{ fontSize: '10px', background: 'var(--dax-danger-bg)', color: 'var(--dax-danger)', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>Requerido</span>}
-                    {group.multiple && <span style={{ fontSize: '10px', background: 'rgba(90,170,240,.1)', color: '#5AAAF0', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>Múltiple</span>}
+                    {group.multiple && <span style={{ fontSize: '10px', background: 'rgba(90,170,240,.1)', color: 'var(--dax-blue)', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>Múltiple</span>}
                     <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{group.minSelect}–{group.maxSelect} opciones</span>
                   </div>
                 </div>
@@ -829,7 +829,7 @@ export default function RestaurantPage() {
       {tab === 'happyhour' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {activeHappyHour?.length > 0 && (
-            <div style={{ padding: '14px 18px', background: 'rgba(249,115,22,.08)', border: '1px solid rgba(249,115,22,.2)', borderRadius: 'var(--dax-radius-md)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ padding: '14px 18px', background: 'var(--dax-amber-bg)', border: '1px solid rgba(249,115,22,.2)', borderRadius: 'var(--dax-radius-md)', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Zap size={16} color={ORANGE} />
               <p style={{ fontSize: '13px', fontWeight: 700, color: ORANGE }}>⚡ Happy Hour activo ahora: {activeHappyHour.map((hh: any) => `${hh.name} (${hh.discount}${hh.discountType === 'percentage' ? '%' : '₡'} off)`).join(' · ')}</p>
             </div>
@@ -871,7 +871,7 @@ export default function RestaurantPage() {
                     {stats.openShift.user?.firstName} · Desde {new Date(stats.openShift.openedAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                <button onClick={() => setShowRegisterModal('close')} style={{ background: 'var(--dax-danger)', color: '#fff', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                <button onClick={() => setShowRegisterModal('close')} style={{ background: 'var(--dax-danger)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: 'var(--dax-radius-md)', padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
                   Cerrar caja
                 </button>
               </div>
@@ -917,10 +917,10 @@ export default function RestaurantPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
             {[
               { label: 'Ventas hoy',      value: formatCurrency(stats?.todayRevenue ?? 0),  color: ORANGE, isText: true },
-              { label: 'Órdenes hoy',     value: stats?.todayOrdersCount ?? 0,              color: '#5AAAF0' },
+              { label: 'Órdenes hoy',     value: stats?.todayOrdersCount ?? 0,              color: 'var(--dax-blue)' },
               { label: 'Propinas hoy',    value: formatCurrency(stats?.todayTips ?? 0),     color: 'var(--dax-success)', isText: true },
               { label: 'Ventas del mes',  value: formatCurrency(stats?.monthRevenue ?? 0),  color: ORANGE, isText: true },
-              { label: 'Órdenes mes',     value: stats?.monthOrdersCount ?? 0,             color: '#A78BFA' },
+              { label: 'Órdenes mes',     value: stats?.monthOrdersCount ?? 0,             color: 'var(--dax-purple)' },
               { label: 'Tiempo promedio', value: `${stats?.avgOrderTime ?? 0}min`,         color: 'var(--dax-text-muted)', isText: true },
             ].map((s, i) => (
               <div key={i} className="dax-card" style={{ padding: '16px 20px' }}>
@@ -964,7 +964,7 @@ export default function RestaurantPage() {
 
       {/* Modal Nueva Mesa */}
       {showTableModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '420px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva mesa</h2>
@@ -990,7 +990,7 @@ export default function RestaurantPage() {
 
       {/* Modal Nueva Orden */}
       {showOrderModal !== null && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '580px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva orden</h2>
@@ -1065,7 +1065,7 @@ export default function RestaurantPage() {
 
       {/* Modal Agregar Items */}
       {showAddItemModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
@@ -1110,7 +1110,7 @@ export default function RestaurantPage() {
 
       {/* Modal Cobrar */}
       {showCloseModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Cobrar orden</h2>
@@ -1163,7 +1163,7 @@ export default function RestaurantPage() {
 
       {/* Modal Dividir Cuenta */}
       {showSplitModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
@@ -1217,7 +1217,7 @@ export default function RestaurantPage() {
 
       {/* Modal Reservación */}
       {showReservationModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva reservación</h2>
@@ -1261,7 +1261,7 @@ export default function RestaurantPage() {
 
       {/* Modal Combo */}
       {showComboModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '520px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo combo / menú del día</h2>
@@ -1316,7 +1316,7 @@ export default function RestaurantPage() {
 
       {/* Modal Modificador */}
       {showModifierModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '520px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo grupo de modificadores</h2>
@@ -1367,7 +1367,7 @@ export default function RestaurantPage() {
 
       {/* Modal Happy Hour */}
       {showHappyHourModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '460px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo Happy Hour</h2>
@@ -1411,7 +1411,7 @@ export default function RestaurantPage() {
 
       {/* Modal Caja */}
       {showRegisterModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '380px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>{showRegisterModal === 'open' ? 'Abrir caja' : 'Cerrar caja'}</h2>

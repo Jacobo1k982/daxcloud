@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useOnboarding, ONBOARDING_STEPS } from '@/hooks/useOnboarding';
@@ -48,13 +48,13 @@ export function OnboardingChecklist() {
                 style={{ transition: 'stroke-dashoffset .4s ease' }}
               />
             </svg>
-            <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, color: '#FF5C35' }}>
+            <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, color: 'var(--dax-coral)' }}>
               {completedCount}/{total}
             </span>
           </div>
 
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '12px', fontWeight: 700, color: '#F0F4FF', marginBottom: '1px' }}>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '1px' }}>
               Completa tu configuración
             </p>
             <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>

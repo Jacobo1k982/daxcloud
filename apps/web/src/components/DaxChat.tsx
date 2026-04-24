@@ -111,20 +111,20 @@ export function DaxChat() {
         }}>
 
           {/* Header */}
-          <div style={{ padding: '16px 18px', borderBottom: '1px solid rgba(255,92,53,0.1)', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,92,53,0.04)', flexShrink: 0 }}>
+          <div style={{ padding: '16px 18px', borderBottom: '1px solid rgba(255,92,53,0.1)', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--dax-coral-soft)', flexShrink: 0 }}>
             <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 12px rgba(255,92,53,0.35)' }}>
               <Bot size={18} color="#fff" />
             </div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '14px', fontWeight: 700, color: '#F0F4FF', margin: 0, lineHeight: 1.2 }}>Dax</p>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', margin: 0, lineHeight: 1.2 }}>Dax</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3DBF7F', animation: 'blink 2s infinite' }} />
-                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Asistente IA · en línea</span>
+                <span style={{ fontSize: '11px', color: 'var(--dax-white-35)' }}>Asistente IA · en línea</span>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: '6px', borderRadius: '8px', display: 'flex', transition: 'all .15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.15)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; }}>
+            <button onClick={() => setOpen(false)} style={{ background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer', color: 'var(--dax-white-35)', padding: '6px', borderRadius: '8px', display: 'flex', transition: 'all .15s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--dax-coral-border)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--dax-surface-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-white-35)'; }}>
               <X size={16} />
             </button>
           </div>
@@ -144,7 +144,7 @@ export function DaxChat() {
                   borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   background: msg.role === 'user'
                     ? 'linear-gradient(135deg,#FF5C35,#FF3D1F)'
-                    : 'rgba(255,255,255,0.06)',
+                    : 'var(--dax-surface-2)',
                   border: msg.role === 'assistant' ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   fontSize: '13px',
                   lineHeight: 1.65,
@@ -161,7 +161,7 @@ export function DaxChat() {
                 <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Bot size={13} color="#fff" />
                 </div>
-                <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px 16px 16px 4px', display: 'flex', gap: '5px', alignItems: 'center' }}>
+                <div style={{ padding: '12px 16px', background: 'var(--dax-surface-2)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px 16px 16px 4px', display: 'flex', gap: '5px', alignItems: 'center' }}>
                   {[0, 1, 2].map(i => (
                     <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF5C35', animation: `typingDot .9s ${i * 0.2}s ease-in-out infinite` }} />
                   ))}
@@ -174,9 +174,9 @@ export function DaxChat() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
                 {QUICK.map((q, i) => (
                   <button key={i} onClick={() => { setInput(q); setTimeout(() => sendMessage(), 50); }}
-                    style={{ padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,92,53,0.25)', background: 'rgba(255,92,53,0.06)', color: 'rgba(255,92,53,0.8)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.15)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,92,53,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,92,53,0.8)'; }}>
+                    style={{ padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,92,53,0.25)', background: 'var(--dax-coral-soft)', color: 'rgba(255,92,53,0.8)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--dax-coral-border)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--dax-coral-soft)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,92,53,0.8)'; }}>
                     {q}
                   </button>
                 ))}
@@ -197,21 +197,21 @@ export function DaxChat() {
               disabled={loading}
               style={{
                 flex: 1, padding: '10px 14px',
-                background: 'rgba(255,255,255,0.05)',
+                background: 'var(--dax-surface-2)',
                 border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '12px', color: '#F0F4FF',
+                borderRadius: '12px', color: 'var(--dax-text-primary)',
                 fontSize: '13px', fontFamily: 'inherit',
                 outline: 'none', transition: 'all .2s',
               }}
-              onFocus={e => { e.target.style.borderColor = 'rgba(255,92,53,0.4)'; e.target.style.background = 'rgba(255,92,53,0.05)'; }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(255,92,53,0.4)'; e.target.style.background = 'var(--dax-coral-soft)'; }}
+              onBlur={e => { e.target.style.borderColor = 'var(--dax-surface-3)'; e.target.style.background = 'var(--dax-surface-2)'; }}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
               style={{
                 width: '38px', height: '38px', borderRadius: '11px', border: 'none',
-                background: input.trim() && !loading ? 'linear-gradient(135deg,#FF5C35,#FF3D1F)' : 'rgba(255,255,255,0.06)',
+                background: input.trim() && !loading ? 'linear-gradient(135deg,#FF5C35,#FF3D1F)' : 'var(--dax-surface-2)',
                 cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0, transition: 'all .2s',

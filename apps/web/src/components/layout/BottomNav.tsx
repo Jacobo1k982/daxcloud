@@ -89,7 +89,7 @@ export function BottomNav() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {/* Avatar */}
             <div style={{ width: '42px', height: '42px', borderRadius: '13px', background: 'linear-gradient(135deg, rgba(255,92,53,.25), rgba(255,61,31,.15))', border: '1.5px solid rgba(255,92,53,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: '14px', fontWeight: 800, color: '#FF5C35' }}>{initials}</span>
+              <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--dax-coral)' }}>{initials}</span>
             </div>
             <div>
               <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1, marginBottom: '3px' }}>

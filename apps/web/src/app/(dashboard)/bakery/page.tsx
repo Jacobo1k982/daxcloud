@@ -29,25 +29,25 @@ interface Supplier { id: string; name: string; contactName?: string; phone?: str
 // CONSTANTES
 // ══════════════════════════════════════════
 const STATUS_PROD: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  planned: { label: 'Planificado', color: '#4A7FAF', bg: 'rgba(74,127,175,.1)', dot: '#4A7FAF' },
-  in_progress: { label: 'En proceso', color: '#F0A030', bg: 'rgba(240,160,48,.1)', dot: '#F0A030' },
-  completed: { label: 'Completado', color: '#3DBF7F', bg: 'rgba(61,191,127,.1)', dot: '#3DBF7F' },
-  cancelled: { label: 'Cancelado', color: '#E05050', bg: 'rgba(224,80,80,.1)', dot: '#E05050' },
+  planned: { label: 'Planificado', color: 'var(--dax-text-muted)', bg: 'rgba(74,127,175,.1)', dot: '#4A7FAF' },
+  in_progress: { label: 'En proceso', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.1)', dot: '#F0A030' },
+  completed: { label: 'Completado', color: 'var(--dax-success)', bg: 'rgba(61,191,127,.1)', dot: '#3DBF7F' },
+  cancelled: { label: 'Cancelado', color: 'var(--dax-danger)', bg: 'rgba(224,80,80,.1)', dot: '#E05050' },
 };
 
 const STATUS_ENCARGO: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: 'Pendiente', color: '#F0A030', bg: 'rgba(240,160,48,.1)' },
-  confirmed: { label: 'Confirmado', color: '#5AAAF0', bg: 'rgba(90,170,240,.1)' },
-  in_production: { label: 'Produciendo', color: '#FF5C35', bg: 'rgba(255,92,53,.1)' },
-  ready: { label: 'Listo ✓', color: '#3DBF7F', bg: 'rgba(61,191,127,.1)' },
+  pending: { label: 'Pendiente', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.1)' },
+  confirmed: { label: 'Confirmado', color: 'var(--dax-blue)', bg: 'rgba(90,170,240,.1)' },
+  in_production: { label: 'Produciendo', color: 'var(--dax-coral)', bg: 'rgba(255,92,53,.1)' },
+  ready: { label: 'Listo ✓', color: 'var(--dax-success)', bg: 'rgba(61,191,127,.1)' },
   delivered: { label: 'Entregado', color: '#718096', bg: 'rgba(113,128,150,.1)' },
-  cancelled: { label: 'Cancelado', color: '#E05050', bg: 'rgba(224,80,80,.1)' },
+  cancelled: { label: 'Cancelado', color: 'var(--dax-danger)', bg: 'rgba(224,80,80,.1)' },
 };
 
 const STATUS_ORDER: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendiente', color: '#F0A030' },
-  received: { label: 'Recibida', color: '#3DBF7F' },
-  cancelled: { label: 'Cancelada', color: '#E05050' },
+  pending: { label: 'Pendiente', color: 'var(--dax-amber)' },
+  received: { label: 'Recibida', color: 'var(--dax-success)' },
+  cancelled: { label: 'Cancelada', color: 'var(--dax-danger)' },
 };
 
 const SHIFT_LABELS: Record<string, { label: string; emoji: string; time: string }> = {
@@ -100,7 +100,7 @@ function Badge({ status, map }: { status: string; map: Record<string, { label: s
 function ModalWrap({ onClose, children, maxWidth = '540px' }: { onClose: () => void; children: React.ReactNode; maxWidth?: string }) {
   return createPortal(
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(6px)' }}
+      style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(6px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="dax-card" style={{ width: '100%', maxWidth, padding: '28px 32px', maxHeight: '92vh', overflowY: 'auto', animation: 'modalIn .2s cubic-bezier(.22,1,.36,1)' }}>
@@ -464,7 +464,7 @@ function EncargoModal({ onClose, onSave, isPending, formatCurrency }: EncargoMod
             {form.deposit > 0 && <>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Depósito</span>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#3DBF7F' }}>-{formatCurrency(form.deposit)}</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-success)' }}>-{formatCurrency(form.deposit)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--dax-border)', paddingTop: '4px' }}>
                 <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Saldo pendiente</span>
@@ -964,7 +964,7 @@ export default function BakeryPage() {
               <Icon size={13} />
               {t.label}
               {t.badge !== undefined && t.badge > 0 && (
-                <span style={{ background: active ? 'rgba(255,255,255,.3)' : 'var(--dax-coral)', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '1px 5px', borderRadius: '8px', lineHeight: 1.4 }}>
+                <span style={{ background: active ? 'rgba(255,255,255,.3)' : 'var(--dax-coral)', color: 'var(--dax-text-primary)', fontSize: '9px', fontWeight: 800, padding: '1px 5px', borderRadius: '8px', lineHeight: 1.4 }}>
                   {t.badge}
                 </span>
               )}
@@ -993,7 +993,7 @@ export default function BakeryPage() {
             <div className="dax-card" style={{ padding: '18px 22px', border: '1px solid rgba(224,80,80,.25)', background: 'rgba(224,80,80,.04)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <AlertTriangle size={15} color="#E05050" />
-                <p style={{ fontSize: '13px', fontWeight: 700, color: '#E05050' }}>Encargos urgentes — próximas 48 horas</p>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-danger)' }}>Encargos urgentes — próximas 48 horas</p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {urgentEncargos.map((enc: Encargo) => {
@@ -1022,7 +1022,7 @@ export default function BakeryPage() {
             <div className="dax-card" style={{ padding: '18px 22px', border: '1px solid rgba(240,160,48,.2)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <AlertCircle size={15} color="#F0A030" />
-                <p style={{ fontSize: '13px', fontWeight: 700, color: '#F0A030' }}>Mínimos diarios sin cubrir ({dailyPlan.uncoveredMinimums.length})</p>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-amber)' }}>Mínimos diarios sin cubrir ({dailyPlan.uncoveredMinimums.length})</p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {dailyPlan.uncoveredMinimums.map((m: any) => (
@@ -1030,7 +1030,7 @@ export default function BakeryPage() {
                     <div>
                       <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{m.recipe?.name}</p>
                       <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
-                        Producido: <strong style={{ color: 'var(--dax-text-primary)' }}>{m.produced}</strong> · Mínimo: <strong style={{ color: '#F0A030' }}>{m.quantity}</strong> {m.recipe?.yieldUnit}
+                        Producido: <strong style={{ color: 'var(--dax-text-primary)' }}>{m.produced}</strong> · Mínimo: <strong style={{ color: 'var(--dax-amber)' }}>{m.quantity}</strong> {m.recipe?.yieldUnit}
                       </p>
                     </div>
                     <button onClick={() => { setProdInitRecipeId(m.recipeId); setModal('production'); }} className="dax-btn-primary" style={{ fontSize: '11px', padding: '6px 12px' }}>
@@ -1244,7 +1244,7 @@ export default function BakeryPage() {
                   <button onClick={() => { setEditRecipe(recipe); setModal('recipe'); }} style={{ background: 'var(--dax-surface-2)', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: 'var(--dax-radius-md)', color: 'var(--dax-text-muted)', display: 'flex' }}>
                     <Edit2 size={13} />
                   </button>
-                  <button onClick={() => { if (confirm(`¿Eliminar receta "${recipe.name}"?`)) deleteMutation.mutate(recipe.id); }} style={{ background: 'rgba(224,80,80,.08)', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: 'var(--dax-radius-md)', color: 'var(--dax-danger)', display: 'flex' }}>
+                  <button onClick={() => { if (confirm(`¿Eliminar receta "${recipe.name}"?`)) deleteMutation.mutate(recipe.id); }} style={{ background: 'var(--dax-danger-bg)', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: 'var(--dax-radius-md)', color: 'var(--dax-danger)', display: 'flex' }}>
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -1323,7 +1323,7 @@ export default function BakeryPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
                       <Badge status={enc.status} map={STATUS_ENCARGO} />
                       <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--dax-text-primary)' }}>{enc.clientName}</p>
-                      {isUrgent && <span style={{ fontSize: '10px', fontWeight: 700, color: '#E05050', background: 'rgba(224,80,80,.1)', padding: '2px 8px', borderRadius: '8px' }}>⚠️ URGENTE</span>}
+                      {isUrgent && <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-danger)', background: 'rgba(224,80,80,.1)', padding: '2px 8px', borderRadius: '8px' }}>⚠️ URGENTE</span>}
                     </div>
                     {enc.clientPhone && <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', marginBottom: '2px' }}>📞 {enc.clientPhone}</p>}
                     <p style={{ fontSize: '12px', color: isUrgent ? '#E05050' : 'var(--dax-text-muted)' }}>
@@ -1335,8 +1335,8 @@ export default function BakeryPage() {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontSize: '20px', fontWeight: 800, color: 'var(--dax-coral)' }}>{formatCurrency(Number(enc.totalAmount))}</p>
-                    <p style={{ fontSize: '11px', color: '#3DBF7F' }}>Depósito: {formatCurrency(Number(enc.deposit))}</p>
-                    {balance > 0 && <p style={{ fontSize: '12px', fontWeight: 700, color: '#F0A030' }}>Saldo: {formatCurrency(balance)}</p>}
+                    <p style={{ fontSize: '11px', color: 'var(--dax-success)' }}>Depósito: {formatCurrency(Number(enc.deposit))}</p>
+                    {balance > 0 && <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-amber)' }}>Saldo: {formatCurrency(balance)}</p>}
                   </div>
                 </div>
 
@@ -1385,7 +1385,7 @@ export default function BakeryPage() {
                       <span style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>{r.reason}</span>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{r.count}x</span>
-                        {r.cost > 0 && <span style={{ fontSize: '10px', color: '#E05050' }}>{formatCurrency(r.cost)}</span>}
+                        {r.cost > 0 && <span style={{ fontSize: '10px', color: 'var(--dax-danger)' }}>{formatCurrency(r.cost)}</span>}
                       </div>
                     </div>
                   ))}
@@ -1410,7 +1410,7 @@ export default function BakeryPage() {
                       </td>
                       <td style={{ fontWeight: 600 }}>{Number(w.quantity)} <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)', fontWeight: 400 }}>{w.unit}</span></td>
                       <td style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{w.reason}</td>
-                      <td style={{ color: '#E05050', fontWeight: 700 }}>{w.cost ? formatCurrency(Number(w.cost)) : '—'}</td>
+                      <td style={{ color: 'var(--dax-danger)', fontWeight: 700 }}>{w.cost ? formatCurrency(Number(w.cost)) : '—'}</td>
                       <td style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{fmtDate(w.createdAt)}</td>
                     </tr>
                   ))}
@@ -1437,7 +1437,7 @@ export default function BakeryPage() {
                   <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{sup.name}</p>
                   {sup.contactName && <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{sup.contactName}</p>}
                 </div>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#3DBF7F', background: 'rgba(61,191,127,.1)', padding: '3px 10px', borderRadius: '10px' }}>Activo</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-success)', background: 'rgba(61,191,127,.1)', padding: '3px 10px', borderRadius: '10px' }}>Activo</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {sup.phone && <p style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>📞 {sup.phone}</p>}
@@ -1446,7 +1446,7 @@ export default function BakeryPage() {
                 {sup.taxId && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>🏢 {sup.taxId}</p>}
                 {sup.paymentTerms && (
                   <div style={{ marginTop: '6px', padding: '5px 10px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)', display: 'inline-block' }}>
-                    <p style={{ fontSize: '11px', fontWeight: 600, color: '#5AAAF0' }}>💳 {sup.paymentTerms}</p>
+                    <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-blue)' }}>💳 {sup.paymentTerms}</p>
                   </div>
                 )}
                 {(sup._count?.purchaseOrders ?? 0) > 0 && (
@@ -1505,7 +1505,7 @@ export default function BakeryPage() {
       {tab === 'minimums' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ padding: '14px 16px', background: 'rgba(90,170,240,.06)', border: '1px solid rgba(90,170,240,.15)', borderRadius: 'var(--dax-radius-md)' }}>
-            <p style={{ fontSize: '12px', color: '#5AAAF0', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '12px', color: 'var(--dax-blue)', lineHeight: 1.6 }}>
               💡 Los mínimos diarios te alertan cuando una receta no ha alcanzado su producción objetivo del día. Aparecen en el dashboard con opción de planificar rápidamente.
             </p>
           </div>

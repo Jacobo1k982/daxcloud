@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -156,7 +156,7 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
 
   const modal = (
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(4px)' }}
+      style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(4px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
@@ -184,16 +184,16 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   boxShadow: '0 4px 16px rgba(255,92,53,.15)',
                 }}>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#FF5C35', letterSpacing: '-.02em' }}>{initials}</span>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--dax-coral)', letterSpacing: '-.02em' }}>{initials}</span>
                 </div>
                 <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', width: '12px', height: '12px', borderRadius: '50%', background: '#3DBF7F', border: '2px solid rgba(22,34,53,.97)', boxShadow: '0 0 6px rgba(61,191,127,.5)' }} />
               </div>
               <div>
-                <p style={{ fontSize: '15px', fontWeight: 700, color: '#F0F4FF', marginBottom: '2px', letterSpacing: '-.01em' }}>
+                <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px', letterSpacing: '-.01em' }}>
                   {user?.firstName} {user?.lastName}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#FF5C35', background: 'rgba(255,92,53,.1)', border: '1px solid rgba(255,92,53,.2)', padding: '1px 7px', borderRadius: '5px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-coral)', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,.2)', padding: '1px 7px', borderRadius: '5px' }}>
                     {roleLabels[user?.role ?? ''] ?? user?.role}
                   </span>
                   <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{tenant?.name}</span>
@@ -356,10 +356,10 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
                   }
                 />
                 {passForm.confirm && passForm.newPass !== passForm.confirm && (
-                  <p style={{ fontSize: '10px', color: '#E05050', marginTop: '4px' }}>⚠️ Las contraseñas no coinciden</p>
+                  <p style={{ fontSize: '10px', color: 'var(--dax-danger)', marginTop: '4px' }}>⚠️ Las contraseñas no coinciden</p>
                 )}
                 {passForm.confirm && passForm.newPass === passForm.confirm && passForm.newPass.length >= 8 && (
-                  <p style={{ fontSize: '10px', color: '#3DBF7F', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <p style={{ fontSize: '10px', color: 'var(--dax-success)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <Check size={9} /> Contraseñas coinciden
                   </p>
                 )}
@@ -388,10 +388,10 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
 
               {/* Recomendaciones */}
               <div style={{ padding: '12px 14px', background: 'rgba(90,170,240,.06)', border: '1px solid rgba(90,170,240,.15)', borderRadius: '10px' }}>
-                <p style={{ fontSize: '11px', fontWeight: 700, color: '#5AAAF0', marginBottom: '8px' }}>💡 Recomendaciones</p>
+                <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-blue)', marginBottom: '8px' }}>💡 Recomendaciones</p>
                 {['Usa al menos 8 caracteres', 'Incluye mayúsculas y números', 'Agrega símbolos especiales', 'No uses la misma contraseña en otros sitios'].map(r => (
                   <p key={r} style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginBottom: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ color: '#5AAAF0', fontSize: '8px' }}>●</span> {r}
+                    <span style={{ color: 'var(--dax-blue)', fontSize: '8px' }}>●</span> {r}
                   </p>
                 ))}
               </div>
@@ -415,7 +415,7 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
                       <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Sesión actual</p>
                     </div>
                   </div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#3DBF7F', background: 'rgba(61,191,127,.12)', padding: '2px 8px', borderRadius: '5px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-success)', background: 'rgba(61,191,127,.12)', padding: '2px 8px', borderRadius: '5px' }}>
                     Activa
                   </span>
                 </div>
@@ -452,7 +452,7 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
               <div style={{ padding: '14px', background: 'rgba(224,80,80,.05)', border: '1px solid rgba(224,80,80,.12)', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <AlertTriangle size={14} color="#E05050" />
-                  <p style={{ fontSize: '12px', fontWeight: 700, color: '#E05050' }}>Cerrar sesión</p>
+                  <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-danger)' }}>Cerrar sesión</p>
                 </div>
                 <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', lineHeight: 1.6, marginBottom: '12px' }}>
                   Al cerrar sesión serás redirigido al login. Necesitarás tus credenciales para volver a ingresar.
@@ -462,7 +462,7 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
                   background: 'rgba(224,80,80,.1)',
                   border: '1px solid rgba(224,80,80,.25)',
                   borderRadius: '10px', fontSize: '13px', fontWeight: 700,
-                  color: '#E05050', cursor: 'pointer', fontFamily: 'var(--font-primary)',
+                  color: 'var(--dax-danger)', cursor: 'pointer', fontFamily: 'var(--font-primary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                   transition: 'all .15s',
                 }}

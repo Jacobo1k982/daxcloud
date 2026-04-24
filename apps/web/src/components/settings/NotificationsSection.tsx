@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +17,7 @@ const NOTIF_TYPES = [
     label: 'Stock bajo',
     desc:  'Cuando un producto baja del nivel mínimo de inventario',
     icon:  Package,
-    color: '#F0A030',
+    color: 'var(--dax-amber)',
     recommended: true,
   },
   {
@@ -25,7 +25,7 @@ const NOTIF_TYPES = [
     label: 'Nueva venta',
     desc:  'Cada vez que se registra una venta en el POS',
     icon:  ShoppingCart,
-    color: '#3DBF7F',
+    color: 'var(--dax-success)',
     recommended: false,
   },
   {
@@ -33,7 +33,7 @@ const NOTIF_TYPES = [
     label: 'Metas diarias',
     desc:  'Al alcanzar hitos de ventas (10, 20, 50 ventas en el día)',
     icon:  Target,
-    color: '#A78BFA',
+    color: 'var(--dax-purple)',
     recommended: true,
   },
   {
@@ -41,7 +41,7 @@ const NOTIF_TYPES = [
     label: 'Alertas del sistema',
     desc:  'Avisos importantes sobre el funcionamiento de DaxCloud',
     icon:  AlertTriangle,
-    color: '#E05050',
+    color: 'var(--dax-danger)',
     recommended: true,
   },
   {
@@ -49,7 +49,7 @@ const NOTIF_TYPES = [
     label: 'Nuevos usuarios',
     desc:  'Cuando se agrega un nuevo miembro al equipo',
     icon:  Users,
-    color: '#5AAAF0',
+    color: 'var(--dax-blue)',
     recommended: true,
   },
   {
@@ -57,7 +57,7 @@ const NOTIF_TYPES = [
     label: 'Logros',
     desc:  'Celebraciones y hitos del negocio',
     icon:  Zap,
-    color: '#F0A030',
+    color: 'var(--dax-amber)',
     recommended: false,
   },
 ];
@@ -75,7 +75,7 @@ const Toggle = ({ value, onChange }: { value: boolean; onChange: () => void }) =
     <span style={{
       position: 'absolute', top: '2px', left: value ? '22px' : '2px',
       width: '20px', height: '20px', borderRadius: '50%',
-      background: '#fff', transition: 'left 0.2s ease', display: 'block',
+      background: 'var(--dax-surface)', transition: 'left 0.2s ease', display: 'block',
     }} />
   </button>
 );
@@ -212,14 +212,14 @@ export function NotificationsSection({ showToast }: { showToast: (m: string, t?:
               label: 'Sonido de notificación',
               desc:  'Reproduce un sonido al recibir nuevas alertas',
               icon:  prefs.sound ? Volume2 : VolumeX,
-              color: '#5AAAF0',
+              color: 'var(--dax-blue)',
             },
             {
               key:   'desktop',
               label: 'Notificaciones del escritorio',
               desc:  'Muestra alertas del sistema operativo cuando la ventana está en segundo plano',
               icon:  Monitor,
-              color: '#A78BFA',
+              color: 'var(--dax-purple)',
             },
           ].map(item => {
             const Icon    = item.icon;

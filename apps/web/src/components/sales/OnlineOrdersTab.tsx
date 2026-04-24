@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -25,11 +25,11 @@ interface OnlineOrder {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  new:       { label: 'Nuevo',      color: '#FF5C35', bg: 'rgba(255,92,53,0.1)',   icon: Bell       },
-  preparing: { label: 'Preparando', color: '#F0A030', bg: 'rgba(240,160,48,0.1)', icon: ChefHat    },
-  ready:     { label: 'Listo',      color: '#5AAAF0', bg: 'rgba(90,170,240,0.1)', icon: CheckCircle },
-  delivered: { label: 'Entregado',  color: '#3DBF7F', bg: 'rgba(61,191,127,0.1)', icon: Truck      },
-  cancelled: { label: 'Cancelado',  color: '#E05050', bg: 'rgba(224,80,80,0.1)',  icon: Package    },
+  new:       { label: 'Nuevo',      color: 'var(--dax-coral)', bg: 'var(--dax-coral-soft)',   icon: Bell       },
+  preparing: { label: 'Preparando', color: 'var(--dax-amber)', bg: 'var(--dax-warning-bg)', icon: ChefHat    },
+  ready:     { label: 'Listo',      color: 'var(--dax-blue)', bg: 'var(--dax-info-bg)', icon: CheckCircle },
+  delivered: { label: 'Entregado',  color: 'var(--dax-success)', bg: 'var(--dax-success-bg)', icon: Truck      },
+  cancelled: { label: 'Cancelado',  color: 'var(--dax-danger)', bg: 'var(--dax-danger-bg)',  icon: Package    },
 };
 
 const STATUS_FLOW: Record<string, string> = {
@@ -61,7 +61,7 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
   return (
     <div style={{
       background: 'rgba(10,18,32,0.95)',
-      border: `1px solid ${order.status === 'new' ? 'rgba(255,92,53,0.3)' : 'rgba(255,255,255,0.07)'}`,
+      border: `1px solid ${order.status === 'new' ? 'var(--dax-coral-border)' : 'var(--dax-surface-2)'}`,
       borderRadius: '14px',
       overflow: 'hidden',
       transition: 'border-color .2s',
@@ -76,28 +76,28 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff', letterSpacing: '-.01em' }}>{order.orderNumber}</span>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--dax-text-primary)', letterSpacing: '-.01em' }}>{order.orderNumber}</span>
             <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '20px', background: cfg.bg, color: cfg.color, fontWeight: 700, border: `1px solid ${cfg.color}25` }}>{cfg.label}</span>
-            <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '20px', background: order.type === 'delivery' ? 'rgba(90,170,240,0.1)' : 'rgba(255,255,255,0.06)', color: order.type === 'delivery' ? '#5AAAF0' : 'rgba(255,255,255,0.4)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '20px', background: order.type === 'delivery' ? 'var(--dax-info-bg)' : 'var(--dax-surface-2)', color: order.type === 'delivery' ? '#5AAAF0' : 'var(--dax-white-35)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
               {order.type === 'delivery' ? <Truck size={10}/> : <Store size={10}/>}
               {order.type === 'delivery' ? 'Delivery' : 'Pickup'}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <User size={11} color="rgba(255,255,255,0.3)"/>
-            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{order.customerName}</span>
+            <span style={{ fontSize: '12px', color: 'var(--dax-white-60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{order.customerName}</span>
           </div>
         </div>
 
         <div style={{ textAlign: 'right' as const, flexShrink: 0 }}>
-          <p style={{ fontSize: '16px', fontWeight: 900, color: '#FF5C35', letterSpacing: '-.02em' }}>{formatCurrency(order.total)}</p>
-          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', marginTop: '1px' }}>{timeAgo(order.createdAt)}</p>
+          <p style={{ fontSize: '16px', fontWeight: 900, color: 'var(--dax-coral)', letterSpacing: '-.02em' }}>{formatCurrency(order.total)}</p>
+          <p style={{ fontSize: '10px', color: 'var(--dax-white-25)', marginTop: '1px' }}>{timeAgo(order.createdAt)}</p>
         </div>
       </div>
 
       {/* Items preview */}
       <div style={{ padding: '0 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '11px', color: 'var(--dax-white-35)', lineHeight: 1.5 }}>
           {order.items.map(i => `${i.quantity}× ${i.name}`).join(' · ')}
         </p>
       </div>
@@ -108,26 +108,26 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
           {/* Desglose items */}
           {order.items.map((item, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: 'rgba(255,255,255,0.6)' }}>{item.quantity}× {item.name}</span>
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>{formatCurrency(item.price * item.quantity)}</span>
+              <span style={{ color: 'var(--dax-white-60)' }}>{item.quantity}× {item.name}</span>
+              <span style={{ color: 'var(--dax-white-60)', fontWeight: 600 }}>{formatCurrency(item.price * item.quantity)}</span>
             </div>
           ))}
           {/* Info cliente */}
-          <div style={{ marginTop: '8px', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+          <div style={{ marginTop: '8px', padding: '10px 12px', background: 'var(--dax-surface)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
               <Phone size={12} color="rgba(255,255,255,0.3)"/>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>{order.customerPhone}</span>
+              <span style={{ fontSize: '12px', color: 'var(--dax-white-60)' }}>{order.customerPhone}</span>
             </div>
             {order.customerAddress && (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
                 <MapPin size={12} color="rgba(255,255,255,0.3)" style={{ marginTop: '1px' }}/>
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>{order.customerAddress}</span>
+                <span style={{ fontSize: '12px', color: 'var(--dax-white-60)', lineHeight: 1.4 }}>{order.customerAddress}</span>
               </div>
             )}
             {order.notes && (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
                 <FileText size={12} color="rgba(255,255,255,0.3)" style={{ marginTop: '1px' }}/>
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4, fontStyle: 'italic' }}>{order.notes}</span>
+                <span style={{ fontSize: '12px', color: 'var(--dax-white-60)', lineHeight: 1.4, fontStyle: 'italic' }}>{order.notes}</span>
               </div>
             )}
           </div>
@@ -136,14 +136,14 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
 
       {/* Footer actions */}
       <div style={{ padding: '10px 12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <button onClick={() => setExpanded(p => !p)} style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}
+        <button onClick={() => setExpanded(p => !p)} style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent', color: 'var(--dax-white-35)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}
           onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--dax-white-35)')}>
           {expanded ? 'Ocultar' : 'Ver detalle'}
         </button>
 
         {/* Llamar cliente */}
-        <a href={`tel:${order.customerPhone}`} style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(90,170,240,0.2)', background: 'rgba(90,170,240,0.07)', color: '#5AAAF0', fontSize: '11px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all .15s' }}>
+        <a href={`tel:${order.customerPhone}`} style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(90,170,240,0.2)', background: 'var(--dax-info-bg)', color: 'var(--dax-blue)', fontSize: '11px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all .15s' }}>
           <Phone size={11}/> Llamar
         </a>
 
@@ -162,7 +162,7 @@ function OrderCard({ order, onUpdateStatus }: { order: OnlineOrder; onUpdateStat
         {/* Avanzar estado */}
         {nextStatus && nextCfg && (
           <button onClick={() => onUpdateStatus(order.id, nextStatus)}
-            style={{ padding: '8px 14px', borderRadius: '9px', border: 'none', background: `linear-gradient(135deg,${nextCfg.color},${nextCfg.color}CC)`, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: `0 2px 12px ${nextCfg.color}30` }}>
+            style={{ padding: '8px 14px', borderRadius: '9px', border: 'none', background: `linear-gradient(135deg,${nextCfg.color},${nextCfg.color}CC)`, color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: `0 2px 12px ${nextCfg.color}30` }}>
             {nextStatus === 'preparing' && <ChefHat size={13}/>}
             {nextStatus === 'ready'     && <CheckCircle size={13}/>}
             {nextStatus === 'delivered' && <Truck size={13}/>}
@@ -226,25 +226,25 @@ export function OnlineOrdersTab() {
       {/* Stats + Link */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px,1fr))', gap: '12px', marginBottom: '20px' }}>
         {[
-          { label: 'Nuevos',      value: stats?.new ?? 0,       color: '#FF5C35' },
-          { label: 'Preparando',  value: stats?.preparing ?? 0, color: '#F0A030' },
-          { label: 'Listos',      value: stats?.ready ?? 0,     color: '#5AAAF0' },
-          { label: 'Hoy',         value: stats?.today ?? 0,     color: '#3DBF7F' },
+          { label: 'Nuevos',      value: stats?.new ?? 0,       color: 'var(--dax-coral)' },
+          { label: 'Preparando',  value: stats?.preparing ?? 0, color: 'var(--dax-amber)' },
+          { label: 'Listos',      value: stats?.ready ?? 0,     color: 'var(--dax-blue)' },
+          { label: 'Hoy',         value: stats?.today ?? 0,     color: 'var(--dax-success)' },
         ].map(({ label, value, color }) => (
-          <div key={label} style={{ padding: '16px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px' }}>
+          <div key={label} style={{ padding: '16px', background: 'var(--dax-surface)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px' }}>
             <p style={{ fontSize: '24px', fontWeight: 900, color, letterSpacing: '-.02em', marginBottom: '4px' }}>{value}</p>
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>{label}</p>
+            <p style={{ fontSize: '11px', color: 'var(--dax-white-35)', fontWeight: 500 }}>{label}</p>
           </div>
         ))}
       </div>
 
       {/* Link público */}
       {slug && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'rgba(255,92,53,0.05)', border: '1px solid rgba(255,92,53,0.15)', borderRadius: '12px', marginBottom: '20px', flexWrap: 'wrap' as const }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,0.15)', borderRadius: '12px', marginBottom: '20px', flexWrap: 'wrap' as const }}>
           <ShoppingBag size={16} color="#FF5C35" style={{ flexShrink: 0 }}/>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: '11px', color: 'rgba(255,92,53,0.6)', fontWeight: 600, marginBottom: '2px' }}>Link de pedidos online</p>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, fontFamily: 'monospace' }}>
+            <p style={{ fontSize: '12px', color: 'var(--dax-white-60)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, fontFamily: 'monospace' }}>
               {typeof window !== 'undefined' ? window.location.origin : 'https://daxcloud.shop'}/order/{slug}
             </p>
           </div>
@@ -253,7 +253,7 @@ export function OnlineOrdersTab() {
               <Copy size={11}/> Copiar
             </button>
             <a href={`/order/${slug}`} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', borderRadius: '8px', border: 'none', background: 'rgba(255,92,53,0.12)', color: '#FF5C35', fontSize: '11px', fontWeight: 700, textDecoration: 'none', transition: 'all .15s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 12px', borderRadius: '8px', border: 'none', background: 'var(--dax-coral-soft)', color: 'var(--dax-coral)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', transition: 'all .15s' }}>
               <ExternalLink size={11}/> Ver página
             </a>
           </div>
@@ -264,14 +264,14 @@ export function OnlineOrdersTab() {
       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginBottom: '16px', alignItems: 'center' }}>
         {FILTERS.map(f => (
           <button key={f.id} onClick={() => setStatusFilter(f.id)}
-            style={{ padding: '6px 13px', borderRadius: '20px', border: `1px solid ${statusFilter === f.id ? 'rgba(255,92,53,0.4)' : 'rgba(255,255,255,0.07)'}`, background: statusFilter === f.id ? 'rgba(255,92,53,0.1)' : 'transparent', color: statusFilter === f.id ? '#FF5C35' : 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: statusFilter === f.id ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            style={{ padding: '6px 13px', borderRadius: '20px', border: `1px solid ${statusFilter === f.id ? 'rgba(255,92,53,0.4)' : 'var(--dax-surface-2)'}`, background: statusFilter === f.id ? 'var(--dax-coral-soft)' : 'transparent', color: statusFilter === f.id ? '#FF5C35' : 'var(--dax-white-35)', fontSize: '12px', fontWeight: statusFilter === f.id ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', display: 'flex', alignItems: 'center', gap: '5px' }}>
             {f.label}
             {f.count !== null && f.count > 0 && (
-              <span style={{ padding: '1px 6px', borderRadius: '10px', background: statusFilter === f.id ? '#FF5C35' : 'rgba(255,255,255,0.1)', color: statusFilter === f.id ? '#fff' : 'rgba(255,255,255,0.5)', fontSize: '10px', fontWeight: 800 }}>{f.count}</span>
+              <span style={{ padding: '1px 6px', borderRadius: '10px', background: statusFilter === f.id ? '#FF5C35' : 'var(--dax-border)', color: statusFilter === f.id ? '#fff' : 'var(--dax-white-60)', fontSize: '10px', fontWeight: 800 }}>{f.count}</span>
             )}
           </button>
         ))}
-        <button onClick={() => refetch()} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', background: 'transparent', color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+        <button onClick={() => refetch()} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', background: 'transparent', color: 'var(--dax-text-muted)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
           <RefreshCw size={11}/> Actualizar
         </button>
       </div>
@@ -280,15 +280,15 @@ export function OnlineOrdersTab() {
       {isLoading ? (
         <div style={{ textAlign: 'center' as const, padding: '48px 0' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2.5px solid rgba(255,92,53,0.2)', borderTopColor: '#FF5C35', animation: 'spin .7s linear infinite', margin: '0 auto 12px' }}/>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>Cargando pedidos...</p>
+          <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)' }}>Cargando pedidos...</p>
         </div>
       ) : orders.length === 0 ? (
         <div style={{ textAlign: 'center' as const, padding: '56px 24px' }}>
-          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(255,92,53,0.07)', border: '1px solid rgba(255,92,53,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <ShoppingBag size={24} color="rgba(255,92,53,0.4)"/>
           </div>
-          <p style={{ fontSize: '15px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>Sin pedidos {statusFilter === 'active' ? 'activos' : ''}</p>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-white-60)', marginBottom: '6px' }}>Sin pedidos {statusFilter === 'active' ? 'activos' : ''}</p>
+          <p style={{ fontSize: '13px', color: 'var(--dax-white-25)', lineHeight: 1.6 }}>
             Comparte el link de tu tienda online para empezar a recibir pedidos.
           </p>
         </div>

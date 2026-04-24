@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -98,16 +98,16 @@ function printReport(title: string, subtitle: string, tableId: string) {
 
 // ── Componentes ───────────────────────────────────────────────────────────────
 const S = {
-  bg:     '#080C14',
-  surf:   'rgba(255,255,255,0.025)',
-  surf2:  'rgba(255,255,255,0.04)',
-  border: 'rgba(255,255,255,0.07)',
+  bg:     'var(--dax-bg)',
+  surf:   'var(--dax-surface)',
+  surf2:  'var(--dax-surface-2)',
+  border: 'var(--dax-surface-2)',
   border2:'rgba(255,255,255,0.11)',
-  muted:  'rgba(255,255,255,0.35)',
+  muted:  'var(--dax-white-35)',
   dim:    'rgba(255,255,255,0.18)',
-  th:     { fontSize:'10px', fontWeight:700, letterSpacing:'.08em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.65)', padding:'10px 14px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,92,53,0.04)', textAlign:'left' as const, whiteSpace:'nowrap' as const },
-  td:     { fontSize:'12px', color:'rgba(255,255,255,0.65)', padding:'9px 14px', borderBottom:'1px solid rgba(255,255,255,0.04)', verticalAlign:'top' as const },
-  tdR:    { fontSize:'12px', color:'rgba(255,255,255,0.65)', padding:'9px 14px', borderBottom:'1px solid rgba(255,255,255,0.04)', textAlign:'right' as const, fontFamily:'monospace' },
+  th:     { fontSize:'10px', fontWeight:700, letterSpacing:'.08em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.65)', padding:'10px 14px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'var(--dax-coral-soft)', textAlign:'left' as const, whiteSpace:'nowrap' as const },
+  td:     { fontSize:'12px', color: 'var(--dax-white-60)', padding:'9px 14px', borderBottom:'1px solid rgba(255,255,255,0.04)', verticalAlign:'top' as const },
+  tdR:    { fontSize:'12px', color: 'var(--dax-white-60)', padding:'9px 14px', borderBottom:'1px solid rgba(255,255,255,0.04)', textAlign:'right' as const, fontFamily:'monospace' },
 };
 
 function KPICard({ label, value, sub, color='#FF5C35', icon: Icon, trend, trendVal }: any) {
@@ -115,7 +115,7 @@ function KPICard({ label, value, sub, color='#FF5C35', icon: Icon, trend, trendV
     <div style={{ padding:'18px 20px', background:S.surf, border:`1px solid ${S.border}`, borderRadius:'14px', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:0, right:0, width:'80px', height:'80px', background:`radial-gradient(circle at top right, ${color}12, transparent 70%)`, pointerEvents:'none' }}/>
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'10px' }}>
-        <p style={{ fontSize:'11px', fontWeight:600, color:'rgba(255,255,255,0.35)', letterSpacing:'.08em', textTransform:'uppercase' as const }}>{label}</p>
+        <p style={{ fontSize:'11px', fontWeight:600, color: 'var(--dax-white-35)', letterSpacing:'.08em', textTransform:'uppercase' as const }}>{label}</p>
         {Icon && <div style={{ width:'30px', height:'30px', borderRadius:'8px', background:`${color}15`, border:`1px solid ${color}25`, display:'flex', alignItems:'center', justifyContent:'center' }}>
           <Icon size={14} color={color}/>
         </div>}
@@ -126,7 +126,7 @@ function KPICard({ label, value, sub, color='#FF5C35', icon: Icon, trend, trendV
           {trend==='up' ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
           {trendVal}
         </span>}
-        {sub && <p style={{ fontSize:'11px', color:'rgba(255,255,255,0.3)' }}>{sub}</p>}
+        {sub && <p style={{ fontSize:'11px', color:'var(--dax-text-muted)' }}>{sub}</p>}
       </div>
     </div>
   );
@@ -136,8 +136,8 @@ function SectionHeader({ title, subtitle, children }: any) {
   return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px', flexWrap:'wrap', gap:'10px' }}>
       <div>
-        <h3 style={{ fontSize:'15px', fontWeight:800, color:'#fff', letterSpacing:'-.02em', marginBottom:'2px' }}>{title}</h3>
-        {subtitle && <p style={{ fontSize:'12px', color:'rgba(255,255,255,0.35)' }}>{subtitle}</p>}
+        <h3 style={{ fontSize:'15px', fontWeight:800, color: 'var(--dax-text-primary)', letterSpacing:'-.02em', marginBottom:'2px' }}>{title}</h3>
+        {subtitle && <p style={{ fontSize:'12px', color: 'var(--dax-white-35)' }}>{subtitle}</p>}
       </div>
       {children && <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>{children}</div>}
     </div>
@@ -147,10 +147,10 @@ function SectionHeader({ title, subtitle, children }: any) {
 function ExportBtn({ onCSV, onPDF, small }: any) {
   return (
     <>
-      <button onClick={onCSV} style={{ display:'flex', alignItems:'center', gap:'5px', padding: small?'6px 11px':'8px 14px', background:'rgba(61,191,127,0.08)', border:'1px solid rgba(61,191,127,0.2)', borderRadius:'9px', color:'#3DBF7F', fontSize:'11px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
+      <button onClick={onCSV} style={{ display:'flex', alignItems:'center', gap:'5px', padding: small?'6px 11px':'8px 14px', background:'var(--dax-success-bg)', border:'1px solid rgba(61,191,127,0.2)', borderRadius:'9px', color: 'var(--dax-success)', fontSize:'11px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
         <Download size={11}/> Excel
       </button>
-      <button onClick={onPDF} style={{ display:'flex', alignItems:'center', gap:'5px', padding: small?'6px 11px':'8px 14px', background:'rgba(255,92,53,0.08)', border:'1px solid rgba(255,92,53,0.2)', borderRadius:'9px', color:'#FF5C35', fontSize:'11px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
+      <button onClick={onPDF} style={{ display:'flex', alignItems:'center', gap:'5px', padding: small?'6px 11px':'8px 14px', background:'var(--dax-coral-soft)', border:'1px solid rgba(255,92,53,0.2)', borderRadius:'9px', color: 'var(--dax-coral)', fontSize:'11px', fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
         <Printer size={11}/> PDF
       </button>
     </>
@@ -279,13 +279,13 @@ export default function AccountingPage() {
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'16px' }}>
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
-            <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:'rgba(255,92,53,0.1)', border:'1px solid rgba(255,92,53,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ width:'36px', height:'36px', borderRadius:'10px', background: 'var(--dax-coral-soft)', border:'1px solid rgba(255,92,53,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
               <Scale size={17} color="#FF5C35"/>
             </div>
-            <h1 style={{ fontSize:'22px', fontWeight:900, color:'#fff', letterSpacing:'-.03em' }}>Módulo Contable</h1>
-            <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'20px', background:'rgba(61,191,127,0.1)', border:'1px solid rgba(61,191,127,0.2)', color:'#3DBF7F' }}>PRO</span>
+            <h1 style={{ fontSize:'22px', fontWeight:900, color: 'var(--dax-text-primary)', letterSpacing:'-.03em' }}>Módulo Contable</h1>
+            <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'20px', background:'var(--dax-success-bg)', border:'1px solid rgba(61,191,127,0.2)', color: 'var(--dax-success)' }}>PRO</span>
           </div>
-          <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.4)' }}>{subtitle}</p>
+          <p style={{ fontSize:'13px', color:'var(--dax-white-35)' }}>{subtitle}</p>
         </div>
 
         {/* Controles de período */}
@@ -293,18 +293,18 @@ export default function AccountingPage() {
           <div style={{ position:'relative' }}>
             <Calendar size={13} color="rgba(255,255,255,0.3)" style={{ position:'absolute', left:'11px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
             <select value={period} onChange={e => setPeriod(e.target.value)}
-              style={{ padding:'9px 30px 9px 32px', background:'rgba(255,255,255,0.05)', border:`1px solid ${S.border2}`, borderRadius:'10px', color:'#F0F4FF', fontSize:'12px', fontFamily:'inherit', outline:'none', appearance:'none', cursor:'pointer' }}>
-              {PERIODS.map(p => <option key={p.value} value={p.value} style={{ background:'#080C14' }}>{p.label}</option>)}
+              style={{ padding:'9px 30px 9px 32px', background:'var(--dax-surface-2)', border:`1px solid ${S.border2}`, borderRadius:'10px', color: 'var(--dax-text-primary)', fontSize:'12px', fontFamily:'inherit', outline:'none', appearance:'none', cursor:'pointer' }}>
+              {PERIODS.map(p => <option key={p.value} value={p.value} style={{ background: 'var(--dax-bg)' }}>{p.label}</option>)}
             </select>
             <ChevronDown size={11} color="rgba(255,255,255,0.3)" style={{ position:'absolute', right:'9px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
           </div>
           {period==='custom' && <>
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-              style={{ padding:'9px 12px', background:'rgba(255,255,255,0.05)', border:`1px solid ${S.border2}`, borderRadius:'10px', color:'#F0F4FF', fontSize:'12px', fontFamily:'inherit', outline:'none' }}/>
+              style={{ padding:'9px 12px', background:'var(--dax-surface-2)', border:`1px solid ${S.border2}`, borderRadius:'10px', color: 'var(--dax-text-primary)', fontSize:'12px', fontFamily:'inherit', outline:'none' }}/>
             <input type="date" value={to} onChange={e => setTo(e.target.value)}
-              style={{ padding:'9px 12px', background:'rgba(255,255,255,0.05)', border:`1px solid ${S.border2}`, borderRadius:'10px', color:'#F0F4FF', fontSize:'12px', fontFamily:'inherit', outline:'none' }}/>
+              style={{ padding:'9px 12px', background:'var(--dax-surface-2)', border:`1px solid ${S.border2}`, borderRadius:'10px', color: 'var(--dax-text-primary)', fontSize:'12px', fontFamily:'inherit', outline:'none' }}/>
           </>}
-          <button onClick={() => refetch()} style={{ display:'flex', alignItems:'center', gap:'5px', padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:`1px solid ${S.border}`, borderRadius:'10px', color:'rgba(255,255,255,0.4)', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
+          <button onClick={() => refetch()} style={{ display:'flex', alignItems:'center', gap:'5px', padding:'9px 14px', background:'var(--dax-surface-2)', border:`1px solid ${S.border}`, borderRadius:'10px', color:'var(--dax-white-35)', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all .15s' }}>
             <RefreshCw size={12}/> Actualizar
           </button>
         </div>
@@ -317,7 +317,7 @@ export default function AccountingPage() {
           const active = tab===t.id;
           return (
             <button key={t.id} onClick={() => setTab(t.id)}
-              style={{ display:'flex', alignItems:'center', gap:'7px', padding:'10px 16px', borderRadius:'10px 10px 0 0', border:'none', borderBottom: active ? '2px solid #FF5C35' : '2px solid transparent', background: active ? 'rgba(255,92,53,0.07)' : 'transparent', color: active ? '#FF5C35' : 'rgba(255,255,255,0.4)', fontSize:'12px', fontWeight: active ? 700 : 500, cursor:'pointer', fontFamily:'inherit', transition:'all .15s', marginBottom:'-1px', flexShrink:0, whiteSpace:'nowrap' as const }}>
+              style={{ display:'flex', alignItems:'center', gap:'7px', padding:'10px 16px', borderRadius:'10px 10px 0 0', border:'none', borderBottom: active ? '2px solid #FF5C35' : '2px solid transparent', background: active ? 'var(--dax-coral-soft)' : 'transparent', color: active ? '#FF5C35' : 'var(--dax-white-35)', fontSize:'12px', fontWeight: active ? 700 : 500, cursor:'pointer', fontFamily:'inherit', transition:'all .15s', marginBottom:'-1px', flexShrink:0, whiteSpace:'nowrap' as const }}>
               <Icon size={13}/> {t.label}
             </button>
           );
@@ -325,7 +325,7 @@ export default function AccountingPage() {
       </div>
 
       {isLoading && (
-        <div style={{ textAlign:'center', padding:'80px', color:'rgba(255,255,255,0.3)' }}>
+        <div style={{ textAlign:'center', padding:'80px', color:'var(--dax-text-muted)' }}>
           <div style={{ width:'32px', height:'32px', borderRadius:'50%', border:'2.5px solid rgba(255,92,53,0.15)', borderTopColor:'#FF5C35', animation:'spin .7s linear infinite', margin:'0 auto 16px' }}/>
           <p style={{ fontSize:'14px' }}>Cargando datos contables...</p>
         </div>
@@ -352,7 +352,7 @@ export default function AccountingPage() {
 
               {/* Métodos de pago */}
               <div style={{ padding:'20px 22px', background:S.surf, border:`1px solid ${S.border}`, borderRadius:'14px' }}>
-                <h3 style={{ fontSize:'14px', fontWeight:800, color:'#fff', letterSpacing:'-.01em', marginBottom:'16px' }}>Métodos de pago</h3>
+                <h3 style={{ fontSize:'14px', fontWeight:800, color: 'var(--dax-text-primary)', letterSpacing:'-.01em', marginBottom:'16px' }}>Métodos de pago</h3>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                   {Object.entries(byMethod).sort(([,a],[,b]) => b.amount-a.amount).map(([method, data]) => {
                     const pct = totalRevenue>0 ? (data.amount/totalRevenue)*100 : 0;
@@ -364,40 +364,40 @@ export default function AccountingPage() {
                           <div style={{ width:'28px', height:'28px', borderRadius:'7px', background:`${color}15`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                             <Icon size={13} color={color}/>
                           </div>
-                          <span style={{ fontSize:'12px', color:'rgba(255,255,255,0.65)', flex:1 }}>{PAY_LABELS[method]??method}</span>
-                          <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.35)', marginRight:'4px' }}>{data.count} ventas</span>
+                          <span style={{ fontSize:'12px', color: 'var(--dax-white-60)', flex:1 }}>{PAY_LABELS[method]??method}</span>
+                          <span style={{ fontSize:'11px', color: 'var(--dax-white-35)', marginRight:'4px' }}>{data.count} ventas</span>
                           <span style={{ fontSize:'12px', fontWeight:700, color }}>
                             {fmtPct(pct)}
                           </span>
                         </div>
-                        <div style={{ height:'5px', borderRadius:'3px', background:'rgba(255,255,255,0.06)', overflow:'hidden' }}>
+                        <div style={{ height:'5px', borderRadius:'3px', background:'var(--dax-surface-2)', overflow:'hidden' }}>
                           <div style={{ height:'100%', width:`${pct}%`, background:color, borderRadius:'3px', transition:'width .6s cubic-bezier(.22,1,.36,1)' }}/>
                         </div>
-                        <p style={{ fontSize:'11px', color:'rgba(255,255,255,0.35)', textAlign:'right' as const, marginTop:'3px' }}>{fmt(data.amount)}</p>
+                        <p style={{ fontSize:'11px', color: 'var(--dax-white-35)', textAlign:'right' as const, marginTop:'3px' }}>{fmt(data.amount)}</p>
                       </div>
                     );
                   })}
-                  {Object.keys(byMethod).length===0 && <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.25)', textAlign:'center', padding:'16px 0' }}>Sin datos para el período</p>}
+                  {Object.keys(byMethod).length===0 && <p style={{ fontSize:'13px', color: 'var(--dax-white-25)', textAlign:'center', padding:'16px 0' }}>Sin datos para el período</p>}
                 </div>
               </div>
 
               {/* Resumen P&L rápido */}
               <div style={{ padding:'20px 22px', background:S.surf, border:`1px solid ${S.border}`, borderRadius:'14px' }}>
-                <h3 style={{ fontSize:'14px', fontWeight:800, color:'#fff', letterSpacing:'-.01em', marginBottom:'16px' }}>Rentabilidad del período</h3>
+                <h3 style={{ fontSize:'14px', fontWeight:800, color: 'var(--dax-text-primary)', letterSpacing:'-.01em', marginBottom:'16px' }}>Rentabilidad del período</h3>
                 <div style={{ display:'flex', flexDirection:'column', gap:'0' }}>
                   {[
-                    { label:'Ventas brutas',   value: totalRevenue,                       color:'#fff',    bold:false },
-                    { label:'− Descuentos',    value: -totalDiscount,                     color:'#F0A030', bold:false },
-                    { label:'Ingresos netos',  value: totalRevenue-totalDiscount,         color:'#fff',    bold:true, sep:true },
-                    { label:'− Costo ventas',  value: -totalCost,                         color:'#E05050', bold:false },
+                    { label:'Ventas brutas',   value: totalRevenue,                       color: 'var(--dax-text-primary)',    bold:false },
+                    { label:'− Descuentos',    value: -totalDiscount,                     color: 'var(--dax-amber)', bold:false },
+                    { label:'Ingresos netos',  value: totalRevenue-totalDiscount,         color: 'var(--dax-text-primary)',    bold:true, sep:true },
+                    { label:'− Costo ventas',  value: -totalCost,                         color: 'var(--dax-danger)', bold:false },
                     { label:'Utilidad bruta',  value: grossProfit,                        color: grossProfit>=0?'#3DBF7F':'#E05050', bold:true, sep:true },
-                    { label:'IVA recaudado',   value: totalTax,                           color:'#5AAAF0', bold:false },
+                    { label:'IVA recaudado',   value: totalTax,                           color: 'var(--dax-blue)', bold:false },
                     { label:`Margen neto`,     value: null, pct: margin,                 color: margin>=0?'#3DBF7F':'#E05050', bold:true, sep:true },
                   ].map(({ label, value, color, bold, sep, pct }, i) => (
                     <div key={i}>
-                      {sep && <div style={{ height:'1px', background:'rgba(255,255,255,0.07)', margin:'8px 0' }}/>}
+                      {sep && <div style={{ height:'1px', background:'var(--dax-surface-2)', margin:'8px 0' }}/>}
                       {!sep && <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0' }}>
-                        <span style={{ fontSize: bold?'13px':'12px', fontWeight: bold?700:400, color: bold?'rgba(255,255,255,0.8)':'rgba(255,255,255,0.5)' }}>{label}</span>
+                        <span style={{ fontSize: bold?'13px':'12px', fontWeight: bold?700:400, color: bold?'var(--dax-text-primary)':'var(--dax-white-60)' }}>{label}</span>
                         <span style={{ fontSize: bold?'15px':'12px', fontWeight: bold?900:600, color, fontFamily:'monospace' }}>
                           {pct!==undefined ? fmtPct(pct) : fmt(value??0)}
                         </span>
@@ -411,7 +411,7 @@ export default function AccountingPage() {
             {/* Ventas por día */}
             {dayRows.length > 0 && (
               <div style={{ padding:'20px 22px', background:S.surf, border:`1px solid ${S.border}`, borderRadius:'14px' }}>
-                <h3 style={{ fontSize:'14px', fontWeight:800, color:'#fff', letterSpacing:'-.01em', marginBottom:'16px' }}>Ingresos por día</h3>
+                <h3 style={{ fontSize:'14px', fontWeight:800, color: 'var(--dax-text-primary)', letterSpacing:'-.01em', marginBottom:'16px' }}>Ingresos por día</h3>
                 <div style={{ display:'flex', gap:'4px', alignItems:'flex-end', height:'100px', overflowX:'auto', paddingBottom:'8px' }}>
                   {dayRows.map(([date, data]) => {
                     const maxRev = Math.max(...dayRows.map(([,d]) => d.revenue));
@@ -420,7 +420,7 @@ export default function AccountingPage() {
                       <div key={date} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', flex:1, minWidth:'28px' }}
                         title={`${fmtDate(date+'T00:00')}: ${fmt(data.revenue)} (${data.count} ventas)`}>
                         <div style={{ width:'100%', height:`${h}%`, background:'linear-gradient(180deg,#FF5C35,rgba(255,92,53,0.5))', borderRadius:'4px 4px 0 0', minHeight:'6px', transition:'height .4s' }}/>
-                        <span style={{ fontSize:'9px', color:'rgba(255,255,255,0.25)', transform:'rotate(-45deg)', transformOrigin:'center', whiteSpace:'nowrap' as const }}>
+                        <span style={{ fontSize:'9px', color: 'var(--dax-white-25)', transform:'rotate(-45deg)', transformOrigin:'center', whiteSpace:'nowrap' as const }}>
                           {new Date(date+'T12:00').toLocaleDateString('es-CR',{ day:'2-digit', month:'short' })}
                         </span>
                       </div>
@@ -440,7 +440,7 @@ export default function AccountingPage() {
               <div style={{ position:'relative' }}>
                 <Search size={12} color="rgba(255,255,255,0.3)" style={{ position:'absolute', left:'11px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por cajero, sucursal, método..."
-                  style={{ padding:'8px 12px 8px 30px', background:'rgba(255,255,255,0.05)', border:`1px solid ${S.border}`, borderRadius:'9px', color:'#F0F4FF', fontSize:'12px', fontFamily:'inherit', outline:'none', width:'220px' }}/>
+                  style={{ padding:'8px 12px 8px 30px', background:'var(--dax-surface-2)', border:`1px solid ${S.border}`, borderRadius:'9px', color: 'var(--dax-text-primary)', fontSize:'12px', fontFamily:'inherit', outline:'none', width:'220px' }}/>
               </div>
               <ExportBtn
                 onCSV={() => exportCSV(filteredSales.map(s => ({
@@ -471,15 +471,15 @@ export default function AccountingPage() {
                   {filteredSales.map((s,i) => (
                     <tr key={s.id} style={{ background: i%2===0?'transparent':'rgba(255,255,255,0.012)' }}>
                       <td style={S.td}>{fmtDate(s.createdAt)}</td>
-                      <td style={{ ...S.td, fontFamily:'monospace', fontWeight:700, color:'#FF5C35' }}>#{s.id?.slice(-8).toUpperCase()}</td>
+                      <td style={{ ...S.td, fontFamily:'monospace', fontWeight:700, color: 'var(--dax-coral)' }}>#{s.id?.slice(-8).toUpperCase()}</td>
                       <td style={S.td}>{`${s.user?.firstName??''} ${s.user?.lastName??''}`.trim()}</td>
                       <td style={S.td}>{s.branch?.name??'—'}</td>
                       <td style={S.tdR}>{fmt(Number(s.subtotal))}</td>
-                      <td style={{ ...S.tdR, color: Number(s.discount)>0?'#F0A030':'rgba(255,255,255,0.3)' }}>
+                      <td style={{ ...S.tdR, color: Number(s.discount)>0?'#F0A030':'var(--dax-text-muted)' }}>
                         {Number(s.discount)>0 ? `-${fmt(Number(s.discount))}` : '—'}
                       </td>
-                      <td style={{ ...S.tdR, color:'#5AAAF0' }}>{fmt(Number(s.tax))}</td>
-                      <td style={{ ...S.tdR, fontWeight:700, color:'#fff' }}>{fmt(Number(s.total))}</td>
+                      <td style={{ ...S.tdR, color: 'var(--dax-blue)' }}>{fmt(Number(s.tax))}</td>
+                      <td style={{ ...S.tdR, fontWeight:700, color: 'var(--dax-text-primary)' }}>{fmt(Number(s.total))}</td>
                       <td style={S.td}>
                         <span style={{ display:'inline-flex', alignItems:'center', gap:'5px', padding:'3px 9px', borderRadius:'20px', fontSize:'10px', fontWeight:700, background:`${PAY_COLORS[s.paymentMethod]??'#fff'}15`, color:PAY_COLORS[s.paymentMethod]??'#fff' }}>
                           {PAY_LABELS[s.paymentMethod]??s.paymentMethod}
@@ -488,14 +488,14 @@ export default function AccountingPage() {
                     </tr>
                   ))}
                   {/* Fila de totales */}
-                  <tr style={{ background:'rgba(255,92,53,0.05)' }}>
-                    <td colSpan={4} style={{ ...S.td, fontWeight:800, color:'#fff', fontSize:'13px' }}>
+                  <tr style={{ background:'var(--dax-coral-soft)' }}>
+                    <td colSpan={4} style={{ ...S.td, fontWeight:800, color: 'var(--dax-text-primary)', fontSize:'13px' }}>
                       TOTALES — {filteredSales.length} ventas
                     </td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#fff' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.subtotal??0),0))}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#F0A030' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.discount??0),0))}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#5AAAF0' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.tax??0),0))}</td>
-                    <td style={{ ...S.tdR, fontWeight:900, color:'#FF5C35', fontSize:'14px' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.total??0),0))}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-text-primary)' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.subtotal??0),0))}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-amber)' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.discount??0),0))}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-blue)' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.tax??0),0))}</td>
+                    <td style={{ ...S.tdR, fontWeight:900, color: 'var(--dax-coral)', fontSize:'14px' }}>{fmt(filteredSales.reduce((a,s)=>a+Number(s.total??0),0))}</td>
                     <td style={S.td}/>
                   </tr>
                 </tbody>
@@ -533,21 +533,21 @@ export default function AccountingPage() {
                   <tr><td colSpan={2} style={{ padding:'6px 0 4px', fontSize:'10px', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.6)' }}>INGRESOS</td></tr>
                   {[
                     { label:'Ventas brutas',         v:totalRevenue,                        indent:false },
-                    { label:'(-) Descuentos',        v:-totalDiscount,                      indent:true,  color:'#F0A030' },
+                    { label:'(-) Descuentos',        v:-totalDiscount,                      indent:true,  color: 'var(--dax-amber)' },
                     { label:'Ingresos netos',        v:totalRevenue-totalDiscount,          indent:false, bold:true, sep:true },
                   ].map(({ label, v, indent, bold, sep, color: c }, i) => (
                     <tr key={i} style={{ borderBottom: sep ? '2px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding:'9px 0 9px '+(indent?'16px':'0'), fontSize: bold?'14px':'12px', fontWeight: bold?700:400, color: bold?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.55)' }}>{label}</td>
-                      <td style={{ padding:'9px 0', textAlign:'right' as const, fontFamily:'monospace', fontSize: bold?'16px':'12px', fontWeight: bold?900:600, color: c??(v>=0?'rgba(255,255,255,0.75)':'#E05050') }}>{fmt(v)}</td>
+                      <td style={{ padding:'9px 0 9px '+(indent?'16px':'0'), fontSize: bold?'14px':'12px', fontWeight: bold?700:400, color: bold?'var(--dax-text-primary)':'var(--dax-white-60)' }}>{label}</td>
+                      <td style={{ padding:'9px 0', textAlign:'right' as const, fontFamily:'monospace', fontSize: bold?'16px':'12px', fontWeight: bold?900:600, color: c??(v>=0?'var(--dax-white-60)':'#E05050') }}>{fmt(v)}</td>
                     </tr>
                   ))}
 
                   <tr><td colSpan={2} style={{ padding:'16px 0 4px', fontSize:'10px', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.6)' }}>COSTOS</td></tr>
                   {[
-                    { label:'(-) Costo de ventas',   v:-totalCost, color:'#E05050' },
+                    { label:'(-) Costo de ventas',   v:-totalCost, color: 'var(--dax-danger)' },
                   ].map(({ label, v, color: c }, i) => (
                     <tr key={i} style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding:'9px 0', fontSize:'12px', color:'rgba(255,255,255,0.55)' }}>{label}</td>
+                      <td style={{ padding:'9px 0', fontSize:'12px', color:'var(--dax-white-60)' }}>{label}</td>
                       <td style={{ padding:'9px 0', textAlign:'right' as const, fontFamily:'monospace', fontSize:'12px', fontWeight:600, color:c }}>{fmt(v)}</td>
                     </tr>
                   ))}
@@ -555,10 +555,10 @@ export default function AccountingPage() {
                   <tr><td colSpan={2} style={{ padding:'16px 0 4px', fontSize:'10px', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.6)' }}>UTILIDAD</td></tr>
                   {[
                     { label:'Utilidad bruta',        v:grossProfit, bold:true, sep:true },
-                    { label:'IVA recaudado',          v:totalTax,   color:'#5AAAF0' },
+                    { label:'IVA recaudado',          v:totalTax,   color: 'var(--dax-blue)' },
                   ].map(({ label, v, bold, sep, color: c }, i) => (
                     <tr key={i} style={{ borderBottom: sep?'2px solid rgba(255,255,255,0.08)':'1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding:'9px 0', fontSize: bold?'14px':'12px', fontWeight: bold?700:400, color: bold?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.55)' }}>{label}</td>
+                      <td style={{ padding:'9px 0', fontSize: bold?'14px':'12px', fontWeight: bold?700:400, color: bold?'var(--dax-text-primary)':'var(--dax-white-60)' }}>{label}</td>
                       <td style={{ padding:'9px 0', textAlign:'right' as const, fontFamily:'monospace', fontSize: bold?'16px':'12px', fontWeight: bold?900:600, color: c??(v>=0?'#3DBF7F':'#E05050') }}>{fmt(v)}</td>
                     </tr>
                   ))}
@@ -567,12 +567,12 @@ export default function AccountingPage() {
                   <tr><td colSpan={2} style={{ padding:'16px 0 4px', fontSize:'10px', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase' as const, color:'rgba(255,92,53,0.6)' }}>INDICADORES</td></tr>
                   {[
                     { label:'Margen neto',           value: fmtPct(margin),                 color: margin>=0?'#3DBF7F':'#E05050' },
-                    { label:'Ticket promedio',        value: fmt(avgTicket),                 color:'#F0A030' },
-                    { label:'Número de transacciones',value: String(sales.length),           color:'#5AAAF0' },
-                    { label:'Tasa efectiva de IVA',   value: fmtPct(effectiveTax),           color:'#A78BFA' },
+                    { label:'Ticket promedio',        value: fmt(avgTicket),                 color: 'var(--dax-amber)' },
+                    { label:'Número de transacciones',value: String(sales.length),           color: 'var(--dax-blue)' },
+                    { label:'Tasa efectiva de IVA',   value: fmtPct(effectiveTax),           color: 'var(--dax-purple)' },
                   ].map(({ label, value, color }, i) => (
                     <tr key={i} style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding:'9px 0', fontSize:'12px', color:'rgba(255,255,255,0.55)' }}>{label}</td>
+                      <td style={{ padding:'9px 0', fontSize:'12px', color:'var(--dax-white-60)' }}>{label}</td>
                       <td style={{ padding:'9px 0', textAlign:'right' as const, fontFamily:'monospace', fontSize:'13px', fontWeight:700, color }}>{value}</td>
                     </tr>
                   ))}
@@ -628,18 +628,18 @@ export default function AccountingPage() {
                         <td style={S.tdR}>{data.count}</td>
                         <td style={S.tdR}>{fmt(data.revenue)}</td>
                         <td style={S.tdR}>{fmt(base)}</td>
-                        <td style={{ ...S.tdR, color:'#5AAAF0', fontWeight:700 }}>{fmt(data.tax)}</td>
-                        <td style={{ ...S.tdR, color:'rgba(255,255,255,0.5)' }}>{fmtPct(pct)}</td>
+                        <td style={{ ...S.tdR, color: 'var(--dax-blue)', fontWeight:700 }}>{fmt(data.tax)}</td>
+                        <td style={{ ...S.tdR, color:'var(--dax-white-60)' }}>{fmtPct(pct)}</td>
                       </tr>
                     );
                   })}
-                  <tr style={{ background:'rgba(255,92,53,0.05)' }}>
-                    <td style={{ ...S.td, fontWeight:800, color:'#fff' }}>TOTAL</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#fff' }}>{sales.length}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#fff' }}>{fmt(totalRevenue)}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#fff' }}>{fmt(taxBase)}</td>
-                    <td style={{ ...S.tdR, fontWeight:900, color:'#5AAAF0', fontSize:'14px' }}>{fmt(totalTax)}</td>
-                    <td style={{ ...S.tdR, fontWeight:700, color:'#A78BFA' }}>{fmtPct(effectiveTax)}</td>
+                  <tr style={{ background:'var(--dax-coral-soft)' }}>
+                    <td style={{ ...S.td, fontWeight:800, color: 'var(--dax-text-primary)' }}>TOTAL</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-text-primary)' }}>{sales.length}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-text-primary)' }}>{fmt(totalRevenue)}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-text-primary)' }}>{fmt(taxBase)}</td>
+                    <td style={{ ...S.tdR, fontWeight:900, color: 'var(--dax-blue)', fontSize:'14px' }}>{fmt(totalTax)}</td>
+                    <td style={{ ...S.tdR, fontWeight:700, color: 'var(--dax-purple)' }}>{fmtPct(effectiveTax)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -683,22 +683,22 @@ export default function AccountingPage() {
                         <tr key={date} style={{ background: i%2===0?'transparent':'rgba(255,255,255,0.012)' }}>
                           <td style={S.td}>{fmtDate(date+'T00:00')}</td>
                           <td style={S.tdR}>{data.count}</td>
-                          <td style={{ ...S.tdR, color:'#3DBF7F', fontWeight:700 }}>{fmt(data.revenue)}</td>
-                          <td style={{ ...S.tdR, color:'#E05050' }}>{fmt(data.cost)}</td>
+                          <td style={{ ...S.tdR, color: 'var(--dax-success)', fontWeight:700 }}>{fmt(data.revenue)}</td>
+                          <td style={{ ...S.tdR, color: 'var(--dax-danger)' }}>{fmt(data.cost)}</td>
                           <td style={{ ...S.tdR, color: net>=0?'#3DBF7F':'#E05050', fontWeight:700 }}>{fmt(net)}</td>
-                          <td style={{ ...S.tdR, color:'#5AAAF0' }}>{fmt(data.tax)}</td>
+                          <td style={{ ...S.tdR, color: 'var(--dax-blue)' }}>{fmt(data.tax)}</td>
                           <td style={{ ...S.tdR, color: acc>=0?'rgba(61,191,127,0.8)':'rgba(224,80,80,0.8)', fontWeight:600 }}>{fmt(acc)}</td>
                         </tr>
                       );
                     });
                   })()}
-                  <tr style={{ background:'rgba(255,92,53,0.05)' }}>
-                    <td style={{ ...S.td, fontWeight:800, color:'#fff' }}>TOTAL</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#fff' }}>{sales.length}</td>
-                    <td style={{ ...S.tdR, fontWeight:900, color:'#3DBF7F', fontSize:'14px' }}>{fmt(totalRevenue)}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#E05050' }}>{fmt(totalCost)}</td>
+                  <tr style={{ background:'var(--dax-coral-soft)' }}>
+                    <td style={{ ...S.td, fontWeight:800, color: 'var(--dax-text-primary)' }}>TOTAL</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-text-primary)' }}>{sales.length}</td>
+                    <td style={{ ...S.tdR, fontWeight:900, color: 'var(--dax-success)', fontSize:'14px' }}>{fmt(totalRevenue)}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-danger)' }}>{fmt(totalCost)}</td>
                     <td style={{ ...S.tdR, fontWeight:900, color: netProfit>=0?'#3DBF7F':'#E05050', fontSize:'14px' }}>{fmt(netProfit)}</td>
-                    <td style={{ ...S.tdR, fontWeight:800, color:'#5AAAF0' }}>{fmt(totalTax)}</td>
+                    <td style={{ ...S.tdR, fontWeight:800, color: 'var(--dax-blue)' }}>{fmt(totalTax)}</td>
                     <td style={S.tdR}/>
                   </tr>
                 </tbody>
@@ -741,28 +741,28 @@ export default function AccountingPage() {
                     const share  = totalRevenue>0 ? (p.revenue/totalRevenue)*100 : 0;
                     return (
                       <tr key={p.name} style={{ background: i%2===0?'transparent':'rgba(255,255,255,0.012)' }}>
-                        <td style={{ ...S.td, color:'rgba(255,255,255,0.25)', width:'36px' }}>{i+1}</td>
-                        <td style={{ ...S.td, fontWeight:600, color:'#fff' }}>{p.name}</td>
+                        <td style={{ ...S.td, color: 'var(--dax-white-25)', width:'36px' }}>{i+1}</td>
+                        <td style={{ ...S.td, fontWeight:600, color: 'var(--dax-text-primary)' }}>{p.name}</td>
                         <td style={S.tdR}>{fmtNum(p.qty)}</td>
-                        <td style={{ ...S.tdR, color:'#3DBF7F', fontWeight:700 }}>{fmt(p.revenue)}</td>
-                        <td style={{ ...S.tdR, color:'#E05050' }}>{fmt(p.cost)}</td>
+                        <td style={{ ...S.tdR, color: 'var(--dax-success)', fontWeight:700 }}>{fmt(p.revenue)}</td>
+                        <td style={{ ...S.tdR, color: 'var(--dax-danger)' }}>{fmt(p.cost)}</td>
                         <td style={{ ...S.tdR, color: util>=0?'#3DBF7F':'#E05050', fontWeight:700 }}>{fmt(util)}</td>
                         <td style={{ ...S.tdR, color: margin>=20?'#3DBF7F':margin>=10?'#F0A030':'#E05050', fontWeight:700 }}>
                           {fmtPct(margin)}
                         </td>
                         <td style={{ padding:'9px 14px', verticalAlign:'top' as const }}>
                           <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
-                            <div style={{ flex:1, height:'5px', borderRadius:'3px', background:'rgba(255,255,255,0.07)', overflow:'hidden', minWidth:'60px' }}>
+                            <div style={{ flex:1, height:'5px', borderRadius:'3px', background:'var(--dax-surface-2)', overflow:'hidden', minWidth:'60px' }}>
                               <div style={{ height:'100%', width:`${share}%`, background:'linear-gradient(90deg,#FF5C35,rgba(255,92,53,0.6))', borderRadius:'3px' }}/>
                             </div>
-                            <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.4)', minWidth:'32px', textAlign:'right' as const }}>{fmtPct(share)}</span>
+                            <span style={{ fontSize:'11px', color:'var(--dax-white-35)', minWidth:'32px', textAlign:'right' as const }}>{fmtPct(share)}</span>
                           </div>
                         </td>
                       </tr>
                     );
                   })}
                   {productRows.length===0 && (
-                    <tr><td colSpan={8} style={{ ...S.td, textAlign:'center', padding:'48px', color:'rgba(255,255,255,0.25)' }}>Sin datos de productos para el período</td></tr>
+                    <tr><td colSpan={8} style={{ ...S.td, textAlign:'center', padding:'48px', color: 'var(--dax-white-25)' }}>Sin datos de productos para el período</td></tr>
                   )}
                 </tbody>
               </table>

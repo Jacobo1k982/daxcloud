@@ -173,7 +173,7 @@ export function SinpePaymentModal({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {/* Paso 1 */}
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: '#fff', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</div>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: 'var(--dax-text-primary)', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '6px' }}>
                         Transfiere exactamente <strong style={{ color: planColor }}>${amount} USD</strong> vía SINPE Móvil
@@ -195,7 +195,7 @@ export function SinpePaymentModal({
 
                   {/* Paso 2 */}
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: '#fff', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</div>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: 'var(--dax-text-primary)', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</div>
                     <p style={{ fontSize: '12px', color: 'var(--dax-text-secondary)', lineHeight: 1.5 }}>
                       Haz clic en <strong>"Continuar"</strong> — te asignaremos una referencia única para identificar tu pago
                     </p>
@@ -203,7 +203,7 @@ export function SinpePaymentModal({
 
                   {/* Paso 3 */}
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: '#fff', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</div>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: planColor, color: 'var(--dax-text-primary)', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</div>
                     <p style={{ fontSize: '12px', color: 'var(--dax-text-secondary)', lineHeight: 1.5 }}>
                       Sube una captura del comprobante — activamos tu plan en menos de <strong>2 horas hábiles</strong>
                     </p>
@@ -211,7 +211,7 @@ export function SinpePaymentModal({
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(90,170,240,.08)', border: '1px solid rgba(90,170,240,.2)', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px', display: 'flex', gap: '8px' }}>
+              <div style={{ background: 'var(--dax-blue-bg)', border: '1px solid rgba(90,170,240,.2)', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px', display: 'flex', gap: '8px' }}>
                 <AlertCircle size={14} color="#5AAAF0" style={{ flexShrink: 0, marginTop: '1px' }} />
                 <p style={{ fontSize: '11px', color: 'var(--dax-text-secondary)', lineHeight: 1.5 }}>
                   El tipo de cambio se aplica al momento de verificar el pago. Si tienes dudas escríbenos a <strong>ventas@daxcloud.shop</strong>
@@ -223,7 +223,7 @@ export function SinpePaymentModal({
                 disabled={createMutation.isPending}
                 style={{
                   width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
-                  background: planColor, color: '#fff', fontSize: '14px', fontWeight: 800,
+                  background: planColor, color: 'var(--dax-text-primary)', fontSize: '14px', fontWeight: 800,
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                   boxShadow: `0 4px 20px ${planColor}40`,
                 }}
@@ -345,7 +345,7 @@ export function SinpePaymentModal({
               </p>
               <button
                 onClick={onClose}
-                style={{ padding: '12px 32px', borderRadius: '12px', border: 'none', background: planColor, color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ padding: '12px 32px', borderRadius: '12px', border: 'none', background: planColor, color: 'var(--dax-text-primary)', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
               >
                 Entendido
               </button>

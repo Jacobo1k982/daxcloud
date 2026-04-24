@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { Bell, X, Check, CheckCheck, Wifi, WifiOff } from 'lucide-react';
@@ -55,7 +55,7 @@ function NotificationPanel({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Notificaciones</p>
             {unreadCount > 0 && (
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#FF5C35', background: 'rgba(255,92,53,.12)', padding: '2px 7px', borderRadius: '10px' }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--dax-coral)', background: 'rgba(255,92,53,.12)', padding: '2px 7px', borderRadius: '10px' }}>
                 {unreadCount}
               </span>
             )}
@@ -173,7 +173,7 @@ export function NotificationBell() {
             <div style={{
               position: 'absolute', top: '-5px', right: '-6px',
               width: '14px', height: '14px', borderRadius: '50%',
-              background: '#FF5C35', color: '#fff',
+              background: '#FF5C35', color: 'var(--dax-text-primary)',
               fontSize: '8px', fontWeight: 800,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               border: '1.5px solid var(--dax-navy-900)',
@@ -226,7 +226,7 @@ export function NotificationBellMobile() {
         <div style={{ width: '44px', height: '28px', borderRadius: '14px', background: open ? 'var(--dax-coral-soft)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease', position: 'relative' }}>
           <Bell size={21} color={open ? 'var(--dax-coral)' : 'var(--dax-text-muted)'} strokeWidth={1.8} />
           {unreadCount > 0 && (
-            <div style={{ position: 'absolute', top: '2px', right: '6px', width: '14px', height: '14px', borderRadius: '50%', background: '#FF5C35', color: '#fff', fontSize: '8px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--dax-surface)' }}>
+            <div style={{ position: 'absolute', top: '2px', right: '6px', width: '14px', height: '14px', borderRadius: '50%', background: '#FF5C35', color: 'var(--dax-text-primary)', fontSize: '8px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--dax-surface)' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </div>
           )}

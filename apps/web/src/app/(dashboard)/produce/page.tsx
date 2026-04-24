@@ -14,8 +14,8 @@ type Tab = 'dashboard' | 'products' | 'lots' | 'wastes' | 'sections' | 'supplier
 
 const FRESHNESS_CONFIG: Record<string, { label: string; color: string; bg: string; emoji: string }> = {
     fresh: { label: 'Fresco', color: 'var(--dax-success)', bg: 'var(--dax-success-bg)', emoji: '🟢' },
-    good: { label: 'Bueno', color: '#5AAAF0', bg: 'rgba(90,170,240,.12)', emoji: '🔵' },
-    warning: { label: 'Por vencer', color: '#F0A030', bg: 'rgba(240,160,48,.12)', emoji: '🟡' },
+    good: { label: 'Bueno', color: 'var(--dax-blue)', bg: 'rgba(90,170,240,.12)', emoji: '🔵' },
+    warning: { label: 'Por vencer', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.12)', emoji: '🟡' },
     critical: { label: 'Crítico', color: 'var(--dax-danger)', bg: 'var(--dax-danger-bg)', emoji: '🔴' },
     expired: { label: 'Vencido', color: '#666', bg: 'var(--dax-surface-2)', emoji: '⚫' },
 };
@@ -273,7 +273,7 @@ export default function ProducePage() {
                             <Icon size={13} />
                             {t.label}
                             {t.id === 'dashboard' && alertCount > 0 && (
-                                <span style={{ background: '#fff', color: GREEN, borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>{alertCount}</span>
+                                <span style={{ background: 'var(--dax-surface)', color: GREEN, borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>{alertCount}</span>
                             )}
                         </button>
                     );
@@ -288,10 +288,10 @@ export default function ProducePage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
                         {[
                             { label: 'Lotes frescos', value: stats?.freshLots ?? 0, color: GREEN, emoji: '🟢' },
-                            { label: 'Por vencer', value: stats?.warningLots ?? 0, color: '#F0A030', emoji: '🟡' },
+                            { label: 'Por vencer', value: stats?.warningLots ?? 0, color: 'var(--dax-amber)', emoji: '🟡' },
                             { label: 'Críticos', value: stats?.criticalLots ?? 0, color: 'var(--dax-danger)', emoji: '🔴' },
                             { label: 'Vencidos', value: stats?.expiredLots ?? 0, color: '#666', emoji: '⚫' },
-                            { label: 'Productos', value: stats?.totalProducts ?? 0, color: '#5AAAF0', emoji: '🌿' },
+                            { label: 'Productos', value: stats?.totalProducts ?? 0, color: 'var(--dax-blue)', emoji: '🌿' },
                             { label: 'Costo mermas/mes', value: formatCurrency(stats?.monthWasteCost ?? 0), color: 'var(--dax-danger)', emoji: '📉', isText: true },
                             { label: 'Ventas del mes', value: formatCurrency(stats?.monthRevenue ?? 0), color: GREEN, emoji: '💰', isText: true },
                         ].map((s, i) => (
@@ -333,12 +333,12 @@ export default function ProducePage() {
                         <div className="dax-card" style={{ padding: '20px 24px', border: '1px solid rgba(240,160,48,.2)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                                 <Thermometer size={15} color="#F0A030" />
-                                <p style={{ fontSize: '14px', fontWeight: 700, color: '#F0A030' }}>Alertas de temperatura ({alerts.temperatureAlerts.length})</p>
+                                <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-amber)' }}>Alertas de temperatura ({alerts.temperatureAlerts.length})</p>
                             </div>
                             {alerts.temperatureAlerts.map((lot: any) => (
-                                <div key={lot.id} style={{ padding: '10px 14px', background: 'rgba(240,160,48,.08)', borderRadius: 'var(--dax-radius-md)', marginBottom: '6px' }}>
+                                <div key={lot.id} style={{ padding: '10px 14px', background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-md)', marginBottom: '6px' }}>
                                     <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{lot.produceProduct?.product?.name}</p>
-                                    <p style={{ fontSize: '11px', color: '#F0A030' }}>
+                                    <p style={{ fontSize: '11px', color: 'var(--dax-amber)' }}>
                                         Temp. actual: {Number(lot.temperature)}°C ·
                                         Rango: {lot.produceProduct?.minTemperature ?? '—'}°C — {lot.produceProduct?.maxTemperature ?? '—'}°C
                                     </p>
@@ -358,11 +358,11 @@ export default function ProducePage() {
                                 {stats.expiringIn3.map((lot: any) => {
                                     const days = daysUntil(lot.expirationDate);
                                     return (
-                                        <div key={lot.id} style={{ padding: '8px 12px', background: 'rgba(240,160,48,.08)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(240,160,48,.2)' }}>
+                                        <div key={lot.id} style={{ padding: '8px 12px', background: 'var(--dax-amber-bg)', borderRadius: 'var(--dax-radius-md)', border: '1px solid rgba(240,160,48,.2)' }}>
                                             <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>
                                                 {lot.produceProduct?.product?.name}
                                             </p>
-                                            <p style={{ fontSize: '11px', color: '#F0A030', fontWeight: 600 }}>
+                                            <p style={{ fontSize: '11px', color: 'var(--dax-amber)', fontWeight: 600 }}>
                                                 {days === 0 ? 'Vence hoy' : days === 1 ? 'Vence mañana' : `${days} días`} · {Number(lot.quantity)} {lot.weightUnit}
                                             </p>
                                         </div>
@@ -520,7 +520,7 @@ export default function ProducePage() {
                                                 <td style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{lot.origin ?? '—'}</td>
                                                 <td>
                                                     {lot.temperature !== null ? (
-                                                        <button onClick={() => { setShowTempModal(lot); setTempForm({ temperature: Number(lot.temperature) }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#5AAAF0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <button onClick={() => { setShowTempModal(lot); setTempForm({ temperature: Number(lot.temperature) }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--dax-blue)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                             <Thermometer size={12} /> {Number(lot.temperature)}°C
                                                         </button>
                                                     ) : (
@@ -546,7 +546,7 @@ export default function ProducePage() {
                                                     </span>
                                                 </td>
                                                 <td style={{ textAlign: 'center' }}>
-                                                    <button onClick={() => setShowWasteModal(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: '#F0A030', marginRight: '6px' }}>
+                                                    <button onClick={() => setShowWasteModal(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: 'var(--dax-amber)', marginRight: '6px' }}>
                                                         Merma
                                                     </button>
                                                     {lot.freshnessStatus !== 'expired' && (
@@ -613,13 +613,13 @@ export default function ProducePage() {
                                 {sec.temperature !== null && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)' }}>
                                         <span style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>🌡 Temperatura</span>
-                                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#5AAAF0' }}>{Number(sec.temperature)}°C</span>
+                                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-blue)' }}>{Number(sec.temperature)}°C</span>
                                     </div>
                                 )}
                                 {sec.humidity !== null && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)' }}>
                                         <span style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>💧 Humedad</span>
-                                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#5AAAF0' }}>{Number(sec.humidity)}%</span>
+                                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-blue)' }}>{Number(sec.humidity)}%</span>
                                     </div>
                                 )}
                                 {sec.capacity !== null && (
@@ -670,7 +670,7 @@ export default function ProducePage() {
 
             {/* Modal Producto */}
             {showProductModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '580px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <div>
@@ -837,7 +837,7 @@ export default function ProducePage() {
 
             {/* Modal Lote */}
             {showLotModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '520px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Registrar lote de cosecha</h2>
@@ -890,7 +890,7 @@ export default function ProducePage() {
 
             {/* Modal Merma */}
             {showWasteModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Registrar merma</h2>
@@ -936,7 +936,7 @@ export default function ProducePage() {
 
             {/* Modal Sección */}
             {showSectionModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva sección de almacenaje</h2>
@@ -970,7 +970,7 @@ export default function ProducePage() {
 
             {/* Modal Proveedor */}
             {showSupplierModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo proveedor / finca</h2>
@@ -1007,7 +1007,7 @@ export default function ProducePage() {
 
             {/* Modal Cambio de precio */}
             {showPriceModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '380px', padding: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Cambiar precio</h2>
@@ -1040,7 +1040,7 @@ export default function ProducePage() {
 
             {/* Modal Temperatura */}
             {showTempModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                     <div className="dax-card" style={{ width: '100%', maxWidth: '360px', padding: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h2 style={{ fontSize: '18px', margin: 0 }}>Registrar temperatura</h2>

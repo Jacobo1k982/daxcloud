@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,10 +24,10 @@ const Label = ({ children }: { children: React.ReactNode }) => (
 );
 
 function getStatus(item: InventoryItem) {
-  if (item.quantity === 0)                            return { key: 'empty',     label: 'Agotado',    color: '#E05050', bg: 'rgba(224,80,80,.1)'    };
-  if (item.quantity <= item.minStock)                 return { key: 'low',       label: 'Stock bajo', color: '#F0A030', bg: 'rgba(240,160,48,.1)'   };
-  if (item.maxStock && item.quantity > item.maxStock) return { key: 'overstock', label: 'Sobrestock', color: '#5AAAF0', bg: 'rgba(90,170,240,.1)'   };
-  return                                                     { key: 'ok',        label: 'OK',         color: '#3DBF7F', bg: 'rgba(61,191,127,.1)'   };
+  if (item.quantity === 0)                            return { key: 'empty',     label: 'Agotado',    color: 'var(--dax-danger)', bg: 'rgba(224,80,80,.1)'    };
+  if (item.quantity <= item.minStock)                 return { key: 'low',       label: 'Stock bajo', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.1)'   };
+  if (item.maxStock && item.quantity > item.maxStock) return { key: 'overstock', label: 'Sobrestock', color: 'var(--dax-blue)', bg: 'rgba(90,170,240,.1)'   };
+  return                                                     { key: 'ok',        label: 'OK',         color: 'var(--dax-success)', bg: 'rgba(61,191,127,.1)'   };
 }
 
 function fmtDate(d: string) {
@@ -75,17 +75,17 @@ function StockModal({ item, branches, products, onClose, onSuccess, showToast, h
   });
 
   const TYPE_OPTS = [
-    { value: 'in',         label: 'Entrada',    color: '#3DBF7F' },
-    { value: 'out',        label: 'Salida',     color: '#E05050' },
-    { value: 'adjustment', label: 'Ajuste',     color: '#5AAAF0' },
+    { value: 'in',         label: 'Entrada',    color: 'var(--dax-success)' },
+    { value: 'out',        label: 'Salida',     color: 'var(--dax-danger)' },
+    { value: 'adjustment', label: 'Ajuste',     color: 'var(--dax-blue)' },
   ];
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '560px', maxHeight: '92vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'rgba(255,92,53,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--dax-coral-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Package size={15} color="#FF5C35" />
             </div>
             <div>
@@ -142,7 +142,7 @@ function StockModal({ item, branches, products, onClose, onSuccess, showToast, h
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '4px 0' }}>
                 <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#FF5C35', letterSpacing: '.08em', textTransform: 'uppercase' }}>Lotes y trazabilidad</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-coral)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Lotes y trazabilidad</span>
                 <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -152,7 +152,7 @@ function StockModal({ item, branches, products, onClose, onSuccess, showToast, h
               </div>
             </>
           )}
-          {error && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 12px', background: 'rgba(224,80,80,.08)', borderRadius: '8px', border: '1px solid rgba(224,80,80,.2)' }}><AlertTriangle size={13} color="#E05050" /><p style={{ fontSize: '12px', color: '#E05050', fontWeight: 600 }}>{error}</p></div>}
+          {error && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 12px', background: 'var(--dax-danger-bg)', borderRadius: '8px', border: '1px solid rgba(224,80,80,.2)' }}><AlertTriangle size={13} color="#E05050" /><p style={{ fontSize: '12px', color: 'var(--dax-danger)', fontWeight: 600 }}>{error}</p></div>}
         </div>
 
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--dax-border)', flexShrink: 0, display: 'flex', gap: '10px' }}>
@@ -180,7 +180,7 @@ function QuickAdjustModal({ item, onClose, onSuccess, showToast }: { item: Inven
   const diff = parseInt(qty) - item.quantity;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '380px', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
@@ -200,8 +200,8 @@ function QuickAdjustModal({ item, onClose, onSuccess, showToast }: { item: Inven
           {!isNaN(parseInt(qty)) && parseInt(qty) !== item.quantity && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: diff > 0 ? 'rgba(61,191,127,.1)' : 'rgba(224,80,80,.08)', borderRadius: '9px', border: `1px solid ${diff > 0 ? 'rgba(61,191,127,.2)' : 'rgba(224,80,80,.15)'}` }}>
               {diff > 0
-                ? <><ArrowUpCircle   size={13} color="#3DBF7F" /><span style={{ fontSize: '12px', color: '#3DBF7F', fontWeight: 700 }}>+{diff} unidades</span></>
-                : <><ArrowDownCircle size={13} color="#E05050" /><span style={{ fontSize: '12px', color: '#E05050', fontWeight: 700 }}>{diff} unidades</span></>
+                ? <><ArrowUpCircle   size={13} color="#3DBF7F" /><span style={{ fontSize: '12px', color: 'var(--dax-success)', fontWeight: 700 }}>+{diff} unidades</span></>
+                : <><ArrowDownCircle size={13} color="#E05050" /><span style={{ fontSize: '12px', color: 'var(--dax-danger)', fontWeight: 700 }}>{diff} unidades</span></>
               }
             </div>
           )}
@@ -226,13 +226,13 @@ function MovementsModal({ item, branchId, onClose, formatCurrency }: { item: Inv
   });
 
   const TYPE_CFG: Record<string, { label: string; color: string; icon: any }> = {
-    in:         { label: 'Entrada', color: '#3DBF7F', icon: ArrowUpCircle   },
-    out:        { label: 'Salida',  color: '#E05050', icon: ArrowDownCircle },
-    adjustment: { label: 'Ajuste', color: '#5AAAF0', icon: ArrowLeftRight  },
+    in:         { label: 'Entrada', color: 'var(--dax-success)', icon: ArrowUpCircle   },
+    out:        { label: 'Salida',  color: 'var(--dax-danger)', icon: ArrowDownCircle },
+    adjustment: { label: 'Ajuste', color: 'var(--dax-blue)', icon: ArrowLeftRight  },
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '600px', maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--dax-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
@@ -274,8 +274,8 @@ function MovementsModal({ item, branchId, onClose, formatCurrency }: { item: Inv
                         {m.supplier       && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Prov: {m.supplier}</span>}
                         {m.documentNumber && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Doc: {m.documentNumber}</span>}
                         {m.unitCost       && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Costo: {formatCurrency(Number(m.unitCost))}</span>}
-                        {m.lotNumber      && <span style={{ fontSize: '10px', color: '#FF5C35', fontWeight: 600 }}>Lote: {m.lotNumber}</span>}
-                        {m.expirationDate && <span style={{ fontSize: '10px', color: '#F0A030', fontWeight: 600 }}>Vence: {fmtDate(m.expirationDate)}</span>}
+                        {m.lotNumber      && <span style={{ fontSize: '10px', color: 'var(--dax-coral)', fontWeight: 600 }}>Lote: {m.lotNumber}</span>}
+                        {m.expirationDate && <span style={{ fontSize: '10px', color: 'var(--dax-amber)', fontWeight: 600 }}>Vence: {fmtDate(m.expirationDate)}</span>}
                         {m.user           && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Por: {m.user.firstName}</span>}
                       </div>
                       {m.notes && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', fontStyle: 'italic', marginTop: '3px' }}>{m.notes}</p>}
@@ -361,7 +361,7 @@ export default function InventoryPage() {
 
       {/* Toast */}
       {toastState && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', background: toastState.type === 'success' ? '#22C55E' : '#E05050', color: '#fff', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,.3)', animation: 'slideUp .2s ease' }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', background: toastState.type === 'success' ? '#22C55E' : '#E05050', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,.3)', animation: 'slideUp .2s ease' }}>
           {toastState.msg}
         </div>
       )}
@@ -374,7 +374,7 @@ export default function InventoryPage() {
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => refetch()} style={{ width: '36px', height: '36px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><RefreshCw size={14} /></button>
-          <button onClick={() => setShowAddStock(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(255,92,53,.3)' }}>
+          <button onClick={() => setShowAddStock(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(255,92,53,.3)' }}>
             <Plus size={14} /> Agregar stock
           </button>
         </div>
@@ -384,11 +384,11 @@ export default function InventoryPage() {
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px' }}>
           {[
-            { label: 'Total productos', value: stats.total,                           color: '#5AAAF0', icon: Package       },
-            { label: 'Stock OK',        value: stats.ok,                              color: '#3DBF7F', icon: Check         },
-            { label: 'Stock bajo',      value: stats.low,                             color: '#F0A030', icon: AlertTriangle },
-            { label: 'Agotados',        value: stats.empty,                           color: '#E05050', icon: TrendingDown  },
-            { label: 'Valor total',     value: formatCurrency(stats.totalValue ?? 0), color: '#A78BFA', icon: DollarSign    },
+            { label: 'Total productos', value: stats.total,                           color: 'var(--dax-blue)', icon: Package       },
+            { label: 'Stock OK',        value: stats.ok,                              color: 'var(--dax-success)', icon: Check         },
+            { label: 'Stock bajo',      value: stats.low,                             color: 'var(--dax-amber)', icon: AlertTriangle },
+            { label: 'Agotados',        value: stats.empty,                           color: 'var(--dax-danger)', icon: TrendingDown  },
+            { label: 'Valor total',     value: formatCurrency(stats.totalValue ?? 0), color: 'var(--dax-purple)', icon: DollarSign    },
           ].map(s => {
             const Icon = s.icon;
             return (
@@ -470,7 +470,7 @@ export default function InventoryPage() {
                     <td style={{ color: 'var(--dax-text-muted)', fontFamily: 'monospace', fontSize: '11px' }}>{item.product.sku || '—'}</td>
                     <td>
                       {item.product.category
-                        ? <span style={{ fontSize: '11px', fontWeight: 600, color: '#5AAAF0', background: 'rgba(90,170,240,.1)', padding: '2px 8px', borderRadius: '6px' }}>{item.product.category}</span>
+                        ? <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-blue)', background: 'rgba(90,170,240,.1)', padding: '2px 8px', borderRadius: '6px' }}>{item.product.category}</span>
                         : <span style={{ color: 'var(--dax-text-muted)', fontSize: '12px' }}>—</span>
                       }
                     </td>
@@ -487,7 +487,7 @@ export default function InventoryPage() {
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
-                        <button onClick={() => setAdjustItem(item)} title="Ajuste rapido" style={{ padding: '5px 10px', borderRadius: '7px', border: '1px solid rgba(255,92,53,.3)', background: 'rgba(255,92,53,.06)', cursor: 'pointer', color: '#FF5C35', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', transition: 'all .15s' }}>
+                        <button onClick={() => setAdjustItem(item)} title="Ajuste rapido" style={{ padding: '5px 10px', borderRadius: '7px', border: '1px solid rgba(255,92,53,.3)', background: 'rgba(255,92,53,.06)', cursor: 'pointer', color: 'var(--dax-coral)', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', transition: 'all .15s' }}>
                           <SlidersHorizontal size={11} /> Ajustar
                         </button>
                         {isAdvanced && (

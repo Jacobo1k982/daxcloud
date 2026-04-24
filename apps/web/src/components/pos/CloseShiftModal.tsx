@@ -15,9 +15,9 @@ interface Props {
 
 const METHOD_CFG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
   cash:     { label: 'Efectivo', icon: '💵', color: '#22C55E', bg: 'rgba(34,197,94,0.1)'   },
-  card:     { label: 'Tarjeta',  icon: '💳', color: '#5AAAF0', bg: 'rgba(90,170,240,0.1)'  },
-  transfer: { label: 'SINPE',    icon: '📱', color: '#A78BFA', bg: 'rgba(167,139,250,0.1)' },
-  mixed:    { label: 'Mixto',    icon: '🔀', color: '#F97316', bg: 'rgba(249,115,22,0.1)'  },
+  card:     { label: 'Tarjeta',  icon: '💳', color: 'var(--dax-blue)', bg: 'var(--dax-info-bg)'  },
+  transfer: { label: 'SINPE',    icon: '📱', color: 'var(--dax-purple)', bg: 'var(--dax-purple-bg)' },
+  mixed:    { label: 'Mixto',    icon: '🔀', color: 'var(--dax-amber)', bg: 'rgba(249,115,22,0.1)'  },
 };
 
 function fmtDuration(from: string): string {
@@ -200,8 +200,8 @@ export function CloseShiftModal({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
                   {[
                     { key: 'cashTotal',     label: 'Efectivo', color: '#22C55E', icon: '💵' },
-                    { key: 'cardTotal',     label: 'Tarjeta',  color: '#5AAAF0', icon: '💳' },
-                    { key: 'transferTotal', label: 'SINPE',    color: '#A78BFA', icon: '📱' },
+                    { key: 'cardTotal',     label: 'Tarjeta',  color: 'var(--dax-blue)', icon: '💳' },
+                    { key: 'transferTotal', label: 'SINPE',    color: 'var(--dax-purple)', icon: '📱' },
                   ].filter(({ key }) => (bd as any)[key] > 0).map(({ key, label, color, icon }) => (
                     <div key={key} style={{ background: `${color}12`, borderRadius: '9px', padding: '8px 10px', border: `1px solid ${color}25`, textAlign: 'center' }}>
                       <p style={{ fontSize: '14px', marginBottom: '2px' }}>{icon}</p>

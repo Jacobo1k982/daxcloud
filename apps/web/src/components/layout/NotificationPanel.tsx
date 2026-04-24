@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -10,13 +10,13 @@ import {
 } from 'lucide-react';
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string }> = {
-  low_stock:   { icon: Package,       color: '#F0A030' },
-  new_sale:    { icon: ShoppingCart,  color: '#3DBF7F' },
-  new_user:    { icon: Users,         color: '#5AAAF0' },
-  system:      { icon: AlertTriangle, color: '#E05050' },
-  daily_goal:  { icon: Target,        color: '#A78BFA' },
-  reminder:    { icon: Clock,         color: '#FF5C35' },
-  achievement: { icon: Zap,           color: '#F0A030' },
+  low_stock:   { icon: Package,       color: 'var(--dax-amber)' },
+  new_sale:    { icon: ShoppingCart,  color: 'var(--dax-success)' },
+  new_user:    { icon: Users,         color: 'var(--dax-blue)' },
+  system:      { icon: AlertTriangle, color: 'var(--dax-danger)' },
+  daily_goal:  { icon: Target,        color: 'var(--dax-purple)' },
+  reminder:    { icon: Clock,         color: 'var(--dax-coral)' },
+  achievement: { icon: Zap,           color: 'var(--dax-amber)' },
 };
 
 function timeAgo(dateStr: string) {
@@ -30,7 +30,7 @@ function timeAgo(dateStr: string) {
 }
 
 function NotifItem({ notif, onRead }: { notif: Notification; onRead: (id: string) => void }) {
-  const cfg  = TYPE_CONFIG[notif.type] ?? { icon: Bell, color: '#5AAAF0' };
+  const cfg  = TYPE_CONFIG[notif.type] ?? { icon: Bell, color: 'var(--dax-blue)' };
   const Icon = cfg.icon;
 
   return (
@@ -104,7 +104,7 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
 
   return createPortal(
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'var(--dax-overlay-soft)', backdropFilter: 'blur(2px)' }} />
 
       <div ref={panelRef} style={{
         position: 'fixed', top: 0, right: 0, bottom: 0,
@@ -128,7 +128,7 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
               <div>
                 <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.2 }}>Notificaciones</p>
                 {unreadCount > 0 && (
-                  <p style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600 }}>{unreadCount} sin leer</p>
+                  <p style={{ fontSize: '11px', color: 'var(--dax-coral)', fontWeight: 600 }}>{unreadCount} sin leer</p>
                 )}
               </div>
             </div>
@@ -140,7 +140,7 @@ export function NotificationPanel({ open, onClose, notifications, unreadCount, o
           </div>
 
           {unreadCount > 0 && (
-            <button onClick={onReadAll} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', color: '#FF5C35', fontSize: '11px', fontWeight: 700, padding: '4px 0', fontFamily: 'var(--font-primary)', transition: 'opacity .15s' }}
+            <button onClick={onReadAll} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-coral)', fontSize: '11px', fontWeight: 700, padding: '4px 0', fontFamily: 'var(--font-primary)', transition: 'opacity .15s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.7')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
               <CheckCheck size={12} /> Marcar todas como leídas
@@ -232,7 +232,7 @@ export function NotificationBell() {
             minWidth: '16px', height: '16px', borderRadius: '8px',
             background: '#FF5C35', border: '1.5px solid var(--dax-bg)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '9px', fontWeight: 800, color: '#fff',
+            fontSize: '9px', fontWeight: 800, color: 'var(--dax-text-primary)',
             padding: '0 3px', lineHeight: 1,
             animation: 'badgePop .3s cubic-bezier(.22,1,.36,1)',
           }}>

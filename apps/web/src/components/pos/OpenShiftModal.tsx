@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { X, DollarSign, Lock, AlertTriangle } from 'lucide-react';
@@ -34,7 +34,7 @@ export function OpenShiftModal({ branchName, accentColor: C, formatCurrency, onO
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+      background: 'var(--dax-overlay)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '20px',
     }}>

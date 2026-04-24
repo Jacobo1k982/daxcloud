@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -90,7 +90,7 @@ function ClientFormModal({ client, onClose, onSave, showToast }: {
   });
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '560px', padding: '28px', maxHeight: '92vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
@@ -112,7 +112,7 @@ function ClientFormModal({ client, onClose, onSave, showToast }: {
               </div>
             </div>
             <button onClick={() => f('isCompany', !form.isCompany)} style={{ width: '44px', height: '24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: form.isCompany ? '#5AAAF0' : 'var(--dax-surface-3)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
-              <span style={{ position: 'absolute', top: '2px', left: form.isCompany ? '22px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', transition: 'left .2s', display: 'block' }} />
+              <span style={{ position: 'absolute', top: '2px', left: form.isCompany ? '22px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: 'var(--dax-surface)', transition: 'left .2s', display: 'block' }} />
             </button>
           </div>
 
@@ -275,7 +275,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
   const levelCfg = LOYALTY_LEVELS[client?.loyaltyLevel ?? 'bronze'] ?? LOYALTY_LEVELS.bronze;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '580px', maxHeight: '92vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {isLoading ? (
@@ -313,10 +313,10 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
               {stats && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                   {[
-                    { label: 'Compras',    value: stats.totalPurchases,            color: '#5AAAF0' },
-                    { label: 'Gastado',    value: formatCurrency(stats.totalSpent), color: '#3DBF7F' },
-                    { label: 'Ticket prom', value: formatCurrency(stats.avgTicket), color: '#A78BFA' },
-                    { label: 'Puntos',     value: client?.points ?? 0,             color: '#F0A030' },
+                    { label: 'Compras',    value: stats.totalPurchases,            color: 'var(--dax-blue)' },
+                    { label: 'Gastado',    value: formatCurrency(stats.totalSpent), color: 'var(--dax-success)' },
+                    { label: 'Ticket prom', value: formatCurrency(stats.avgTicket), color: 'var(--dax-purple)' },
+                    { label: 'Puntos',     value: client?.points ?? 0,             color: 'var(--dax-amber)' },
                   ].map(s => (
                     <div key={s.label} style={{ background: `${s.color}10`, borderRadius: '8px', padding: '8px 10px', textAlign: 'center', border: `1px solid ${s.color}20` }}>
                       <p style={{ fontSize: '14px', fontWeight: 800, color: s.color, lineHeight: 1, marginBottom: '2px' }}>{s.value}</p>
@@ -328,7 +328,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
 
               {/* Alerta fiado */}
               {Number(client?.creditBalance ?? 0) > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', padding: '7px 12px', background: 'rgba(224,80,80,.08)', border: '1px solid rgba(224,80,80,.2)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', padding: '7px 12px', background: 'var(--dax-danger-bg)', border: '1px solid rgba(224,80,80,.2)', borderRadius: '8px' }}>
                   <AlertTriangle size={13} color="var(--dax-danger)" />
                   <p style={{ fontSize: '12px', color: 'var(--dax-danger)', fontWeight: 700 }}>
                     Fiado pendiente: {formatCurrency(Number(client.creditBalance))}
@@ -476,7 +476,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
                       <TrendingUp size={14} color="#3DBF7F" />
                       <span style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>Total acumulado</span>
                     </div>
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: '#3DBF7F' }}>{formatCurrency(Number(client.totalSpent))}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--dax-success)' }}>{formatCurrency(Number(client.totalSpent))}</span>
                   </div>
 
                   {/* Agregar puntos */}
@@ -486,7 +486,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <input className="dax-input" type="number" min="1" placeholder="Cantidad de puntos..." value={pointsInput} onChange={e => setPointsInput(e.target.value)} style={{ margin: 0, flex: 1 }} />
-                      <button onClick={() => addPointsMutation.mutate(parseInt(pointsInput))} disabled={addPointsMutation.isPending || !pointsInput || parseInt(pointsInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#F0A030', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                      <button onClick={() => addPointsMutation.mutate(parseInt(pointsInput))} disabled={addPointsMutation.isPending || !pointsInput || parseInt(pointsInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: 'var(--dax-amber)', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                         {addPointsMutation.isPending ? '...' : 'Agregar'}
                       </button>
                     </div>
@@ -500,7 +500,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
                       </p>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input className="dax-input" type="number" min="1" max={client.points} placeholder={`Máx. ${client.points} puntos`} value={redeemInput} onChange={e => setRedeemInput(e.target.value)} style={{ margin: 0, flex: 1 }} />
-                        <button onClick={() => redeemMutation.mutate(parseInt(redeemInput))} disabled={redeemMutation.isPending || !redeemInput || parseInt(redeemInput) <= 0 || parseInt(redeemInput) > client.points} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#A78BFA', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        <button onClick={() => redeemMutation.mutate(parseInt(redeemInput))} disabled={redeemMutation.isPending || !redeemInput || parseInt(redeemInput) <= 0 || parseInt(redeemInput) > client.points} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#A78BFA', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           {redeemMutation.isPending ? '...' : 'Canjear'}
                         </button>
                       </div>
@@ -543,7 +543,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <input className="dax-input" type="number" min="0" step="100" placeholder="Monto..." value={creditInput} onChange={e => setCreditInput(e.target.value)} style={{ margin: 0, flex: 1 }} />
-                      <button onClick={() => creditMutation.mutate(parseFloat(creditInput))} disabled={creditMutation.isPending || !creditInput || parseFloat(creditInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#F0A030', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                      <button onClick={() => creditMutation.mutate(parseFloat(creditInput))} disabled={creditMutation.isPending || !creditInput || parseFloat(creditInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: 'var(--dax-amber)', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                         {creditMutation.isPending ? '...' : 'Fiar'}
                       </button>
                     </div>
@@ -556,7 +556,7 @@ function ClientDetailModal({ clientId, onClose, onEdit, onDelete, showToast, for
                       </p>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <input className="dax-input" type="number" min="0" step="100" placeholder="Monto a pagar..." value={payInput} onChange={e => setPayInput(e.target.value)} style={{ margin: 0, flex: 1 }} />
-                        <button onClick={() => payMutation.mutate(parseFloat(payInput))} disabled={payMutation.isPending || !payInput || parseFloat(payInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#3DBF7F', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        <button onClick={() => payMutation.mutate(parseFloat(payInput))} disabled={payMutation.isPending || !payInput || parseFloat(payInput) <= 0} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#3DBF7F', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           {payMutation.isPending ? '...' : 'Pagar'}
                         </button>
                       </div>
@@ -627,7 +627,7 @@ export default function ClientsPage() {
 
       {/* Toast */}
       {toastState && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', background: toastState.type === 'success' ? '#22C55E' : 'var(--dax-danger)', color: '#fff', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,.3)', animation: 'slideUp .2s ease' }}>
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', background: toastState.type === 'success' ? '#22C55E' : 'var(--dax-danger)', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 600, boxShadow: '0 4px 20px rgba(0,0,0,.3)', animation: 'slideUp .2s ease' }}>
           {toastState.msg}
         </div>
       )}
@@ -652,10 +652,10 @@ export default function ClientsPage() {
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px', marginBottom: '20px' }}>
           {[
-            { label: 'Total',      value: stats.total,                           color: '#5AAAF0', icon: Users         },
-            { label: 'Activos',    value: stats.active,                          color: '#3DBF7F', icon: User          },
-            { label: 'Con fiado',  value: stats.withDebt,                        color: '#E05050', icon: AlertTriangle },
-            { label: 'Total fiado', value: formatCurrency(stats.totalDebt ?? 0), color: '#F0A030', icon: DollarSign    },
+            { label: 'Total',      value: stats.total,                           color: 'var(--dax-blue)', icon: Users         },
+            { label: 'Activos',    value: stats.active,                          color: 'var(--dax-success)', icon: User          },
+            { label: 'Con fiado',  value: stats.withDebt,                        color: 'var(--dax-danger)', icon: AlertTriangle },
+            { label: 'Total fiado', value: formatCurrency(stats.totalDebt ?? 0), color: 'var(--dax-amber)', icon: DollarSign    },
           ].map(s => {
             const Icon = s.icon;
             return (
@@ -766,7 +766,7 @@ export default function ClientsPage() {
                         <td style={{ textAlign: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                             <Star size={11} color="#F0A030" />
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#F0A030' }}>{client.points ?? 0}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-amber)' }}>{client.points ?? 0}</span>
                           </div>
                         </td>
                         <td style={{ textAlign: 'center' }}>
@@ -830,7 +830,7 @@ export default function ClientsPage() {
       )}
 
       {deleteTarget && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '400px', padding: '28px', textAlign: 'center' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--dax-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={22} color="var(--dax-danger)" />
@@ -841,7 +841,7 @@ export default function ClientsPage() {
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <button onClick={() => setDeleteTarget(null)} className="dax-btn-secondary">Cancelar</button>
-              <button onClick={() => deleteMutation.mutate(deleteTarget.id)} disabled={deleteMutation.isPending} style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <button onClick={() => deleteMutation.mutate(deleteTarget.id)} disabled={deleteMutation.isPending} style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 {deleteMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <Trash2 size={13} />}
                 Eliminar
               </button>

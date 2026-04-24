@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -17,7 +17,7 @@ interface Props {
 
 const Toggle = ({ value, onChange }: { value: boolean; onChange: () => void }) => (
   <button onClick={onChange} style={{ width: '44px', height: '24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: value ? 'var(--dax-coral)' : 'var(--dax-surface-3)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
-    <span style={{ position: 'absolute', top: '2px', left: value ? '22px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', transition: 'left .2s', display: 'block' }} />
+    <span style={{ position: 'absolute', top: '2px', left: value ? '22px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: 'var(--dax-surface)', transition: 'left .2s', display: 'block' }} />
   </button>
 );
 
@@ -250,7 +250,7 @@ export function PrintingSection({ showToast }: Props) {
             </button>
             <button
               onClick={() => print(sampleReceipt, config)}
-              style={{ flex: 1, minWidth: '120px', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid rgba(90,170,240,.4)', background: 'rgba(90,170,240,.08)', color: '#5AAAF0', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              style={{ flex: 1, minWidth: '120px', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid rgba(90,170,240,.4)', background: 'var(--dax-blue-bg)', color: 'var(--dax-blue)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             >
               <Printer size={14} /> Imprimir prueba
             </button>
@@ -279,7 +279,7 @@ export function PrintingSection({ showToast }: Props) {
             </div>
             <button
               onClick={() => print(sampleReceipt, config)}
-              style={{ padding: '9px 18px', borderRadius: '10px', border: 'none', background: 'var(--dax-coral)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 12px rgba(255,92,53,.3)' }}
+              style={{ padding: '9px 18px', borderRadius: '10px', border: 'none', background: 'var(--dax-coral)', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 12px rgba(255,92,53,.3)' }}
             >
               <Printer size={13} /> Imprimir prueba
             </button>
@@ -288,7 +288,7 @@ export function PrintingSection({ showToast }: Props) {
           {/* Preview del recibo */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{
-              background: '#fff',
+              background: 'var(--dax-surface)',
               borderRadius: '8px',
               padding: '8px',
               boxShadow: '0 4px 24px rgba(0,0,0,.3)',
@@ -302,7 +302,7 @@ export function PrintingSection({ showToast }: Props) {
               <iframe
                 srcDoc={previewHTML}
                 title="Preview recibo"
-                style={{ width: '100%', border: 'none', minHeight: '500px', display: 'block', background: '#fff' }}
+                style={{ width: '100%', border: 'none', minHeight: '500px', display: 'block', background: 'var(--dax-surface)' }}
                 sandbox="allow-same-origin"
               />
               {/* Simulación corte de papel abajo */}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -40,10 +40,10 @@ function PasswordStrength({ password }: { password: string }) {
 
   const score  = checks.filter(c => c.pass).length;
   const levels = [
-    { label: 'Muy débil', color: '#E05050' },
-    { label: 'Débil',     color: '#F0A030' },
-    { label: 'Regular',   color: '#EAB308' },
-    { label: 'Buena',     color: '#3DBF7F' },
+    { label: 'Muy débil', color: 'var(--dax-danger)' },
+    { label: 'Débil',     color: 'var(--dax-amber)' },
+    { label: 'Regular',   color: 'var(--dax-amber)' },
+    { label: 'Buena',     color: 'var(--dax-success)' },
     { label: 'Excelente', color: '#22C55E' },
   ];
   const level = levels[Math.min(score - 1, 4)] ?? levels[0];
@@ -120,7 +120,7 @@ export function SecuritySection({ showToast }: { showToast: (msg: string, type?:
           <Shield size={22} color="#3DBF7F" />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: '14px', fontWeight: 700, color: '#3DBF7F', marginBottom: '2px' }}>Cuenta protegida</p>
+          <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-success)', marginBottom: '2px' }}>Cuenta protegida</p>
           <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
             {user?.email} · Rol: <strong style={{ color: 'var(--dax-text-secondary)', textTransform: 'capitalize' }}>{user?.role}</strong>
           </p>

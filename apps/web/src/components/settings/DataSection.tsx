@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useAuthStore } from '@/store/auth.store';
@@ -27,7 +27,7 @@ const EXPORTS: ExportItem[] = [
     endpoint: '/exports/products',
     filename: 'productos',
     icon:     Package,
-    color:    '#5AAAF0',
+    color: 'var(--dax-blue)',
   },
   {
     label:        'Exportar ventas',
@@ -35,7 +35,7 @@ const EXPORTS: ExportItem[] = [
     endpoint:     '/exports/sales',
     filename:     'ventas',
     icon:         TrendingUp,
-    color:        '#3DBF7F',
+    color: 'var(--dax-success)',
     hasDateRange: true,
   },
   {
@@ -44,7 +44,7 @@ const EXPORTS: ExportItem[] = [
     endpoint: '/exports/inventory',
     filename: 'inventario',
     icon:     Warehouse,
-    color:    '#A78BFA',
+    color: 'var(--dax-purple)',
   },
   {
     label:    'Backup completo',
@@ -52,7 +52,7 @@ const EXPORTS: ExportItem[] = [
     endpoint: '/exports/backup',
     filename: 'backup-daxcloud',
     icon:     Database,
-    color:    '#FF5C35',
+    color: 'var(--dax-coral)',
   },
 ];
 

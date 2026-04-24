@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState }                  from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_CFG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  pending:  { label: 'Pendiente', color: '#F0A030', bg: 'rgba(240,160,48,.1)',  icon: Clock        },
+  pending:  { label: 'Pendiente', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.1)',  icon: Clock        },
   approved: { label: 'Aprobado',  color: '#22C55E', bg: 'rgba(34,197,94,.1)',   icon: CheckCircle  },
-  rejected: { label: 'Rechazado', color: '#E05050', bg: 'rgba(224,80,80,.1)',   icon: XCircle      },
+  rejected: { label: 'Rechazado', color: 'var(--dax-danger)', bg: 'rgba(224,80,80,.1)',   icon: XCircle      },
 };
 
 const PLAN_LABELS: Record<string, string> = {
@@ -83,7 +83,7 @@ export default function AdminPage() {
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           {pendingCount > 0 && (
-            <span style={{ background: '#F0A030', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px' }}>
+            <span style={{ background: 'var(--dax-amber)', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px' }}>
               {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -178,7 +178,7 @@ export default function AdminPage() {
                         {req.receiptUrl ? (
                           <button
                             onClick={() => setImgPreview(getImageUrl(req.receiptUrl) ?? req.receiptUrl)}
-                            style={{ background: 'rgba(90,170,240,.1)', border: 'none', cursor: 'pointer', color: '#5AAAF0', padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            style={{ background: 'rgba(90,170,240,.1)', border: 'none', cursor: 'pointer', color: 'var(--dax-blue)', padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           >
                             <Eye size={11} /> Ver
                           </button>
@@ -212,7 +212,7 @@ export default function AdminPage() {
 
       {/* Modal de revisión */}
       {selected && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>Revisar solicitud</h2>
@@ -263,7 +263,7 @@ export default function AdminPage() {
               <button
                 onClick={() => rejectMutation.mutate({ id: selected.id, notes })}
                 disabled={rejectMutation.isPending}
-                style={{ padding: '12px', borderRadius: '12px', border: '1.5px solid rgba(224,80,80,.4)', background: 'rgba(224,80,80,.06)', color: '#E05050', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ padding: '12px', borderRadius: '12px', border: '1.5px solid rgba(224,80,80,.4)', background: 'rgba(224,80,80,.06)', color: 'var(--dax-danger)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 <XCircle size={14} />
                 {rejectMutation.isPending ? 'Rechazando...' : 'Rechazar'}
@@ -271,7 +271,7 @@ export default function AdminPage() {
               <button
                 onClick={() => approveMutation.mutate({ id: selected.id, notes })}
                 disabled={approveMutation.isPending}
-                style={{ padding: '12px', borderRadius: '12px', border: 'none', background: '#22C55E', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 16px rgba(34,197,94,.3)' }}
+                style={{ padding: '12px', borderRadius: '12px', border: 'none', background: '#22C55E', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 16px rgba(34,197,94,.3)' }}
               >
                 <CheckCircle size={14} />
                 {approveMutation.isPending ? 'Aprobando...' : 'Aprobar'}

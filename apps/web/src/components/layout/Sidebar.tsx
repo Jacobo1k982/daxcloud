@@ -138,7 +138,7 @@ export function Sidebar() {
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'transparent'; (e.currentTarget as HTMLElement).style.background = 'var(--dax-surface-2)'; }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'linear-gradient(135deg,rgba(255,92,53,.25),rgba(255,61,31,.15))', border: '1px solid rgba(255,92,53,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#FF5C35' }}>{user?.firstName?.[0]?.toUpperCase() ?? '?'}</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-coral)' }}>{user?.firstName?.[0]?.toUpperCase() ?? '?'}</span>
               </div>
               <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '9px', height: '9px', borderRadius: '50%', background: '#3DBF7F', border: '1.5px solid var(--dax-navy-900)', boxShadow: '0 0 5px rgba(61,191,127,.5)' }} />
             </div>

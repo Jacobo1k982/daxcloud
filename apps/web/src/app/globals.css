@@ -1,22 +1,22 @@
-/* ── Google Fonts ── */
+﻿/* â”€â”€ Google Fonts â”€â”€ */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
-/* ══════════════════════════════════════════════════════
-   DAXCLOUD — DESIGN SYSTEM
-   Paleta: Azul profundo enterprise + Coral acción
-══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DAXCLOUD â€” DESIGN SYSTEM
+   Paleta: Azul profundo enterprise + Coral acciÃ³n
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 :root {
-  /* ── Tipografía ── */
+  /* â”€â”€ TipografÃ­a â”€â”€ */
   --font-primary: 'Outfit', system-ui, -apple-system, sans-serif;
 
-  /* ── Marca (se sobreescribe con useTheme) ── */
+  /* â”€â”€ Marca (se sobreescribe con useTheme) â”€â”€ */
   --dax-coral:          #FF5C35;
   --dax-coral-hover:    #E8440E;
   --dax-coral-soft:     rgba(255, 92, 53, 0.10);
   --dax-coral-border:   rgba(255, 92, 53, 0.25);
 
-  /* ── Azul profundo ── */
+  /* â”€â”€ Azul profundo â”€â”€ */
   --dax-navy-950:       #080F1A;
   --dax-navy-900:       #0F1924;
   --dax-navy-800:       #162235;
@@ -29,22 +29,22 @@
   --dax-navy-100:       #B8D8F0;
   --dax-navy-50:        #E8F4FB;
 
-  /* ── Backgrounds (tema oscuro por defecto) ── */
+  /* â”€â”€ Backgrounds (tema oscuro por defecto) â”€â”€ */
   --dax-bg:             #0F1924;
   --dax-surface:        #1A2840;
   --dax-surface-2:      #1E3050;
   --dax-surface-3:      #243660;
 
-  /* ── Bordes ── */
+  /* â”€â”€ Bordes â”€â”€ */
   --dax-border:         #1E3A5F;
   --dax-border-soft:    rgba(30, 58, 95, 0.6);
 
-  /* ── Textos ── */
+  /* â”€â”€ Textos â”€â”€ */
   --dax-text-primary:   #F0F4FF;
   --dax-text-secondary: #B8D0E8;
   --dax-text-muted:     #4A7FAF;
 
-  /* ── Estados ── */
+  /* â”€â”€ Estados â”€â”€ */
   --dax-success:        #3DBF7F;
   --dax-success-bg:     rgba(61, 191, 127, 0.10);
   --dax-warning:        #F0A030;
@@ -54,22 +54,22 @@
   --dax-info:           #5AAAF0;
   --dax-info-bg:        rgba(90, 170, 240, 0.10);
 
-  /* ── Radios ── */
+  /* â”€â”€ Radios â”€â”€ */
   --dax-radius-sm:      6px;
   --dax-radius-md:      10px;
   --dax-radius-lg:      14px;
   --dax-radius-xl:      18px;
 
-  /* ── Sombras ── */
+  /* â”€â”€ Sombras â”€â”€ */
   --dax-shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.3);
   --dax-shadow-md:      0 4px 12px rgba(0, 0, 0, 0.4);
   --dax-shadow-lg:      0 8px 28px rgba(0, 0, 0, 0.5);
   --dax-shadow-coral:   0 4px 16px rgba(255, 92, 53, 0.30);
 }
 
-/* ══════════════════════════════════════════════════════
-   TEMA CLARO — aplicado por next-themes con class="light"
-══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TEMA CLARO â€” aplicado por next-themes con class="light"
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .light {
   --dax-bg:             #F0F4F8;
   --dax-surface:        #FFFFFF;
@@ -91,6 +91,15 @@
   --dax-navy-400:       #6A8AAA;
   --dax-navy-300:       #4A7FAF;
 
+  --dax-overlay:        rgba(0, 0, 0, 0.50);
+  --dax-overlay-soft:   rgba(0, 0, 0, 0.20);
+  --dax-white-10:       rgba(0, 0, 0, 0.06);
+  --dax-white-25:       rgba(0, 0, 0, 0.15);
+  --dax-white-35:       rgba(0, 0, 0, 0.25);
+  --dax-white-60:       rgba(0, 0, 0, 0.55);
+  --dax-amber-bg:       rgba(240, 160, 48, 0.12);
+  --dax-blue-bg:        rgba(90, 170, 240, 0.12);
+  --dax-purple-bg:      rgba(167, 139, 250, 0.12);
   --dax-shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.08);
   --dax-shadow-md:      0 4px 12px rgba(0, 0, 0, 0.10);
   --dax-shadow-lg:      0 8px 28px rgba(0, 0, 0, 0.14);
@@ -101,7 +110,7 @@
   --dax-info-bg:        rgba(90, 170, 240, 0.12);
 }
 
-/* tema claro — ajustes específicos de componentes */
+/* tema claro â€” ajustes especÃ­ficos de componentes */
 .light .dax-table tbody tr:hover td {
   background: rgba(209, 217, 230, 0.4);
 }
@@ -115,7 +124,7 @@
 .light ::-webkit-scrollbar-track { background: #E8EDF5; }
 .light ::-webkit-scrollbar-thumb { background: #A0B4C8; }
 
-/* ══ Reset ════════════════════════════════════════════ */
+/* â•â• Reset â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -143,13 +152,13 @@ h1, h2, h3, h4, h5, h6 {
 a { color: var(--dax-coral); text-decoration: none; }
 a:hover { color: var(--dax-coral-hover); }
 
-/* ══ Scrollbar ════════════════════════════════════════ */
+/* â•â• Scrollbar â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--dax-navy-800); }
 ::-webkit-scrollbar-thumb { background: var(--dax-navy-600); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--dax-navy-400); }
 
-/* ══ Componentes base ══════════════════════════════════ */
+/* â•â• Componentes base â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Cards */
 .dax-card {
@@ -322,14 +331,14 @@ select.dax-input option {
 .dax-nav-item.active { background: var(--dax-coral-soft); color: var(--dax-coral); font-weight: 700; }
 .dax-nav-item.active svg { color: var(--dax-coral); }
 
-/* ══ Animaciones globales ════════════════════════════ */
+/* â•â• Animaciones globales â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeInUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideIn   { from { opacity: 0; transform: translateY(8px);  } to { opacity: 1; transform: translateY(0); } }
 @keyframes spin      { to { transform: rotate(360deg); } }
 @keyframes pulse     { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-/* ══ Utilidades ══════════════════════════════════════ */
+/* â•â• Utilidades â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .spinning { animation: spin 1s linear infinite; }
 
 ::selection { background: var(--dax-coral-soft); color: var(--dax-coral); }
@@ -342,3 +351,5 @@ input:-webkit-autofill:focus {
   caret-color: var(--dax-text-primary);
   border-color: var(--dax-border) !important;
 }
+
+

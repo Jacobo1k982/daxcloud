@@ -13,9 +13,9 @@ import {
 type Tab = 'dashboard' | 'lots' | 'expiring' | 'prescriptions' | 'clients';
 
 const PRESCRIPTION_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Pendiente',  color: '#F0A030',            bg: 'rgba(240,160,48,.12)' },
+  pending:   { label: 'Pendiente',  color: 'var(--dax-amber)',            bg: 'rgba(240,160,48,.12)' },
   dispensed: { label: 'Despachada', color: 'var(--dax-success)', bg: 'var(--dax-success-bg)' },
-  partial:   { label: 'Parcial',    color: '#5AAAF0',            bg: 'rgba(90,170,240,.12)' },
+  partial:   { label: 'Parcial',    color: 'var(--dax-blue)',            bg: 'rgba(90,170,240,.12)' },
   cancelled: { label: 'Cancelada',  color: 'var(--dax-danger)',  bg: 'var(--dax-danger-bg)' },
 };
 
@@ -184,7 +184,7 @@ export default function PharmacyPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: 'var(--dax-radius-lg)', background: 'rgba(90,170,240,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: 'var(--dax-radius-lg)', background: 'var(--dax-blue-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: '22px' }}>💊</span>
           </div>
           <div>
@@ -209,12 +209,12 @@ export default function PharmacyPage() {
               <Icon size={13} />
               {t.label}
               {t.id === 'expiring' && (stats?.expiringIn30 > 0 || stats?.expiredLots > 0) && (
-                <span style={{ background: '#fff', color: '#5AAAF0', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
+                <span style={{ background: 'var(--dax-surface)', color: 'var(--dax-blue)', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
                   {(stats?.expiredLots ?? 0) + (stats?.expiringIn30 ?? 0)}
                 </span>
               )}
               {t.id === 'prescriptions' && stats?.pendingPrescriptions > 0 && (
-                <span style={{ background: '#fff', color: '#5AAAF0', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
+                <span style={{ background: 'var(--dax-surface)', color: 'var(--dax-blue)', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
                   {stats.pendingPrescriptions}
                 </span>
               )}
@@ -230,11 +230,11 @@ export default function PharmacyPage() {
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
             {[
-              { label: 'Lotes activos',      value: stats?.totalLots ?? 0,            color: '#5AAAF0',            icon: Package },
-              { label: 'Vencen en 7 días',   value: stats?.expiringIn7 ?? 0,          color: '#F0A030',            icon: AlertCircle },
-              { label: 'Vencen en 30 días',  value: stats?.expiringIn30 ?? 0,         color: '#F0A030',            icon: Calendar },
+              { label: 'Lotes activos',      value: stats?.totalLots ?? 0,            color: 'var(--dax-blue)',            icon: Package },
+              { label: 'Vencen en 7 días',   value: stats?.expiringIn7 ?? 0,          color: 'var(--dax-amber)',            icon: AlertCircle },
+              { label: 'Vencen en 30 días',  value: stats?.expiringIn30 ?? 0,         color: 'var(--dax-amber)',            icon: Calendar },
               { label: 'Lotes vencidos',     value: stats?.expiredLots ?? 0,          color: 'var(--dax-danger)',  icon: AlertTriangle },
-              { label: 'Recetas pendientes', value: stats?.pendingPrescriptions ?? 0,  color: '#F0A030',            icon: FileText },
+              { label: 'Recetas pendientes', value: stats?.pendingPrescriptions ?? 0,  color: 'var(--dax-amber)',            icon: FileText },
               { label: 'Pacientes',          value: stats?.totalClients ?? 0,          color: 'var(--dax-success)', icon: Users },
               { label: 'Ventas del mes',     value: formatCurrency(stats?.monthRevenue ?? 0), color: 'var(--dax-coral)', icon: TrendingUp, isText: true },
             ].map((s, i) => {
@@ -551,8 +551,8 @@ export default function PharmacyPage() {
               </button>
               <div className="dax-card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-                  <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(90,170,240,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#5AAAF0' }}>{selectedClient.firstName[0]}{selectedClient.lastName?.[0] ?? ''}</span>
+                  <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--dax-blue-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--dax-blue)' }}>{selectedClient.firstName[0]}{selectedClient.lastName?.[0] ?? ''}</span>
                   </div>
                   <div>
                     <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '4px' }}>{selectedClient.firstName} {selectedClient.lastName}</p>
@@ -594,8 +594,8 @@ export default function PharmacyPage() {
               ) : clients.map((client: any) => (
                 <div key={client.id} className="dax-card" style={{ padding: '18px 20px', cursor: 'pointer', transition: 'all .15s' }} onClick={() => setSelectedClient(client)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(90,170,240,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: '14px', fontWeight: 700, color: '#5AAAF0' }}>{client.firstName[0]}{client.lastName?.[0] ?? ''}</span>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--dax-blue-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-blue)' }}>{client.firstName[0]}{client.lastName?.[0] ?? ''}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{client.firstName} {client.lastName}</p>
@@ -603,7 +603,7 @@ export default function PharmacyPage() {
                       {client.idNumber && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Cédula: {client.idNumber}</p>}
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      {client._count?.prescriptions > 0 && <p style={{ fontSize: '11px', color: '#5AAAF0' }}>{client._count.prescriptions} receta{client._count.prescriptions !== 1 ? 's' : ''}</p>}
+                      {client._count?.prescriptions > 0 && <p style={{ fontSize: '11px', color: 'var(--dax-blue)' }}>{client._count.prescriptions} receta{client._count.prescriptions !== 1 ? 's' : ''}</p>}
                     </div>
                   </div>
                 </div>
@@ -619,7 +619,7 @@ export default function PharmacyPage() {
 
       {/* Modal Lote */}
       {showLotModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Registrar lote</h2>
@@ -679,7 +679,7 @@ export default function PharmacyPage() {
 
       {/* Modal Prescripción */}
       {showPrescriptionModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '560px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva receta médica</h2>
@@ -740,7 +740,7 @@ export default function PharmacyPage() {
 
       {/* Modal Cliente / Paciente */}
       {showClientModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo paciente</h2>

@@ -28,10 +28,10 @@ interface Subscription {
 
 // ── Configuración visual ──────────────────────────────────────────────────────
 const STATUS_INFO: Record<string, { label: string; color: string; bg: string }> = {
-  active: { label: 'Activa', color: '#3DBF7F', bg: 'rgba(61,191,127,.12)' },
-  trialing: { label: 'Trial', color: '#5AAAF0', bg: 'rgba(90,170,240,.12)' },
-  past_due: { label: 'Vencida', color: '#F0A030', bg: 'rgba(240,160,48,.12)' },
-  cancelled: { label: 'Cancelada', color: '#E05050', bg: 'rgba(224,80,80,.12)' },
+  active: { label: 'Activa', color: 'var(--dax-success)', bg: 'rgba(61,191,127,.12)' },
+  trialing: { label: 'Trial', color: 'var(--dax-blue)', bg: 'rgba(90,170,240,.12)' },
+  past_due: { label: 'Vencida', color: 'var(--dax-amber)', bg: 'rgba(240,160,48,.12)' },
+  cancelled: { label: 'Cancelada', color: 'var(--dax-danger)', bg: 'rgba(224,80,80,.12)' },
 };
 
 const PLAN_ICONS: Record<string, any> = {
@@ -82,7 +82,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#F0F4FF', margin: '0 0 4px', letterSpacing: '-.02em' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--dax-text-primary)', margin: '0 0 4px', letterSpacing: '-.02em' }}>
               Elige tu plan
             </h2>
             <p style={{ fontSize: '13px', color: 'rgba(176,208,240,.6)', margin: 0 }}>
@@ -102,11 +102,11 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
               onClick={() => setAnnual(p => !p)}
               style={{ width: '44px', height: '24px', borderRadius: '12px', background: annual ? '#FF5C35' : 'rgba(30,58,95,.8)', position: 'relative', cursor: 'pointer', transition: 'background .2s', flexShrink: 0 }}
             >
-              <div style={{ position: 'absolute', top: '3px', left: annual ? '20px' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: 'left .2s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 4px rgba(0,0,0,.4)' }} />
+              <div style={{ position: 'absolute', top: '3px', left: annual ? '20px' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--dax-surface)', transition: 'left .2s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 4px rgba(0,0,0,.4)' }} />
             </div>
             <span style={{ fontSize: '13px', fontWeight: annual ? 700 : 400, color: annual ? '#F0F4FF' : 'rgba(176,208,240,.4)', transition: 'all .2s' }}>Anual</span>
             {annual && (
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#3DBF7F', background: 'rgba(61,191,127,.15)', border: '1px solid rgba(61,191,127,.25)', padding: '3px 10px', borderRadius: '20px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-success)', background: 'rgba(61,191,127,.15)', border: '1px solid rgba(61,191,127,.25)', padding: '3px 10px', borderRadius: '20px' }}>
                 2 meses gratis
               </span>
             )}
@@ -136,7 +136,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                 transition: 'all .2s',
               }}>
                 {(isCurrent || plan.popular) && (
-                  <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: isCurrent ? plan.color : '#FF5C35', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '4px 14px', borderRadius: '20px', whiteSpace: 'nowrap', letterSpacing: '.06em', textTransform: 'uppercase', boxShadow: `0 4px 12px ${isCurrent ? plan.color : '#FF5C35'}50` }}>
+                  <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: isCurrent ? plan.color : '#FF5C35', color: 'var(--dax-text-primary)', fontSize: '10px', fontWeight: 800, padding: '4px 14px', borderRadius: '20px', whiteSpace: 'nowrap', letterSpacing: '.06em', textTransform: 'uppercase', boxShadow: `0 4px 12px ${isCurrent ? plan.color : '#FF5C35'}50` }}>
                     {isCurrent ? '✓ Plan actual' : '⚡ Popular'}
                   </div>
                 )}
@@ -146,7 +146,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                     <Icon size={18} color={plan.color} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '16px', fontWeight: 800, color: '#F0F4FF', margin: 0 }}>{plan.label}</p>
+                    <p style={{ fontSize: '16px', fontWeight: 800, color: 'var(--dax-text-primary)', margin: 0 }}>{plan.label}</p>
                     <p style={{ fontSize: '11px', color: 'rgba(176,208,240,.5)', margin: 0 }}>{plan.limit}</p>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                     <span style={{ fontSize: '13px', color: 'rgba(176,208,240,.5)', marginBottom: '6px' }}>/mes</span>
                   </div>
                   {annual
-                    ? <p style={{ fontSize: '11px', color: '#3DBF7F', fontWeight: 600 }}>${plan.annualPrice}/año · ahorras ${saving}</p>
+                    ? <p style={{ fontSize: '11px', color: 'var(--dax-success)', fontWeight: 600 }}>${plan.annualPrice}/año · ahorras ${saving}</p>
                     : <p style={{ fontSize: '11px', color: 'rgba(176,208,240,.4)' }}>${plan.monthlyPrice * 12}/año facturado mensual</p>
                   }
                 </div>
@@ -204,7 +204,7 @@ function ChangePlanModal({ currentPlanKey, onClose, onChangePlan, isPending, cha
                         onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(61,191,127,.5)'; el.style.background='rgba(61,191,127,.06)'; }}
                         onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor='rgba(61,191,127,.2)'; el.style.background='rgba(22,34,53,0.6)'; }}>
                         <Smartphone size={13} color="#3DBF7F" />
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#3DBF7F' }}>SINPE</span>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-success)' }}>SINPE</span>
                         <span style={{ fontSize: '9px', color: 'rgba(113,128,150,.6)' }}>Solo CR</span>
                       </button>
 
@@ -264,7 +264,7 @@ function CancelModal({ subscription, onClose, onConfirm, isPending }: {
   return createPortal(
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(8px)' }}
+      style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backdropFilter: 'blur(8px)' }}
     >
       <div className="dax-card" style={{ width: '100%', maxWidth: '460px', padding: '32px', animation: 'modalIn .25s cubic-bezier(.22,1,.36,1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -275,7 +275,7 @@ function CancelModal({ subscription, onClose, onConfirm, isPending }: {
         <div style={{ background: 'rgba(224,80,80,.06)', border: '1px solid rgba(224,80,80,.2)', borderRadius: '12px', padding: '16px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
           <AlertTriangle size={16} color="#E05050" style={{ flexShrink: 0, marginTop: '1px' }} />
           <div>
-            <p style={{ fontSize: '13px', color: '#E05050', fontWeight: 700, marginBottom: '6px' }}>¿Seguro que quieres cancelar?</p>
+            <p style={{ fontSize: '13px', color: 'var(--dax-danger)', fontWeight: 700, marginBottom: '6px' }}>¿Seguro que quieres cancelar?</p>
             <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', lineHeight: 1.6 }}>
               Tu suscripción permanecerá activa hasta el{' '}
               <strong style={{ color: 'var(--dax-text-primary)' }}>{fmtDate(subscription?.currentPeriodEnd)}</strong>.
@@ -459,7 +459,7 @@ export function PlanSection({ showToast }: {
                 <Gift size={18} color="#3DBF7F" />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, color: '#3DBF7F', marginBottom: '2px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-success)', marginBottom: '2px' }}>
                   Prueba DaxCloud gratis por 15 días
                 </p>
                 <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
@@ -486,7 +486,7 @@ export function PlanSection({ showToast }: {
           <div style={{ borderRadius: '14px', padding: '16px 20px', background: 'rgba(240,160,48,.06)', border: '1px solid rgba(240,160,48,.2)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
             <AlertTriangle size={18} color="#F0A030" style={{ flexShrink: 0, marginTop: '1px' }} />
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: '#F0A030', marginBottom: '3px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-amber)', marginBottom: '3px' }}>
                 Tu suscripción se cancelará el {fmtDate(subscription?.currentPeriodEnd)}
               </p>
               <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Puedes reactivarla antes de esa fecha sin perder tus datos.</p>
@@ -542,7 +542,7 @@ export function PlanSection({ showToast }: {
                 </span>
                 <span style={{ fontSize: '13px', color: 'var(--dax-text-muted)', marginBottom: '4px' }}>/mes USD</span>
               </div>
-              <p style={{ fontSize: '11px', color: '#3DBF7F', fontWeight: 600, margin: 0 }}>
+              <p style={{ fontSize: '11px', color: 'var(--dax-success)', fontWeight: 600, margin: 0 }}>
                 o ${planData.annualMonthly}/mes anual · ahorra {savingPct}%
               </p>
             </div>

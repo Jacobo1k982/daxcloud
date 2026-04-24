@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,7 +36,7 @@ function SectionDivider({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '4px 0' }}>
       <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
-      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#FF5C35' }}>{label}</span>
+      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--dax-coral)' }}>{label}</span>
       <div style={{ flex: 1, height: '1px', background: 'var(--dax-border)' }} />
     </div>
   );
@@ -101,7 +101,7 @@ export default function BranchesPage() {
           </p>
         </div>
         {isMultiBranch ? (
-          <button onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(255,92,53,.3)' }}>
+          <button onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: 'var(--dax-text-primary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(255,92,53,.3)' }}>
             <Plus size={14} /> Nueva sucursal
           </button>
         ) : (
@@ -115,10 +115,10 @@ export default function BranchesPage() {
       {!isMultiBranch && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', marginBottom: '20px', background: 'rgba(255,92,53,.06)', border: '1px solid rgba(255,92,53,.2)', borderRadius: '10px', flexWrap: 'wrap' }}>
           <Zap size={15} color="#FF5C35" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: '13px', color: '#FF5C35', flex: 1 }}>
+          <p style={{ fontSize: '13px', color: 'var(--dax-coral)', flex: 1 }}>
             Actualiza a <strong>Growth</strong> para manejar múltiples sucursales.
           </p>
-          <a href="/settings" style={{ fontSize: '12px', fontWeight: 700, color: '#FF5C35', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>Ver planes <ArrowRight size={12} /></a>
+          <a href="/settings" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-coral)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>Ver planes <ArrowRight size={12} /></a>
         </div>
       )}
 
@@ -126,9 +126,9 @@ export default function BranchesPage() {
       {(branches as Branch[]).length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '20px' }}>
           {[
-            { label: 'Total',      value: (branches as Branch[]).length, color: '#5AAAF0', icon: GitBranch  },
-            { label: 'Activas',    value: activeCount,                    color: '#3DBF7F', icon: CheckCircle },
-            { label: 'Inactivas',  value: inactiveCount,                  color: '#E05050', icon: XCircle    },
+            { label: 'Total',      value: (branches as Branch[]).length, color: 'var(--dax-blue)', icon: GitBranch  },
+            { label: 'Activas',    value: activeCount,                    color: 'var(--dax-success)', icon: CheckCircle },
+            { label: 'Inactivas',  value: inactiveCount,                  color: 'var(--dax-danger)', icon: XCircle    },
           ].map(s => {
             const Icon = s.icon;
             return (
@@ -219,7 +219,7 @@ export default function BranchesPage() {
 
       {/* Modal confirmación desactivar */}
       {confirmId && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '380px', padding: '28px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(224,80,80,.1)', border: '1px solid rgba(224,80,80,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <PowerOff size={20} color="#E05050" />
@@ -230,7 +230,7 @@ export default function BranchesPage() {
             </p>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => setConfirmId(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid var(--dax-border)', background: 'transparent', color: 'var(--dax-text-secondary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={() => deleteMutation.mutate(confirmId)} disabled={deleteMutation.isPending} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#E05050', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <button onClick={() => deleteMutation.mutate(confirmId)} disabled={deleteMutation.isPending} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#E05050', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 {deleteMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <PowerOff size={13} />}
                 Desactivar
               </button>
@@ -241,13 +241,13 @@ export default function BranchesPage() {
 
       {/* Modal formulario */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '560px', maxHeight: '92vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
             {/* Header modal */}
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'rgba(255,92,53,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'var(--dax-coral-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Building2 size={16} color="#FF5C35" />
                 </div>
                 <div>
@@ -290,8 +290,8 @@ export default function BranchesPage() {
               <Field label="Notas internas" value={form.notes} onChange={v => f('notes', v)} placeholder="Información adicional para el equipo..." />
 
               {error && (
-                <div style={{ padding: '10px 14px', background: 'rgba(224,80,80,.08)', border: '1px solid rgba(224,80,80,.2)', borderRadius: '9px' }}>
-                  <p style={{ fontSize: '12px', color: '#E05050' }}>⚠️ {error}</p>
+                <div style={{ padding: '10px 14px', background: 'var(--dax-danger-bg)', border: '1px solid rgba(224,80,80,.2)', borderRadius: '9px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--dax-danger)' }}>⚠️ {error}</p>
                 </div>
               )}
             </div>

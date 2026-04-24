@@ -50,7 +50,7 @@ function SaleDetailModal({ sale, onClose, formatCurrency }: { sale: Sale; onClos
   const pColor  = PAYMENT_COLORS[sale.paymentMethod] ?? '#FF5C35';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '520px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
@@ -126,14 +126,14 @@ function SaleDetailModal({ sale, onClose, formatCurrency }: { sale: Sale; onClos
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {sale.items.map(item => (
               <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--dax-surface-2)', borderRadius: '9px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'rgba(255,92,53,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: 'var(--dax-coral-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Package size={12} color="#FF5C35" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product.name}</p>
                   <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
                     ×{item.quantity} · {formatCurrency(Number(item.unitPrice))}
-                    {item.discount > 0 && <span style={{ color: '#F0A030', marginLeft: '6px' }}>-{formatCurrency(Number(item.discount))}</span>}
+                    {item.discount > 0 && <span style={{ color: 'var(--dax-amber)', marginLeft: '6px' }}>-{formatCurrency(Number(item.discount))}</span>}
                   </p>
                 </div>
                 <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', flexShrink: 0 }}>{formatCurrency(Number(item.subtotal))}</p>
@@ -150,7 +150,7 @@ function SaleDetailModal({ sale, onClose, formatCurrency }: { sale: Sale; onClos
             {sale.discount > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <span style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Descuento</span>
-                <span style={{ fontSize: '12px', color: '#F0A030', fontWeight: 600 }}>-{formatCurrency(Number(sale.discount))}</span>
+                <span style={{ fontSize: '12px', color: 'var(--dax-amber)', fontWeight: 600 }}>-{formatCurrency(Number(sale.discount))}</span>
               </div>
             )}
             {sale.tax > 0 && (
@@ -161,7 +161,7 @@ function SaleDetailModal({ sale, onClose, formatCurrency }: { sale: Sale; onClos
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid var(--dax-border)', marginTop: '4px' }}>
               <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Total</span>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#FF5C35' }}>{formatCurrency(Number(sale.total))}</span>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--dax-coral)' }}>{formatCurrency(Number(sale.total))}</span>
             </div>
           </div>
 
@@ -262,10 +262,10 @@ export default function SalesPage() {
   };
 
   const STATS = [
-    { label: 'Ingresos hoy',       value: formatCurrency(summary?.revenueToday ?? 0),  color: '#FF5C35', icon: DollarSign  },
-    { label: 'Transacciones hoy',  value: summary?.salesToday ?? 0,                    color: '#5AAAF0', icon: ShoppingCart },
-    { label: 'Ticket promedio',    value: formatCurrency(summary?.avgTicket ?? 0),      color: '#A78BFA', icon: TrendingUp  },
-    { label: 'Total registros',    value: total,                                        color: '#3DBF7F', icon: FileText    },
+    { label: 'Ingresos hoy',       value: formatCurrency(summary?.revenueToday ?? 0),  color: 'var(--dax-coral)', icon: DollarSign  },
+    { label: 'Transacciones hoy',  value: summary?.salesToday ?? 0,                    color: 'var(--dax-blue)', icon: ShoppingCart },
+    { label: 'Ticket promedio',    value: formatCurrency(summary?.avgTicket ?? 0),      color: 'var(--dax-purple)', icon: TrendingUp  },
+    { label: 'Total registros',    value: total,                                        color: 'var(--dax-success)', icon: FileText    },
   ];
 
   return (
@@ -285,7 +285,7 @@ export default function SalesPage() {
             {exporting ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <Download size={13} />}
             Excel
           </button>
-          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', whiteSpace: 'nowrap' }}>
+          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 18px', background: 'linear-gradient(135deg,#FF5C35,#FF3D1F)', color: 'var(--dax-text-primary)', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', whiteSpace: 'nowrap' }}>
             <Zap size={13} /> POS
           </a>
         </div>

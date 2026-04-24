@@ -250,7 +250,7 @@ export default function ClothingPage() {
               <Icon size={13} />
               {t.label}
               {t.id === 'stock' && (stats?.outOfStock > 0 || stats?.lowStock > 0) && (
-                <span style={{ background: '#fff', color: '#EAB308', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
+                <span style={{ background: 'var(--dax-surface)', color: 'var(--dax-amber)', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>
                   {(stats?.outOfStock ?? 0) + (stats?.lowStock ?? 0)}
                 </span>
               )}
@@ -264,12 +264,12 @@ export default function ClothingPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
             {[
-              { label: 'Variantes activas', value: stats?.totalVariants ?? 0, color: '#EAB308' },
+              { label: 'Variantes activas', value: stats?.totalVariants ?? 0, color: 'var(--dax-amber)' },
               { label: 'Sin stock',         value: stats?.outOfStock ?? 0,   color: 'var(--dax-danger)' },
-              { label: 'Stock bajo',        value: stats?.lowStock ?? 0,     color: '#F0A030' },
-              { label: 'Colecciones',       value: stats?.totalCollections ?? 0, color: '#A78BFA' },
+              { label: 'Stock bajo',        value: stats?.lowStock ?? 0,     color: 'var(--dax-amber)' },
+              { label: 'Colecciones',       value: stats?.totalCollections ?? 0, color: 'var(--dax-purple)' },
               { label: 'Ventas del mes',    value: formatCurrency(stats?.monthRevenue ?? 0), color: 'var(--dax-success)', isText: true },
-              { label: 'Transacciones',     value: stats?.monthSalesCount ?? 0, color: '#5AAAF0' },
+              { label: 'Transacciones',     value: stats?.monthSalesCount ?? 0, color: 'var(--dax-blue)' },
             ].map((s, i) => (
               <div key={i} className="dax-card" style={{ padding: '16px 20px' }}>
                 <p style={{ fontSize: s.isText ? '16px' : '22px', fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</p>
@@ -301,7 +301,7 @@ export default function ClothingPage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {stats.topSizes.map((s: any) => (
                   <div key={s.size} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 16px', background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)', minWidth: '56px' }}>
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: '#EAB308' }}>{s.size}</p>
+                    <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-amber)' }}>{s.size}</p>
                     <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>{s.stock} uds</p>
                   </div>
                 ))}
@@ -373,7 +373,7 @@ export default function ClothingPage() {
                       <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{group.product?.name}</p>
                       <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{group.product?.category} · {group.variants.length} variante{group.variants.length !== 1 ? 's' : ''}</p>
                     </div>
-                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#EAB308', marginLeft: 'auto' }}>{formatCurrency(Number(group.product?.price))}</p>
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--dax-amber)', marginLeft: 'auto' }}>{formatCurrency(Number(group.product?.price))}</p>
                   </div>
 
                   {/* Tabla de variantes */}
@@ -414,7 +414,7 @@ export default function ClothingPage() {
                             </td>
                             <td style={{ padding: '8px 10px' }}>
                               <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => { setShowStockModal(v); setStockForm({ quantity: v.stock, operation: 'set' }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: '#EAB308' }}>
+                                <button onClick={() => { setShowStockModal(v); setStockForm({ quantity: v.stock, operation: 'set' }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: 'var(--dax-amber)' }}>
                                   Stock
                                 </button>
                                 <button onClick={() => { if (confirm('¿Eliminar variante?')) deleteVariantMutation.mutate(v.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: 'var(--dax-danger)' }}>
@@ -458,7 +458,7 @@ export default function ClothingPage() {
                         </td>
                         <td>{v.price ? formatCurrency(Number(v.price)) : '—'}</td>
                         <td style={{ textAlign: 'center' }}>
-                          <button onClick={() => { setShowStockModal(v); setStockForm({ quantity: v.stock, operation: 'set' }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#EAB308', marginRight: '8px' }}>
+                          <button onClick={() => { setShowStockModal(v); setStockForm({ quantity: v.stock, operation: 'set' }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--dax-amber)', marginRight: '8px' }}>
                             Stock
                           </button>
                           <button onClick={() => { if (confirm('¿Eliminar?')) deleteVariantMutation.mutate(v.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: 'var(--dax-danger)' }}>
@@ -489,7 +489,7 @@ export default function ClothingPage() {
                 <div>
                   <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '4px' }}>{col.name}</p>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {col.season && <span style={{ fontSize: '11px', background: 'rgba(234,179,8,.12)', color: '#EAB308', padding: '2px 8px', borderRadius: '8px', fontWeight: 600 }}>{col.season}</span>}
+                    {col.season && <span style={{ fontSize: '11px', background: 'rgba(234,179,8,.12)', color: 'var(--dax-amber)', padding: '2px 8px', borderRadius: '8px', fontWeight: 600 }}>{col.season}</span>}
                     {col.year && <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{col.year}</span>}
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function ClothingPage() {
               </div>
               {col.description && <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>{col.description}</p>}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#EAB308' }}>{col._count?.products ?? 0} producto{(col._count?.products ?? 0) !== 1 ? 's' : ''}</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-amber)' }}>{col._count?.products ?? 0} producto{(col._count?.products ?? 0) !== 1 ? 's' : ''}</span>
               </div>
               {col.products?.length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
@@ -577,7 +577,7 @@ export default function ClothingPage() {
 
       {/* Modal variante individual */}
       {showVariantModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva variante</h2>
@@ -620,7 +620,7 @@ export default function ClothingPage() {
 
       {/* Modal carga masiva */}
       {showBulkModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '600px', padding: '32px', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
@@ -658,9 +658,9 @@ export default function ClothingPage() {
                 ) : (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {bulkForm.sizes.map(s => (
-                      <span key={s} style={{ padding: '5px 10px', background: 'rgba(234,179,8,.12)', color: '#EAB308', borderRadius: 'var(--dax-radius-md)', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span key={s} style={{ padding: '5px 10px', background: 'rgba(234,179,8,.12)', color: 'var(--dax-amber)', borderRadius: 'var(--dax-radius-md)', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {s}
-                        <button onClick={() => setBulkForm(p => ({ ...p, sizes: p.sizes.filter(x => x !== s) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EAB308', padding: 0 }}><X size={10} /></button>
+                        <button onClick={() => setBulkForm(p => ({ ...p, sizes: p.sizes.filter(x => x !== s) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dax-amber)', padding: 0 }}><X size={10} /></button>
                       </span>
                     ))}
                     <div style={{ display: 'flex', gap: '6px' }}>
@@ -702,7 +702,7 @@ export default function ClothingPage() {
               {bulkForm.sizes.length > 0 && bulkForm.colors.length > 0 && (
                 <div style={{ background: 'var(--dax-surface-2)', borderRadius: 'var(--dax-radius-md)', padding: '14px 16px' }}>
                   <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)', marginBottom: '6px' }}>
-                    Se crearán <strong style={{ color: '#EAB308' }}>{bulkForm.sizes.length * bulkForm.colors.length}</strong> variantes
+                    Se crearán <strong style={{ color: 'var(--dax-amber)' }}>{bulkForm.sizes.length * bulkForm.colors.length}</strong> variantes
                   </p>
                   <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
                     {bulkForm.sizes.length} talla{bulkForm.sizes.length !== 1 ? 's' : ''} × {bulkForm.colors.length} color{bulkForm.colors.length !== 1 ? 'es' : ''}
@@ -723,7 +723,7 @@ export default function ClothingPage() {
 
       {/* Modal colección */}
       {showCollectionModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>{editCollection ? 'Editar colección' : 'Nueva colección'}</h2>
@@ -754,7 +754,7 @@ export default function ClothingPage() {
 
       {/* Modal actualizar stock */}
       {showStockModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '380px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Actualizar stock</h2>
@@ -764,7 +764,7 @@ export default function ClothingPage() {
               <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '4px' }}>{showStockModal.product?.name}</p>
               <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>
                 {showStockModal.color && `${showStockModal.color} · `}{showStockModal.size && `Talla ${showStockModal.size} · `}
-                Stock actual: <strong style={{ color: '#EAB308' }}>{showStockModal.stock}</strong>
+                Stock actual: <strong style={{ color: 'var(--dax-amber)' }}>{showStockModal.stock}</strong>
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -783,7 +783,7 @@ export default function ClothingPage() {
                 <input className="dax-input" type="number" min="0" value={stockForm.quantity} onChange={e => setStockForm(p => ({ ...p, quantity: parseInt(e.target.value) || 0 }))} />
                 {stockForm.operation !== 'set' && (
                   <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '5px' }}>
-                    Resultado: <strong style={{ color: '#EAB308' }}>
+                    Resultado: <strong style={{ color: 'var(--dax-amber)' }}>
                       {stockForm.operation === 'increment' ? showStockModal.stock + stockForm.quantity : Math.max(0, showStockModal.stock - stockForm.quantity)}
                     </strong>
                   </p>

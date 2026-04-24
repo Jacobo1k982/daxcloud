@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -204,7 +204,7 @@ export function LocaleSection({ showToast }: { showToast: (msg: string, type?: '
       </div>
 
       {/* Nota de moneda */}
-      <div style={{ display: 'flex', gap: '10px', padding: '12px 14px', background: 'rgba(90,170,240,.08)', borderRadius: '10px', border: '1px solid rgba(90,170,240,.2)', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', gap: '10px', padding: '12px 14px', background: 'var(--dax-blue-bg)', borderRadius: '10px', border: '1px solid rgba(90,170,240,.2)', marginBottom: '8px' }}>
         <Info size={14} color="#5AAAF0" style={{ flexShrink: 0, marginTop: '1px' }} />
         <p style={{ fontSize: '12px', color: 'var(--dax-text-secondary)', lineHeight: 1.5 }}>
           Para cambiar la moneda o el país escríbenos a{' '}

@@ -318,7 +318,7 @@ export default function ReportsPage() {
                     <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Ventas en el tiempo</p>
                     <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{salesByPeriod.length} días con datos</p>
                   </div>
-                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#FF5C35' }}>{formatCurrency(summary?.revenue ?? 0)}</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: 'var(--dax-coral)' }}>{formatCurrency(summary?.revenue ?? 0)}</p>
                 </div>
                 <LineChart data={salesByPeriod} color="#FF5C35" height={140} />
                 {salesByPeriod.length > 0 && (
@@ -361,7 +361,7 @@ export default function ReportsPage() {
                       <div key={b.branchId} style={{ marginBottom: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#fff', background: i === 0 ? '#FF5C35' : 'var(--dax-surface-3)', width: '18px', height: '18px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-primary)', background: i === 0 ? '#FF5C35' : 'var(--dax-surface-3)', width: '18px', height: '18px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
                             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-primary)' }}>{b.name}</span>
                           </div>
                           <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>{formatCurrency(b.revenue)}</span>
@@ -369,7 +369,7 @@ export default function ReportsPage() {
                         <div style={{ display: 'flex', gap: '12px' }}>
                           <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>{b.salesCount} ventas</span>
                           <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Prom: {formatCurrency(b.avgTicket)}</span>
-                          <span style={{ fontSize: '10px', color: '#FF5C35', fontWeight: 600 }}>{b.percentage}%</span>
+                          <span style={{ fontSize: '10px', color: 'var(--dax-coral)', fontWeight: 600 }}>{b.percentage}%</span>
                         </div>
                       </div>
                     ))}
@@ -600,7 +600,7 @@ export default function ReportsPage() {
                           <td><span style={{ fontSize: '11px', color: 'var(--dax-text-muted)', background: 'var(--dax-surface-2)', padding: '2px 8px', borderRadius: '6px' }}>{c.role}</span></td>
                           <td style={{ textAlign: 'center', fontWeight: 700 }}>{c.salesCount}</td>
                           <td style={{ textAlign: 'right', color: 'var(--dax-text-muted)', fontSize: '12px' }}>{formatCurrency(c.avgTicket)}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#FF5C35' }}>{formatCurrency(c.revenue)}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: 'var(--dax-coral)' }}>{formatCurrency(c.revenue)}</td>
                           <td style={{ minWidth: '120px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <div style={{ flex: 1, height: '4px', background: 'var(--dax-surface-3)', borderRadius: '99px', overflow: 'hidden' }}>
@@ -663,7 +663,7 @@ export default function ReportsPage() {
                               <td style={{ textAlign: 'center' }}>
                                 {item.status === 'out'
                                   ? <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-danger)', background: 'var(--dax-danger-bg)', padding: '3px 8px', borderRadius: '20px' }}>Agotado</span>
-                                  : <span style={{ fontSize: '10px', fontWeight: 700, color: '#F0A030', background: 'var(--dax-warning-bg)', padding: '3px 8px', borderRadius: '20px' }}>Stock bajo</span>
+                                  : <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-amber)', background: 'var(--dax-warning-bg)', padding: '3px 8px', borderRadius: '20px' }}>Stock bajo</span>
                                 }
                               </td>
                             </tr>

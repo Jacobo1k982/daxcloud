@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -19,7 +19,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   return (
     <div style={{ marginBottom: '28px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-        <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF5C35', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-coral)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
           Paso {current} de {total}
         </span>
         <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{pct}% completado</span>
@@ -113,7 +113,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
   const modal = (
     <div style={{
       position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.75)',
+      background: 'var(--dax-overlay)',
       backdropFilter: 'blur(6px)',
       zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -141,12 +141,12 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               <div style={{ fontSize: '56px', marginBottom: '16px', lineHeight: 1 }}>
                 {INDUSTRY_EMOJI[industry] ?? '🏪'}
               </div>
-              <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#F0F4FF', marginBottom: '8px', letterSpacing: '-.02em' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--dax-text-primary)', marginBottom: '8px', letterSpacing: '-.02em' }}>
                 ¡Bienvenido a DaxCloud,<br />{user?.firstName}! 🎉
               </h2>
               <p style={{ fontSize: '14px', color: 'var(--dax-text-muted)', lineHeight: 1.7, marginBottom: '24px' }}>
-                Tu negocio <strong style={{ color: '#F0F4FF' }}>{tenant?.name}</strong> está listo.<br />
-                Te guiaremos en 4 pasos rápidos para que aproveches al máximo tus <strong style={{ color: '#FF5C35' }}>14 días gratis</strong>.
+                Tu negocio <strong style={{ color: 'var(--dax-text-primary)' }}>{tenant?.name}</strong> está listo.<br />
+                Te guiaremos en 4 pasos rápidos para que aproveches al máximo tus <strong style={{ color: 'var(--dax-coral)' }}>14 días gratis</strong>.
               </p>
 
               {/* Mini checklist visual */}
@@ -163,7 +163,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                       <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,92,53,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Icon size={15} color="#FF5C35" />
                       </div>
-                      <span style={{ fontSize: '13px', color: '#B8D0E8', flex: 1 }}>{item.text}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--dax-text-secondary)', flex: 1 }}>{item.text}</span>
                       <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{item.time}</span>
                     </div>
                   );
@@ -174,7 +174,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 width: '100%', padding: '14px',
                 background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)',
                 border: 'none', borderRadius: '12px',
-                color: '#fff', fontSize: '15px', fontWeight: 700,
+                color: 'var(--dax-text-primary)', fontSize: '15px', fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
                 boxShadow: '0 4px 20px rgba(255,92,53,.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -201,7 +201,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   <Building2 size={20} color="#FF5C35" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#F0F4FF', marginBottom: '2px' }}>Tu negocio</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Tu negocio</h3>
                   <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Confirma que todo está correcto</p>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(15,25,36,.5)', borderRadius: '10px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>{item.label}</span>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#B8D0E8', textTransform: 'capitalize' }}>{item.value}</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--dax-text-secondary)', textTransform: 'capitalize' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -225,7 +225,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 <a href="/settings" onClick={() => { completeStep('business'); onClose(); }} style={{
                   flex: 1, padding: '12px', textDecoration: 'none',
                   background: 'rgba(30,58,95,.4)', border: '1px solid rgba(30,58,95,.6)',
-                  borderRadius: '12px', color: '#B8D0E8',
+                  borderRadius: '12px', color: 'var(--dax-text-secondary)',
                   fontSize: '13px', fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'Outfit, sans-serif',
@@ -236,7 +236,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   flex: 2, padding: '12px',
                   background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)',
                   border: 'none', borderRadius: '12px',
-                  color: '#fff', fontSize: '13px', fontWeight: 700,
+                  color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700,
                   cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                   boxShadow: '0 4px 14px rgba(255,92,53,.25)',
@@ -256,7 +256,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   <Package size={20} color="#5AAAF0" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#F0F4FF', marginBottom: '2px' }}>Tu primer producto</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>Tu primer producto</h3>
                   <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Agrégalo rápido — puedes añadir más después</p>
                 </div>
               </div>
@@ -266,7 +266,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(61,191,127,.12)', border: '1px solid rgba(61,191,127,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                     <Check size={24} color="#3DBF7F" />
                   </div>
-                  <p style={{ fontSize: '16px', fontWeight: 700, color: '#3DBF7F' }}>¡Producto creado!</p>
+                  <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--dax-success)' }}>¡Producto creado!</p>
                   <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', marginTop: '4px' }}>{productName} · ₡{productPrice}</p>
                 </div>
               ) : (
@@ -283,7 +283,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                         width: '100%', padding: '11px 14px',
                         background: 'rgba(15,25,36,.6)',
                         border: '1px solid rgba(30,58,95,.8)',
-                        borderRadius: '10px', color: '#F0F4FF',
+                        borderRadius: '10px', color: 'var(--dax-text-primary)',
                         fontSize: '14px', fontFamily: 'Outfit, sans-serif',
                         outline: 'none', boxSizing: 'border-box',
                         transition: 'border-color .2s',
@@ -305,7 +305,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                         width: '100%', padding: '11px 14px',
                         background: 'rgba(15,25,36,.6)',
                         border: '1px solid rgba(30,58,95,.8)',
-                        borderRadius: '10px', color: '#F0F4FF',
+                        borderRadius: '10px', color: 'var(--dax-text-primary)',
                         fontSize: '14px', fontFamily: 'Outfit, sans-serif',
                         outline: 'none', boxSizing: 'border-box',
                         transition: 'border-color .2s',
@@ -363,7 +363,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   <Users size={20} color="#A78BFA" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#F0F4FF', marginBottom: '2px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>
                     Invita a tu equipo
                     <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-muted)', marginLeft: '8px' }}>Opcional</span>
                   </h3>
@@ -372,7 +372,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               </div>
 
               <div style={{ padding: '14px', background: 'rgba(167,139,250,.06)', border: '1px solid rgba(167,139,250,.15)', borderRadius: '10px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '12px', color: '#A78BFA', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '12px', color: 'var(--dax-purple)', lineHeight: 1.6 }}>
                   💡 Los negocios con equipo tienen <strong>3x más retención</strong>. Puedes invitar más usuarios en cualquier momento desde Configuración.
                 </p>
               </div>
@@ -380,7 +380,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               {teamSaved ? (
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
                   <Check size={28} color="#3DBF7F" style={{ margin: '0 auto 8px', display: 'block' }} />
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: '#3DBF7F' }}>¡Invitación enviada!</p>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-success)' }}>¡Invitación enviada!</p>
                 </div>
               ) : (
                 <div style={{ marginBottom: '16px' }}>
@@ -396,7 +396,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                       width: '100%', padding: '11px 14px',
                       background: 'rgba(15,25,36,.6)',
                       border: '1px solid rgba(30,58,95,.8)',
-                      borderRadius: '10px', color: '#F0F4FF',
+                      borderRadius: '10px', color: 'var(--dax-text-primary)',
                       fontSize: '14px', fontFamily: 'Outfit, sans-serif',
                       outline: 'none', boxSizing: 'border-box',
                     }}
@@ -419,7 +419,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                   flex: 2, padding: '12px',
                   background: 'linear-gradient(135deg, #A78BFA, #7C3AED)',
                   border: 'none', borderRadius: '12px',
-                  color: '#fff', fontSize: '13px', fontWeight: 700,
+                  color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700,
                   cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
                 }}>
@@ -434,12 +434,12 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
             <div style={{ animation: 'fadeUp .3s ease', textAlign: 'center' }}>
               <ProgressBar current={4} total={4} />
               <div style={{ fontSize: '52px', marginBottom: '16px', lineHeight: 1 }}>⚡</div>
-              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#F0F4FF', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '8px' }}>
                 ¡Todo listo para vender!
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', lineHeight: 1.7, marginBottom: '24px' }}>
                 Abre el POS y haz tu primera venta de prueba.<br />
-                Solo toma <strong style={{ color: '#FF5C35' }}>2 minutos</strong> y verás el poder de DaxCloud.
+                Solo toma <strong style={{ color: 'var(--dax-coral)' }}>2 minutos</strong> y verás el poder de DaxCloud.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
@@ -450,9 +450,9 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 ].map((tip, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'rgba(15,25,36,.5)', borderRadius: '10px', textAlign: 'left' }}>
                     <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,92,53,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, color: '#FF5C35' }}>{i + 1}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--dax-coral)' }}>{i + 1}</span>
                     </div>
-                    <span style={{ fontSize: '12px', color: '#B8D0E8' }}>{tip}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--dax-text-secondary)' }}>{tip}</span>
                   </div>
                 ))}
               </div>
@@ -461,7 +461,7 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
                 width: '100%', padding: '14px',
                 background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)',
                 border: 'none', borderRadius: '12px',
-                color: '#fff', fontSize: '15px', fontWeight: 700,
+                color: 'var(--dax-text-primary)', fontSize: '15px', fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
                 boxShadow: '0 4px 20px rgba(255,92,53,.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -481,17 +481,17 @@ export function OnboardingModal({ onClose }: { onClose: () => void }) {
               <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(61,191,127,.12)', border: '1px solid rgba(61,191,127,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: '0 0 30px rgba(61,191,127,.15)' }}>
                 <Check size={32} color="#3DBF7F" />
               </div>
-              <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#F0F4FF', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '8px' }}>
                 ¡Onboarding completado! 🎉
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--dax-text-muted)', lineHeight: 1.7, marginBottom: '24px' }}>
-                Ya tienes todo configurado. Recuerda que tienes <strong style={{ color: '#FF5C35' }}>14 días gratis</strong> para explorar todas las funciones.
+                Ya tienes todo configurado. Recuerda que tienes <strong style={{ color: 'var(--dax-coral)' }}>14 días gratis</strong> para explorar todas las funciones.
               </p>
               <button onClick={handleFinish} style={{
                 width: '100%', padding: '14px',
                 background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)',
                 border: 'none', borderRadius: '12px',
-                color: '#fff', fontSize: '14px', fontWeight: 700,
+                color: 'var(--dax-text-primary)', fontSize: '14px', fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
                 boxShadow: '0 4px 20px rgba(255,92,53,.35)',
               }}>

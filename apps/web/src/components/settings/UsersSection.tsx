@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -67,7 +67,7 @@ function InviteModal({ onClose, onSuccess, showToast }: {
   });
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
@@ -140,7 +140,7 @@ function TempPasswordModal({ email, password, onClose, showToast }: {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '420px', padding: '32px', textAlign: 'center' }}>
         <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--dax-success-bg)', border: '2px solid var(--dax-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <Check size={26} color="var(--dax-success)" />
@@ -191,7 +191,7 @@ function UserDetailModal({ u, onClose, onRoleChange, onToggle, onResetPassword, 
   const avatarUrl = getImageUrl(u.avatarUrl);
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '28px', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -277,7 +277,7 @@ function UserDetailModal({ u, onClose, onRoleChange, onToggle, onResetPassword, 
               <button onClick={() => onToggle(u.id)} style={{ padding: '10px', borderRadius: '10px', border: `1px solid ${u.active ? 'rgba(224,80,80,.3)' : 'rgba(61,191,127,.3)'}`, background: u.active ? 'rgba(224,80,80,.06)' : 'rgba(61,191,127,.06)', color: u.active ? 'var(--dax-danger)' : 'var(--dax-success)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 {u.active ? 'Desactivar' : 'Activar'}
               </button>
-              <button onClick={() => onResetPassword(u.id)} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(90,170,240,.3)', background: 'rgba(90,170,240,.06)', color: '#5AAAF0', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <button onClick={() => onResetPassword(u.id)} style={{ padding: '10px', borderRadius: '10px', border: '1px solid rgba(90,170,240,.3)', background: 'rgba(90,170,240,.06)', color: 'var(--dax-blue)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 <KeyRound size={13} /> Resetear clave
               </button>
             </div>
@@ -486,7 +486,7 @@ export function UsersSection({ showToast }: { showToast: (msg: string, type?: 's
 
       {/* Modal confirmar eliminación */}
       {deleteTarget && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '400px', padding: '28px' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--dax-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={22} color="var(--dax-danger)" />
@@ -499,7 +499,7 @@ export function UsersSection({ showToast }: { showToast: (msg: string, type?: 's
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <button onClick={() => setDeleteTarget(null)} className="dax-btn-secondary">Cancelar</button>
-              <button onClick={() => deleteMutation.mutate(deleteTarget.id)} disabled={deleteMutation.isPending} style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <button onClick={() => deleteMutation.mutate(deleteTarget.id)} disabled={deleteMutation.isPending} style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                 {deleteMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <Trash2 size={13} />}
                 {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
               </button>
@@ -510,7 +510,7 @@ export function UsersSection({ showToast }: { showToast: (msg: string, type?: 's
 
       {/* Modal info roles */}
       {showRoles && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '520px', padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>Roles del sistema</h2>

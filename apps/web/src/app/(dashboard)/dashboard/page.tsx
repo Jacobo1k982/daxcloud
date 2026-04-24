@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useCallback } from 'react';
 import { useAuth }      from '@/hooks/useAuth';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -278,7 +278,7 @@ export default function DashboardPage() {
           <button onClick={handleRefresh} style={{ width: '36px', height: '36px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <RefreshCw size={14} style={{ animation: refreshing ? 'spin .7s linear infinite' : 'none' }} />
           </button>
-          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', whiteSpace: 'nowrap' }}>
+          <a href="/pos" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 20px', background: 'linear-gradient(135deg, #FF5C35, #FF3D1F)', color: 'var(--dax-text-primary)', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: 700, boxShadow: '0 3px 12px rgba(255,92,53,.3)', whiteSpace: 'nowrap' }}>
             <Zap size={14} /> Abrir POS
           </a>
         </div>
@@ -286,12 +286,12 @@ export default function DashboardPage() {
 
       {/* ── Alertas ── */}
       {(criticalStock as any[]).length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', marginBottom: '20px', background: 'rgba(240,160,48,.08)', border: '1px solid rgba(240,160,48,.2)', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', marginBottom: '20px', background: 'var(--dax-amber-bg)', border: '1px solid rgba(240,160,48,.2)', borderRadius: '10px' }}>
           <AlertTriangle size={15} color="#F0A030" />
-          <p style={{ fontSize: '13px', color: '#F0A030', fontWeight: 600, flex: 1 }}>
+          <p style={{ fontSize: '13px', color: 'var(--dax-amber)', fontWeight: 600, flex: 1 }}>
             {(criticalStock as any[]).length} producto{(criticalStock as any[]).length !== 1 ? 's' : ''} con stock crítico o agotado
           </p>
-          <a href="/inventory" style={{ fontSize: '12px', color: '#F0A030', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+          <a href="/inventory" style={{ fontSize: '12px', color: 'var(--dax-amber)', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
             Ver ahora <ChevronRight size={12} />
           </a>
         </div>
@@ -353,7 +353,7 @@ export default function DashboardPage() {
               </div>
               <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Total: {formatCurrency(barData.reduce((s, d) => s + d.value, 0))}</p>
             </div>
-            <a href="/analytics" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+            <a href="/analytics" style={{ fontSize: '11px', color: 'var(--dax-coral)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
               Analytics <ArrowRight size={11} />
             </a>
           </div>
@@ -395,7 +395,7 @@ export default function DashboardPage() {
               <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Últimas transacciones</p>
             </div>
           </div>
-          <a href="/sales" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <a href="/sales" style={{ fontSize: '11px', color: 'var(--dax-coral)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
             Ver todas <ArrowRight size={11} />
           </a>
         </div>
@@ -444,7 +444,7 @@ export default function DashboardPage() {
                 <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Más vendidos · {PERIOD_LABELS[period]}</p>
               </div>
             </div>
-            <a href="/analytics" style={{ fontSize: '11px', color: '#FF5C35', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <a href="/analytics" style={{ fontSize: '11px', color: 'var(--dax-coral)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px' }}>
               Ver más <ArrowRight size={11} />
             </a>
           </div>
@@ -537,8 +537,8 @@ export default function DashboardPage() {
               <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--dax-text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Más activos:</p>
               <div style={{ display: 'flex', gap: '6px' }}>
                 {top.map((h: any) => (
-                  <div key={h.hour} style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(255,92,53,.1)', border: '1px solid rgba(255,92,53,.2)' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#FF5C35' }}>{h.hour}:00</span>
+                  <div key={h.hour} style={{ padding: '4px 10px', borderRadius: '8px', background: 'var(--dax-coral-soft)', border: '1px solid rgba(255,92,53,.2)' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-coral)' }}>{h.hour}:00</span>
                   </div>
                 ))}
               </div>

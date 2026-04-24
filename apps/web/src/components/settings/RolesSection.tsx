@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -77,7 +77,7 @@ function RoleFormModal({ role, permissions, onClose, onSave, showToast }: {
   });
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div className="dax-card" style={{ width: '100%', maxWidth: '580px', padding: '28px', maxHeight: '92vh', overflowY: 'auto' }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -396,7 +396,7 @@ export function RolesSection({ showToast }: { showToast: (m: string, t?: 'succes
 
       {/* Modal confirmar eliminación */}
       {deleteRole && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '400px', padding: '28px', textAlign: 'center' }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--dax-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={22} color="var(--dax-danger)" />
@@ -410,7 +410,7 @@ export function RolesSection({ showToast }: { showToast: (m: string, t?: 'succes
               <button
                 onClick={() => deleteMutation.mutate(deleteRole.id)}
                 disabled={deleteMutation.isPending}
-                style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ padding: '11px', borderRadius: '12px', border: 'none', background: 'var(--dax-danger)', color: 'var(--dax-text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 {deleteMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin .7s linear infinite' }} /> : <Trash2 size={13} />}
                 {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}

@@ -13,12 +13,12 @@ import {
 type Tab = 'agenda' | 'services' | 'employees' | 'clients' | 'stats';
 
 const APPOINTMENT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  scheduled:   { label: 'Agendada',    color: '#5AAAF0',             bg: 'rgba(90,170,240,.12)' },
+  scheduled:   { label: 'Agendada',    color: 'var(--dax-blue)',             bg: 'rgba(90,170,240,.12)' },
   confirmed:   { label: 'Confirmada',  color: 'var(--dax-success)',  bg: 'var(--dax-success-bg)' },
   in_progress: { label: 'En curso',    color: 'var(--dax-coral)',    bg: 'var(--dax-coral-soft)' },
   completed:   { label: 'Completada',  color: 'var(--dax-text-muted)', bg: 'var(--dax-surface-2)' },
   cancelled:   { label: 'Cancelada',   color: 'var(--dax-danger)',   bg: 'var(--dax-danger-bg)' },
-  no_show:     { label: 'No asistió',  color: '#F0A030',             bg: 'rgba(240,160,48,.12)' },
+  no_show:     { label: 'No asistió',  color: 'var(--dax-amber)',             bg: 'rgba(240,160,48,.12)' },
 };
 
 const COLORS = ['#FF5C35', '#5AAAF0', '#3DBF7F', '#F0A030', '#A78BFA', '#F472B6', '#34D399', '#60A5FA'];
@@ -59,12 +59,12 @@ export default function SalonPage() {
 
   const [serviceForm, setServiceForm] = useState({
     name: '', description: '', duration: 60,
-    price: 0, category: '', color: '#FF5C35',
+    price: 0, category: '', color: 'var(--dax-coral)',
   });
 
   const [employeeForm, setEmployeeForm] = useState({
     firstName: '', lastName: '', phone: '',
-    email: '', role: '', color: '#FF5C35',
+    email: '', role: '', color: 'var(--dax-coral)',
   });
 
   const [clientForm, setClientForm] = useState({
@@ -139,7 +139,7 @@ export default function SalonPage() {
       queryClient.invalidateQueries({ queryKey: ['salon-services'] });
       setShowServiceModal(false);
       setEditService(null);
-      setServiceForm({ name: '', description: '', duration: 60, price: 0, category: '', color: '#FF5C35' });
+      setServiceForm({ name: '', description: '', duration: 60, price: 0, category: '', color: 'var(--dax-coral)' });
     },
   });
 
@@ -156,7 +156,7 @@ export default function SalonPage() {
       queryClient.invalidateQueries({ queryKey: ['salon-employees'] });
       setShowEmployeeModal(false);
       setEditEmployee(null);
-      setEmployeeForm({ firstName: '', lastName: '', phone: '', email: '', role: '', color: '#FF5C35' });
+      setEmployeeForm({ firstName: '', lastName: '', phone: '', email: '', role: '', color: 'var(--dax-coral)' });
     },
   });
 
@@ -274,8 +274,8 @@ export default function SalonPage() {
           {/* Stats rápidos del día */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
             {[
-              { label: 'Total citas', value: appointments.length, color: '#A78BFA' },
-              { label: 'Pendientes', value: appointments.filter((a: any) => ['scheduled', 'confirmed'].includes(a.status)).length, color: '#5AAAF0' },
+              { label: 'Total citas', value: appointments.length, color: 'var(--dax-purple)' },
+              { label: 'Pendientes', value: appointments.filter((a: any) => ['scheduled', 'confirmed'].includes(a.status)).length, color: 'var(--dax-blue)' },
               { label: 'Completadas', value: appointments.filter((a: any) => a.status === 'completed').length, color: 'var(--dax-success)' },
               { label: 'Canceladas', value: appointments.filter((a: any) => a.status === 'cancelled').length, color: 'var(--dax-danger)' },
             ].map((s, i) => (
@@ -296,7 +296,7 @@ export default function SalonPage() {
               <div style={{ padding: '48px', textAlign: 'center' }}>
                 <Calendar size={36} color="var(--dax-text-muted)" style={{ margin: '0 auto 12px', display: 'block', opacity: .4 }} />
                 <p style={{ color: 'var(--dax-text-muted)', fontSize: '13px' }}>No hay citas para este día</p>
-                <button onClick={() => setShowAppointmentModal(true)} style={{ marginTop: '12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#A78BFA', fontWeight: 600 }}>
+                <button onClick={() => setShowAppointmentModal(true)} style={{ marginTop: '12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--dax-purple)', fontWeight: 600 }}>
                   + Agendar cita
                 </button>
               </div>
@@ -469,13 +469,13 @@ export default function SalonPage() {
               <div key={client.id} className="dax-card" style={{ padding: '16px 20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(167,139,250,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#A78BFA' }}>{client.firstName[0]}{client.lastName?.[0] ?? ''}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dax-purple)' }}>{client.firstName[0]}{client.lastName?.[0] ?? ''}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px' }}>{client.firstName} {client.lastName}</p>
                     {client.phone && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{client.phone}</p>}
                     {client._count?.appointments > 0 && (
-                      <p style={{ fontSize: '11px', color: '#A78BFA', marginTop: '2px' }}>{client._count.appointments} visita{client._count.appointments !== 1 ? 's' : ''}</p>
+                      <p style={{ fontSize: '11px', color: 'var(--dax-purple)', marginTop: '2px' }}>{client._count.appointments} visita{client._count.appointments !== 1 ? 's' : ''}</p>
                     )}
                   </div>
                 </div>
@@ -490,10 +490,10 @@ export default function SalonPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
             {[
-              { label: 'Citas hoy',        value: stats?.todayAppointments ?? 0, color: '#A78BFA' },
-              { label: 'Pendientes hoy',   value: stats?.pendingToday ?? 0,      color: '#F0A030' },
+              { label: 'Citas hoy',        value: stats?.todayAppointments ?? 0, color: 'var(--dax-purple)' },
+              { label: 'Pendientes hoy',   value: stats?.pendingToday ?? 0,      color: 'var(--dax-amber)' },
               { label: 'Completadas hoy',  value: stats?.completedToday ?? 0,    color: 'var(--dax-success)' },
-              { label: 'Citas este mes',   value: stats?.monthAppointments ?? 0, color: '#5AAAF0' },
+              { label: 'Citas este mes',   value: stats?.monthAppointments ?? 0, color: 'var(--dax-blue)' },
               { label: 'Clientes totales', value: stats?.totalClients ?? 0,      color: CORAL },
               { label: 'Ingresos del mes', value: formatCurrency(stats?.monthRevenue ?? 0), color: 'var(--dax-success)', isText: true },
             ].map((s, i) => (
@@ -522,7 +522,7 @@ export default function SalonPage() {
                           <span style={{ fontSize: '11px', fontWeight: 700, color: i === 0 ? '#A78BFA' : 'var(--dax-text-muted)' }}>#{i+1}</span>
                           <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)' }}>{s.name}</p>
                         </div>
-                        <p style={{ fontSize: '12px', fontWeight: 700, color: '#A78BFA' }}>{s.count} citas</p>
+                        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-purple)' }}>{s.count} citas</p>
                       </div>
                       <div style={{ height: '3px', background: 'var(--dax-surface-2)', borderRadius: '2px' }}>
                         <div style={{ height: '100%', width: `${pct}%`, background: i === 0 ? '#A78BFA' : 'var(--dax-border)', borderRadius: '2px', transition: 'width .5s' }} />
@@ -563,7 +563,7 @@ export default function SalonPage() {
 
       {/* Modal Nueva cita */}
       {showAppointmentModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nueva cita</h2>
@@ -601,7 +601,7 @@ export default function SalonPage() {
 
       {/* Modal Servicio */}
       {showServiceModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '480px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>{editService ? 'Editar servicio' : 'Nuevo servicio'}</h2>
@@ -636,7 +636,7 @@ export default function SalonPage() {
 
       {/* Modal Estilista */}
       {showEmployeeModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>{editEmployee ? 'Editar estilista' : 'Nuevo estilista'}</h2>
@@ -673,7 +673,7 @@ export default function SalonPage() {
 
       {/* Modal Cliente */}
       {showClientModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--dax-overlay)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div className="dax-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', margin: 0 }}>Nuevo cliente</h2>
