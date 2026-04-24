@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
 import { PLANS } from '@/lib/plans';
 import { SinpePaymentModal } from '@/components/payments/SinpePaymentModal';
 import { StructuredData } from '@/components/StructuredData';
@@ -66,6 +68,15 @@ function FAQ({ q, a }: { q: string; a: string }) {
 
 /* ── LANDING PAGE ─────────────────────────────────────────────────────────── */
 export default function LandingPage() {
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, router]);
+
   const [annual,     setAnnual]     = useState(false);
   const [sinpePlan,  setSinpePlan]  = useState<typeof PLANS[number] | null>(null);
   const [showManual, setShowManual] = useState(false);
