@@ -451,7 +451,7 @@ function ProductCard({ product, onEdit, onDelete }: { product: Product; onEdit: 
       {/* Imagen */}
       <div style={{ position: 'relative', height: '120px', background: 'var(--dax-surface)' }}>
         {product.imageUrl
-          ? <img src={getImageUrl(product.imageUrl) ?? product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ? <img src={getImageUrl(product.imageUrl) ?? product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--dax-surface-2)', padding: '8px' }} />
           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={32} color="rgba(255,255,255,0.1)" /></div>
         }
         {!product.active && <div style={{ position: 'absolute', inset: 0, background: 'var(--dax-overlay-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--dax-text-primary)', background: 'var(--dax-overlay)', padding: '3px 8px', borderRadius: '6px' }}>INACTIVO</span></div>}
