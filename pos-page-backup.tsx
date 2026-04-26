@@ -376,20 +376,18 @@ export default function POSPage() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
 
           {/* Topbar */}
-          <div style={{ height: '54px', padding: '0 16px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
-            <button onClick={() => router.push('/dashboard')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', flexShrink: 0, transition: 'all .15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${C}50`; (e.currentTarget as HTMLElement).style.color = C; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--dax-border)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}>
-              <ArrowLeft size={15} />
+          <div style={{ height: '52px', padding: '0 16px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            <button onClick={() => router.push('/dashboard')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '8px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', color: 'var(--dax-text-muted)', flexShrink: 0 }}>
+              <ArrowLeft size={14} />
             </button>
-            <div style={{ width: '1px', height: '22px', background: 'var(--dax-border)', flexShrink: 0 }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: `${C}18`, border: `1px solid ${C}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={16} color={C} />
+            <div style={{ width: '1px', height: '20px', background: 'var(--dax-border)', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${C}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={14} color={C} />
               </div>
               <div>
-                <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--dax-text-primary)', lineHeight: 1, letterSpacing: '-.01em' }}>POS · {cfg.label}</p>
-                <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', lineHeight: 1, marginTop: '3px' }}>{cfg.description}</p>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1 }}>POS · {cfg.label}</p>
+                <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', lineHeight: 1, marginTop: '2px' }}>{cfg.description}</p>
               </div>
             </div>
 
@@ -431,11 +429,11 @@ export default function POSPage() {
           </div>
 
           {/* Búsqueda + Categorías */}
-          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
-            <div style={{ position: 'relative' }}>
-              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dax-text-muted)', pointerEvents: 'none' }} />
-              <input ref={searchRef} className="dax-input" style={{ paddingLeft: '36px', paddingRight: search ? '32px' : '12px', margin: 0, height: '38px', fontSize: '13px', borderRadius: '10px', transition: 'all .2s' }}
-                placeholder={industry === 'supermarket' || industry === 'pharmacy' ? '🔍 Buscar o escanear código de barras...' : '🔍 Buscar producto...'}
+          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--dax-border)', background: 'var(--dax-surface)', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dax-text-muted)' }} />
+              <input ref={searchRef} className="dax-input" style={{ paddingLeft: '30px', margin: 0, height: '34px', fontSize: '12px' }}
+                placeholder={industry === 'supermarket' || industry === 'pharmacy' ? 'Buscar o escanear código...' : 'Buscar producto...'}
                 value={search} onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && (industry === 'pharmacy' || industry === 'supermarket')) {
@@ -443,18 +441,17 @@ export default function POSPage() {
                     if (found) { addToCart(found); setSearch(''); searchRef.current?.focus(); }
                   }
                 }} autoFocus />
-              {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--dax-text-muted)', padding: '2px' }}><X size={13}/></button>}
             </div>
-            <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px' }}>
-              <button onClick={() => setSelectedCategory('')} style={{ padding: '5px 13px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, border: `1.5px solid ${!selectedCategory ? C : 'transparent'}`, cursor: 'pointer', background: !selectedCategory ? `${C}15` : 'var(--dax-surface-2)', color: !selectedCategory ? C : 'var(--dax-text-muted)', flexShrink: 0, whiteSpace: 'nowrap', transition: 'all .15s' }}>Todos</button>
+            <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', flexShrink: 0, maxWidth: '55%' }}>
+              <button onClick={() => setSelectedCategory('')} style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 600, border: 'none', cursor: 'pointer', background: !selectedCategory ? C : 'var(--dax-surface-2)', color: !selectedCategory ? '#fff' : 'var(--dax-text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}>Todo</button>
               {(categories as string[]).map(cat => (
-                <button key={cat} onClick={() => setSelectedCategory(cat === selectedCategory ? '' : cat)} style={{ padding: '5px 13px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, border: `1.5px solid ${selectedCategory === cat ? C : 'transparent'}`, cursor: 'pointer', background: selectedCategory === cat ? `${C}15` : 'var(--dax-surface-2)', color: selectedCategory === cat ? C : 'var(--dax-text-muted)', flexShrink: 0, whiteSpace: 'nowrap', transition: 'all .15s' }}>{cat}</button>
+                <button key={cat} onClick={() => setSelectedCategory(cat === selectedCategory ? '' : cat)} style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 600, border: 'none', cursor: 'pointer', background: selectedCategory === cat ? C : 'var(--dax-surface-2)', color: selectedCategory === cat ? '#fff' : 'var(--dax-text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}>{cat}</button>
               ))}
             </div>
           </div>
 
           {/* Productos */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
             {industry === 'salon' && (services as any[]).length > 0 && !search && (
               <div style={{ marginBottom: '16px' }}>
                 <p style={{ fontSize: '10px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: '8px' }}>Servicios</p>
@@ -475,7 +472,7 @@ export default function POSPage() {
                 <p style={{ fontSize: '10px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: '8px' }}>Por peso</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
                   {(produceProducts as any[]).map((pp: any) => (
-                    <div key={pp.id} style={{ padding: '12px', background: 'var(--dax-surface)', border: '1px solid var(--dax-border)', borderRadius: '12px', boxShadow: 'var(--dax-shadow-sm)' }}>
+                    <div key={pp.id} style={{ padding: '10px', background: 'var(--dax-surface)', border: '1px solid var(--dax-border)', borderRadius: '10px' }}>
                       <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '1px' }}>{pp.product?.name}</p>
                       <p style={{ fontSize: '11px', fontWeight: 700, color: C, marginBottom: '6px' }}>{formatCurrency(Number(pp.pricePerUnit))}/{pp.weightUnit}</p>
                       <div style={{ display: 'flex', gap: '5px' }}>
@@ -489,39 +486,27 @@ export default function POSPage() {
             )}
 
             {filtered.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--dax-text-muted)' }}>
-                <Package size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: .15 }} />
-                <p style={{ fontSize: '14px', fontWeight: 600 }}>{search ? `Sin resultados para "${search}"` : 'No hay productos'}</p>
-                {search && <p style={{ fontSize: '12px', marginTop: '4px' }}>Intenta con otro término</p>}
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--dax-text-muted)' }}>
+                <Package size={32} style={{ margin: '0 auto 8px', display: 'block', opacity: .2 }} />
+                <p style={{ fontSize: '13px' }}>{search ? `Sin resultados para "${search}"` : 'No hay productos'}</p>
               </div>
             ) : (
-              <div className="pos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
                 {filtered.map((product: any) => {
                   const price = getPrice(product);
                   const hasOffer = price < Number(product.price);
                   const inCart = cart.find(i => i.productId === product.id);
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
-                  const imgUrl = getImageUrl(product.imageUrl);
                   return (
-                    <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }}
-                      style={{ padding: '0', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'all .15s cubic-bezier(.22,1,.36,1)', position: 'relative', overflow: 'hidden', boxShadow: inCart ? `0 0 0 2px ${C}25, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)' }}>
-                      {/* Imagen */}
-                      <div style={{ height: '80px', background: 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                        {imgUrl
-                          ? <img src={imgUrl} alt="" onError={e => { (e.target as HTMLImageElement).parentElement!.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;width:100%"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21 4-4 4 4"/></svg></div>'; }} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
-                          : <Package size={24} style={{ opacity: .15, color: 'var(--dax-text-primary)' }} />
-                        }
-                        {inCart && <div style={{ position: 'absolute', top: '6px', right: '6px', background: C, color: '#fff', borderRadius: '8px', minWidth: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, padding: '0 4px', boxShadow: '0 2px 6px rgba(0,0,0,.2)' }}>{inCart.quantity}</div>}
-                        {hasOffer && <div style={{ position: 'absolute', top: '6px', left: '6px', background: '#F97316', color: '#fff', borderRadius: '6px', padding: '2px 6px', fontSize: '9px', fontWeight: 800 }}>⚡ Oferta</div>}
-                      </div>
-                      {/* Info */}
-                      <div style={{ padding: '9px 10px 10px' }}>
-                        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</p>
-                        {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.sku}</p>}
-                        {hasOffer && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', textDecoration: 'line-through', lineHeight: 1 }}>{formatCurrency(Number(product.price))}</p>}
-                        <p style={{ fontSize: '14px', fontWeight: 900, color: hasOffer ? '#F97316' : C, lineHeight: 1, letterSpacing: '-.01em' }}>{formatCurrency(price)}</p>
-                        {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 700 }}>{pvariants.length} variantes ›</p>}
-                      </div>
+                    <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }} style={{ padding: '10px', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '10px', cursor: 'pointer', textAlign: 'left', transition: 'all .12s', position: 'relative', boxShadow: inCart ? `0 0 0 1px ${C}30` : 'none' }}>
+                      {getImageUrl(product.imageUrl) && <img src={getImageUrl(product.imageUrl)!} alt="" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} style={{ width: '100%', height: '60px', objectFit: 'cover', borderRadius: '7px', marginBottom: '7px' }} />}
+                      {inCart && <div style={{ position: 'absolute', top: '7px', right: '7px', background: C, color: '#fff', borderRadius: '6px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{inCart.quantity}</div>}
+                      {hasOffer && <div style={{ position: 'absolute', top: '7px', left: '7px', background: '#F97316', color: '#fff', borderRadius: '5px', padding: '1px 5px', fontSize: '8px', fontWeight: 800 }}>⚡</div>}
+                      <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--dax-text-primary)', marginBottom: '3px', lineHeight: 1.3 }}>{product.name}</p>
+                      {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace' }}>{product.sku}</p>}
+                      {hasOffer && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', textDecoration: 'line-through' }}>{formatCurrency(Number(product.price))}</p>}
+                      <p style={{ fontSize: '13px', fontWeight: 800, color: hasOffer ? '#F97316' : C, lineHeight: 1 }}>{formatCurrency(price)}</p>
+                      {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 600 }}>{pvariants.length} variantes</p>}
                     </button>
                   );
                 })}
@@ -531,7 +516,7 @@ export default function POSPage() {
         </div>
 
         {/* ══ CARRITO DESKTOP ══ */}
-        <div className="pos-cart-desktop" style={{ width: '320px', borderLeft: '1px solid var(--dax-border)', display: 'flex', flexDirection: 'column', background: 'var(--dax-surface)', flexShrink: 0 }}>
+        <div className="pos-cart-desktop" style={{ width: '300px', borderLeft: '1px solid var(--dax-border)', display: 'flex', flexDirection: 'column', background: 'var(--dax-surface)', flexShrink: 0 }}>
           <CartSide
             cart={cart} subtotal={subtotal} discountAmt={discountAmt} total={total}
             discount={discount} setDiscount={setDiscount} note={note} setNote={setNote}
@@ -761,7 +746,7 @@ function CartSide({
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
       {/* Header */}
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0, background: 'var(--dax-surface)' }}>
+      <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--dax-border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)' }}>Orden actual</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -777,7 +762,7 @@ function CartSide({
       </div>
 
       {/* Items */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 14px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
         {cart.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '8px', color: 'var(--dax-text-muted)' }}>
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${C}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ShoppingCart size={20} color={C} style={{ opacity: .4 }} /></div>
@@ -785,27 +770,20 @@ function CartSide({
             {heldCount > 0 && <p style={{ fontSize: '11px', color: '#F0A030', fontWeight: 600, textAlign: 'center' }}>📋 {heldCount} orden{heldCount !== 1 ? 'es' : ''} en espera</p>}
           </div>
         ) : cart.map((item: CartItem) => (
-          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid var(--dax-border-soft)' }}>
-            {/* Cantidad badge */}
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${C}15`, border: `1px solid ${C}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: '12px', fontWeight: 900, color: C }}>{item.quantity}</span>
-            </div>
-            {/* Nombre + detalles */}
+          <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', borderBottom: '1px solid var(--dax-border-soft)' }}>
+            <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: `${C}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><span style={{ fontSize: '11px', fontWeight: 800, color: C }}>{item.quantity}</span></div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.25, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {(item.size || item.color) && <span style={{ fontSize: '10px', color: C, fontWeight: 600 }}>{item.size && `T.${item.size}`}{item.color && ` · ${item.color}`}</span>}
-                {item.weight && <span style={{ fontSize: '10px', color: C, fontWeight: 600 }}>{item.weight}{item.unit}</span>}
-                {(item.modifiers?.length ?? 0) > 0 && <span style={{ fontSize: '10px', color: C }}>{item.modifiers!.map((m: any) => m.name).join(', ')}</span>}
-              </div>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-primary)', lineHeight: 1.2, marginBottom: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+              {(item.size || item.color) && <p style={{ fontSize: '10px', color: C }}>{item.size && `T.${item.size}`}{item.color && ` · ${item.color}`}</p>}
+              {item.weight && <p style={{ fontSize: '10px', color: C }}>{item.weight}{item.unit}</p>}
+              {(item.modifiers?.length ?? 0) > 0 && <p style={{ fontSize: '10px', color: C }}>{item.modifiers!.map((m: any) => m.name).join(', ')}</p>}
             </div>
-            {/* Precio + controles */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0 }}>
-              <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--dax-text-primary)', letterSpacing: '-.01em' }}>{fmt(item.price * item.quantity)}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: C }}>{fmt(item.price * item.quantity)}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <button onClick={() => updateQty(item.id, -1)} style={{ width: '22px', height: '22px', borderRadius: '6px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)', transition: 'all .1s' }}><Minus size={10} /></button>
-                <button onClick={() => updateQty(item.id, 1)} style={{ width: '22px', height: '22px', borderRadius: '6px', border: `1px solid ${C}40`, background: `${C}10`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C, transition: 'all .1s' }}><Plus size={10} /></button>
-                <button onClick={() => removeFromCart(item.id)} style={{ width: '22px', height: '22px', borderRadius: '6px', border: '1px solid rgba(224,80,80,.2)', background: 'var(--dax-danger-bg)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .1s' }}><Trash2 size={10} color="var(--dax-danger)"/></button>
+                <button onClick={() => updateQty(item.id, -1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Minus size={9} /></button>
+                <button onClick={() => updateQty(item.id, 1)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-text-secondary)' }}><Plus size={9} /></button>
+                <button onClick={() => removeFromCart(item.id)} style={{ width: '20px', height: '20px', borderRadius: '5px', border: 'none', background: 'var(--dax-danger-bg)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dax-danger)' }}><Trash2 size={9} /></button>
               </div>
             </div>
           </div>
