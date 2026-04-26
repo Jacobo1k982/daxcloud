@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+﻿import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export const EXPENSE_CATEGORIES = [
@@ -6,8 +6,8 @@ export const EXPENSE_CATEGORIES = [
   { value: 'servicios',        label: 'Servicios' },
   { value: 'transporte',       label: 'Transporte' },
   { value: 'limpieza',         label: 'Limpieza y aseo' },
-  { value: 'papeleria',        label: 'Papelería' },
-  { value: 'alimentacion',     label: 'Alimentación' },
+  { value: 'papeleria',        label: 'PapelerÃ­a' },
+  { value: 'alimentacion',     label: 'AlimentaciÃ³n' },
   { value: 'mantenimiento',    label: 'Mantenimiento' },
   { value: 'varios',           label: 'Varios' },
 ];
@@ -16,7 +16,7 @@ export const EXPENSE_CATEGORIES = [
 export class CashExpenseService {
   constructor(private prisma: PrismaService) {}
 
-  // ── Registrar gasto ────────────────────────────────────────────────────────
+  // â”€â”€ Registrar gasto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async create(tenantId: string, userId: string, data: {
     branchId:    string;
     amount:      number;
@@ -35,9 +35,9 @@ export class CashExpenseService {
     // Verificar PIN del gerente si se provee
     if (data.managerPin) {
       const manager = await this.prisma.user.findFirst({
-        where: { tenantId, pin: data.managerPin, active: true },
+        where: { tenantId, posPin: data.managerPin, active: true },
       });
-      if (!manager) throw new ForbiddenException('PIN de autorización incorrecto');
+      if (!manager) throw new ForbiddenException('PIN de autorizaciÃ³n incorrecto');
 
       return this.prisma.cashExpense.create({
         data: {
@@ -57,7 +57,7 @@ export class CashExpenseService {
       });
     }
 
-    // Sin PIN — solo cajero
+    // Sin PIN â€” solo cajero
     return this.prisma.cashExpense.create({
       data: {
         tenantId,
@@ -75,7 +75,7 @@ export class CashExpenseService {
     });
   }
 
-  // ── Listar gastos del turno activo ─────────────────────────────────────────
+  // â”€â”€ Listar gastos del turno activo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async findByShift(tenantId: string, branchId: string) {
     const shift = await this.prisma.cashRegisterShift.findFirst({
       where: { tenantId, branchId, status: 'open' },
@@ -123,7 +123,7 @@ export class CashExpenseService {
     };
   }
 
-  // ── Eliminar gasto (solo si no está autorizado) ────────────────────────────
+  // â”€â”€ Eliminar gasto (solo si no estÃ¡ autorizado) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async remove(tenantId: string, expenseId: string, userId: string) {
     const expense = await this.prisma.cashExpense.findFirst({
       where: { id: expenseId, tenantId },
@@ -134,7 +134,7 @@ export class CashExpenseService {
     return this.prisma.cashExpense.delete({ where: { id: expenseId } });
   }
 
-  // ── Categorías disponibles ─────────────────────────────────────────────────
+  // â”€â”€ CategorÃ­as disponibles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   getCategories() {
     return EXPENSE_CATEGORIES;
   }
