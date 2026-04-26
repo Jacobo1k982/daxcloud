@@ -478,14 +478,14 @@ export default function ProductsPage() {
     <div style={{ display:'flex', flexDirection:'column', height:'100%', fontFamily:"'Inter','Outfit',system-ui,sans-serif" }}>
 
       {/* ── TOP BAR ── */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 0', flexWrap:'wrap', gap:'12px' }}>
+      <div className='prod-topbar' style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 20px 0', flexWrap:'wrap', gap:'12px' }}>
         <div>
           <h1 style={{ fontSize:'20px', fontWeight:800, color:'var(--dax-text-primary)', letterSpacing:'-.02em', marginBottom:'2px' }}>Productos</h1>
           <p style={{ fontSize:'12px', color:'var(--dax-text-muted)' }}>{stats.total.toLocaleString()} productos · {stats.active.toLocaleString()} activos</p>
         </div>
-        <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+        <div className='prod-actions' style={{ display:'flex', gap:'8px', alignItems:'center' }}>
           {/* Search */}
-          <div style={{ position:'relative' }}>
+          <div className='prod-search-wrap' style={{ position:'relative' }}>
             <Search size={13} color="var(--dax-text-muted)" style={{ position:'absolute', left:'11px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}/>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar producto, SKU, código..."
               style={{ padding:'9px 14px 9px 32px', background:'var(--dax-surface)', border:'1px solid var(--dax-border)', borderRadius:'9px', color:'var(--dax-text-primary)', fontSize:'13px', fontFamily:'inherit', outline:'none', width:'260px', transition:'all .2s' }}
@@ -515,7 +515,7 @@ export default function ProductsPage() {
       </div>
 
       {/* ── STATS ── */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'10px', padding:'16px 24px 0' }}>
+      <div className='prod-stats' style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'10px', padding:'16px 20px 0' }}>
         {[
           { label:'Total',      value:stats.total,    color:'#FF5C35' },
           { label:'Activos',    value:stats.active,   color:'#3DBF7F' },
@@ -530,11 +530,14 @@ export default function ProductsPage() {
       </div>
 
       {/* ── MAIN BODY ── */}
-      <div style={{ display:'flex', flex:1, overflow:'hidden', padding:'16px 24px', gap:'16px' }}>
+      <div className='prod-layout' style={{ display:'flex', flex:1, overflow:'hidden', padding:'16px 20px', gap:'16px' }}>
+
+        {/* ── OVERLAY MÓVIL ── */}
+        {sidebarOpen && <div className="prod-sidebar-overlay" onClick={() => setSidebarOpen(false)}/>}
 
         {/* ── SIDEBAR FILTROS ── */}
         {sidebarOpen && (
-          <div style={{ width:'220px', flexShrink:0, display:'flex', flexDirection:'column', gap:'16px', overflowY:'auto' }}>
+          <div className='prod-sidebar' style={{ width:'220px', flexShrink:0, display:'flex', flexDirection:'column', gap:'16px', overflowY:'auto' }}>
 
             {/* Estado */}
             <div style={{ background:'var(--dax-surface)', border:'1px solid var(--dax-border)', borderRadius:'12px', padding:'14px 16px' }}>
@@ -632,7 +635,7 @@ export default function ProductsPage() {
           {!isLoading && products.length > 0 && viewMode === 'list' && (
             <div style={{ flex:1, overflowY:'auto', borderRadius:'12px', border:'1px solid var(--dax-border)', background:'var(--dax-surface)' }}>
               {/* Cabecera tabla */}
-              <div style={{ display:'grid', gridTemplateColumns:'42px 2fr 1fr 100px 80px 90px 90px', gap:'0', padding:'9px 14px', borderBottom:'1px solid var(--dax-border)', background:'var(--dax-surface-2)', position:'sticky', top:0, zIndex:1 }}>
+              <div className='prod-list-header' style={{ display:'grid', gridTemplateColumns:'42px 2fr 1fr 100px 80px 90px 90px', gap:'0', padding:'9px 14px', borderBottom:'1px solid var(--dax-border)', background:'var(--dax-surface-2)', position:'sticky', top:0, zIndex:1 }}>
                 {['','Producto','Categoría','Precio','Stock','Estado',''].map((h,i) => (
                   <div key={i} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'.08em', textTransform:'uppercase' as const, color:'var(--dax-text-muted)', display:'flex', alignItems:'center', gap:'4px', cursor: h&&i<6?'pointer':'default' }}
                     onClick={() => { if(h==='Precio') toggleSort('price'); else if(h==='Producto') toggleSort('name'); else if(h==='Stock') toggleSort('stock'); }}>
@@ -651,7 +654,7 @@ export default function ProductsPage() {
                 const isOut = stock === 0;
 
                 return (
-                  <div key={p.id} style={{ display:'grid', gridTemplateColumns:'42px 2fr 1fr 100px 80px 90px 90px', gap:'0', padding:'10px 14px', borderBottom:'1px solid var(--dax-border)', alignItems:'center', background:i%2===0?'transparent':'var(--dax-surface-2)', opacity:p.active?1:.55, transition:'background .15s' }}
+                  <div key={p.id} className='prod-list-row' style={{ display:'grid', gridTemplateColumns:'42px 2fr 1fr 100px 80px 90px 90px', gap:'0', padding:'10px 14px', borderBottom:'1px solid var(--dax-border)', alignItems:'center', background:i%2===0?'transparent':'var(--dax-surface-2)', opacity:p.active?1:.55, transition:'background .15s' }}
                     onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background='var(--dax-coral-soft)';}}
                     onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background=i%2===0?'transparent':'var(--dax-surface-2)';}}>
 
@@ -788,14 +791,48 @@ export default function ProductsPage() {
       )}
 
       <style>{`
-        @keyframes spin    { to{transform:rotate(360deg)} }
+        @keyframes spin      { to{transform:rotate(360deg)} }
         @keyframes modalOpen { from{opacity:0;transform:scale(.97) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
-        @media(max-width:1024px){
-          .prod-modal    { margin:10px!important; max-width:calc(100vw - 20px)!important }
-          .prod-modal-body { max-height:70vh!important }
-          .prod-tabs     { overflow-x:auto!important; scrollbar-width:none!important }
-          .prod-img-grid { grid-template-columns:1fr!important }
+        @keyframes slideInLeft { from{transform:translateX(-100%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+        /* ── Responsive productos ── */
+        @media(max-width:900px){
+          /* Top bar */
+          .prod-topbar     { flex-direction:column!important; align-items:stretch!important; gap:10px!important }
+          .prod-search-wrap { width:100%!important }
+          .prod-search-wrap input { width:100%!important }
+          .prod-actions    { display:grid!important; grid-template-columns:1fr 1fr auto auto auto!important; gap:8px!important }
+
+          /* Stats */
+          .prod-stats      { grid-template-columns:repeat(2,1fr)!important }
+
+          /* Layout — ocultar sidebar, mostrar como drawer */
+          .prod-layout     { position:relative!important }
+          .prod-sidebar    { position:fixed!important; top:0!important; left:0!important; bottom:0!important; zIndex:200!important; width:280px!important; background:var(--dax-surface)!important; border-right:1px solid var(--dax-border)!important; padding:16px!important; overflow-y:auto!important; animation:slideInLeft .25s cubic-bezier(.22,1,.36,1)!important; box-shadow:4px 0 24px rgba(0,0,0,.15)!important }
+          .prod-sidebar-overlay { display:block!important }
+
+          /* Lista — simplificar columnas */
+          .prod-list-header { grid-template-columns:36px 1fr 80px 70px!important }
+          .prod-list-row    { grid-template-columns:36px 1fr 80px 70px!important }
+          .prod-list-col-cat  { display:none!important }
+          .prod-list-col-status { display:none!important }
+          .prod-list-col-price { font-size:12px!important }
+
+          /* Modal */
+          .prod-modal      { margin:8px!important; max-width:calc(100vw - 16px)!important; border-radius:16px!important; max-height:calc(100vh - 16px)!important }
+          .prod-modal-body { max-height:calc(70vh)!important; padding:16px!important }
+          .prod-tabs       { overflow-x:auto!important; scrollbar-width:none!important }
+          .prod-img-grid   { grid-template-columns:1fr!important }
         }
+
+        @media(max-width:480px){
+          .prod-stats      { grid-template-columns:repeat(2,1fr)!important }
+          .prod-list-header { grid-template-columns:36px 1fr 80px!important }
+          .prod-list-row    { grid-template-columns:36px 1fr 80px!important }
+          .prod-list-col-actions { flex-direction:column!important; gap:4px!important }
+        }
+
+        .prod-sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; backdrop-filter:blur(2px); }
       `}</style>
     </div>
   );
