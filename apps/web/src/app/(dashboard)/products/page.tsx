@@ -67,62 +67,108 @@ function calcTaxAmount(price: string, taxRate: string, taxIncluded: boolean) {
 
 // ── Image Uploader ────────────────────────────────────────────────────────────
 function ImageUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
-  const [tab, setTab] = useState<'upload'|'url'>('upload');
+  const [tab, setTab]         = useState<'upload'|'url'>('upload');
   const [loading, setLoading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
-  const [drag, setDrag] = useState(false);
+  const [drag, setDrag]       = useState(false);
+  const [imgError, setImgError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Reset error cuando cambia la imagen
+  const handleChange = (url: string) => { setImgError(false); onChange(url); };
 
   const uploadFile = async (file: File) => {
     setLoading(true);
     const fd = new FormData(); fd.append('file', file);
     try {
-      const { data } = await api.post('/uploads/product-image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      console.log('Upload response:', data);
-      onChange(data.url ?? data.imageUrl ?? '');
+      const { data } = await api.post('/uploads/product-image', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = data.url ?? data.imageUrl ?? '';
+      if (!url) throw new Error('No se recibió URL');
+      handleChange(url);
     } catch (e: any) {
-      console.error('Upload error:', e?.response?.data ?? e?.message);
       alert('Error al subir imagen: ' + (e?.response?.data?.message ?? e?.message ?? 'Error'));
     } finally { setLoading(false); }
   };
 
+  const imgSrc = value ? (getImageUrl(value) ?? value) : null;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', gap: '6px' }}>
-        {['upload','url'].map(t => (
-          <button key={t} type="button" onClick={() => setTab(t as any)}
-            style={{ padding: '5px 12px', borderRadius: '8px', border: `1px solid ${tab===t ? 'rgba(255,92,53,0.4)' : 'var(--dax-border)'}`, background: tab===t ? 'rgba(255,92,53,0.1)' : 'transparent', color: tab===t ? '#FF5C35' : 'var(--dax-text-muted)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-            {t === 'upload' ? 'Subir' : 'URL'}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Preview */}
+      {value && imgSrc && !imgError ? (
+        <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img
+            src={imgSrc}
+            alt="preview"
+            onError={() => setImgError(true)}
+            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', padding: '8px', display: 'block' }}
+          />
+          <button type="button" onClick={() => handleChange('')}
+            style={{ position: 'absolute', top: '6px', right: '6px', width: '26px', height: '26px', borderRadius: '7px', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+            <X size={13} color="#fff"/>
           </button>
-        ))}
-      </div>
+        </div>
+      ) : value && (imgError || !imgSrc) ? (
+        /* URL guardada pero imagen no carga */
+        <div style={{ width: '100%', height: '80px', borderRadius: '10px', border: '1px dashed var(--dax-border)', background: 'var(--dax-surface-2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <ImageIcon size={18} color="var(--dax-text-muted)"/>
+          <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Imagen no disponible</p>
+          <button type="button" onClick={() => handleChange('')} style={{ fontSize: '10px', color: '#FF5C35', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>Cambiar imagen</button>
+        </div>
+      ) : null}
+
+      {/* Tabs solo si no hay imagen */}
+      {!value && (
+        <>
+          <div style={{ display: 'flex', gap: '4px', background: 'var(--dax-surface-2)', padding: '3px', borderRadius: '9px', border: '1px solid var(--dax-border)' }}>
+            {[{ k:'upload', label:'📁 Subir archivo' }, { k:'url', label:'🔗 URL' }].map(t => (
+              <button key={t.k} type="button" onClick={() => setTab(t.k as any)}
+                style={{ flex: 1, padding: '6px 8px', borderRadius: '7px', border: 'none', background: tab===t.k ? 'var(--dax-surface)' : 'transparent', color: tab===t.k ? '#FF5C35' : 'var(--dax-text-muted)', fontSize: '11px', fontWeight: tab===t.k ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', boxShadow: tab===t.k ? 'var(--dax-shadow-sm)' : 'none' }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'upload' && (
+            <div
+              onDragOver={e => { e.preventDefault(); setDrag(true); }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) uploadFile(f); }}
+              onClick={() => inputRef.current?.click()}
+              style={{ height: '80px', border: `2px dashed ${drag ? '#FF5C35' : 'var(--dax-border)'}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '5px', background: drag ? 'rgba(255,92,53,0.04)' : 'transparent', transition: 'all .2s' }}>
+              {loading
+                ? <><Loader2 size={18} color="#FF5C35" style={{ animation: 'spin .7s linear infinite' }}/><p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Subiendo...</p></>
+                : <><Upload size={18} color="var(--dax-text-muted)"/><p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>Arrastra o haz clic · JPG, PNG, WebP</p></>
+              }
+              <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}/>
+            </div>
+          )}
+
+          {tab === 'url' && (
+            <div style={{ display: 'flex', gap: '7px' }}>
+              <input value={urlInput} onChange={e => setUrlInput(e.target.value)}
+                placeholder="https://ejemplo.com/imagen.jpg" type="url"
+                onKeyDown={e => { if (e.key === 'Enter' && urlInput.trim()) handleChange(urlInput.trim()); }}
+                style={{ flex: 1, padding: '9px 12px', background: 'var(--dax-surface-2)', border: '1px solid var(--dax-border)', borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '12px', fontFamily: 'inherit', outline: 'none', minWidth: 0 }}/>
+              <button type="button" onClick={() => { if (urlInput.trim()) handleChange(urlInput.trim()); }}
+                style={{ padding: '9px 14px', background: '#FF5C35', border: 'none', borderRadius: '9px', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
+                Aplicar
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Botón cambiar imagen si ya hay una */}
       {value && (
-        <div style={{ position: 'relative', width: '100%', height: '130px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,92,53,0.25)', background: 'var(--dax-surface-2)' }}>
-          <img src={getImageUrl(value) ?? value} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }}/>
-          <button type="button" onClick={() => onChange('')} style={{ position: 'absolute', top: '6px', right: '6px', width: '24px', height: '24px', borderRadius: '6px', background: 'var(--dax-overlay)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <X size={12} color="#fff"/>
-          </button>
-        </div>
-      )}
-      {tab === 'upload' && !value && (
-        <div onDragOver={e => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
-          onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) uploadFile(f); }}
-          onClick={() => inputRef.current?.click()}
-          style={{ height: '90px', border: `2px dashed ${drag ? 'rgba(255,92,53,0.6)' : 'var(--dax-border)'}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '6px', background: drag ? 'rgba(255,92,53,0.04)' : 'transparent', transition: 'all .2s' }}>
-          {loading ? <Loader2 size={20} color="rgba(255,92,53,0.7)" style={{ animation: 'spin .7s linear infinite' }}/> : <Upload size={20} color="var(--dax-text-muted)"/>}
-          <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>{loading ? 'Subiendo...' : 'Arrastra o haz clic'}</p>
-          <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}/>
-        </div>
-      )}
-      {tab === 'url' && !value && (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input value={urlInput} onChange={e => setUrlInput(e.target.value)} placeholder="https://..." type="url"
-            style={{ flex: 1, padding: '9px 12px', background: 'var(--dax-surface-2)', border: '1px solid var(--dax-border)', borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '12px', fontFamily: 'inherit', outline: 'none' }}/>
-          <button type="button" onClick={() => { if (urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); }}}
-            style={{ padding: '9px 14px', background: 'rgba(255,92,53,0.1)', border: '1px solid rgba(255,92,53,0.25)', borderRadius: '9px', color: '#FF5C35', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-            OK
-          </button>
-        </div>
+        <button type="button" onClick={() => { handleChange(''); setTab('upload'); }}
+          style={{ padding: '7px 12px', background: 'var(--dax-surface-2)', border: '1px solid var(--dax-border)', borderRadius: '8px', color: 'var(--dax-text-muted)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center', transition: 'all .15s' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,92,53,0.3)'; (e.currentTarget as HTMLElement).style.color = '#FF5C35'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--dax-border)'; (e.currentTarget as HTMLElement).style.color = 'var(--dax-text-muted)'; }}>
+          <Upload size={11}/> Cambiar imagen
+        </button>
       )}
     </div>
   );
