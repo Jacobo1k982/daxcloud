@@ -84,6 +84,8 @@ export default function POSPage() {
   const [selectedTable, setSelectedTable] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [weightInput, setWeightInput] = useState<Record<string, string>>({});
+  const [activeWeightId, setActiveWeightId] = useState<string | null>(null);
+  const [weightMode, setWeightMode]         = useState<'numpad'|'quick'>('quick');
   const [showVariantModal, setShowVariantModal] = useState<any>(null);
   const [showModifierModal, setShowModifierModal] = useState<any>(null);
   const [selectedModifiers, setSelectedModifiers] = useState<any[]>([]);
@@ -472,18 +474,160 @@ export default function POSPage() {
 
             {industry === 'produce' && (produceProducts as any[]).length > 0 && !search && (
               <div style={{ marginBottom: '16px' }}>
-                <p style={{ fontSize: '10px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: '8px' }}>Por peso</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
-                  {(produceProducts as any[]).map((pp: any) => (
-                    <div key={pp.id} style={{ padding: '12px', background: 'var(--dax-surface)', border: '1px solid var(--dax-border)', borderRadius: '12px', boxShadow: 'var(--dax-shadow-sm)' }}>
-                      <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '1px' }}>{pp.product?.name}</p>
-                      <p style={{ fontSize: '11px', fontWeight: 700, color: C, marginBottom: '6px' }}>{formatCurrency(Number(pp.pricePerUnit))}/{pp.weightUnit}</p>
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        <input type="number" min="0.1" step="0.1" placeholder="0.0" value={weightInput[pp.id] ?? ''} onChange={e => setWeightInput(p => ({ ...p, [pp.id]: e.target.value }))} style={{ flex: 1, padding: '5px 7px', borderRadius: '7px', border: '1px solid var(--dax-border)', background: 'var(--dax-surface-2)', color: 'var(--dax-text-primary)', fontSize: '11px', minWidth: 0 }} />
-                        <button onClick={() => { const w = parseFloat(weightInput[pp.id] ?? '0'); if (w > 0) { addToCart({ id: pp.productId, name: pp.product?.name, price: Number(pp.pricePerUnit) }, { quantity: w, unit: pp.weightUnit, weight: w }); setWeightInput(p => ({ ...p, [pp.id]: '' })); } }} style={{ padding: '5px 8px', background: C, color: '#fff', border: 'none', borderRadius: '7px', fontSize: '13px', fontWeight: 800, cursor: 'pointer' }}>+</button>
+                {/* Header sección */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase' as const }}>⚖️ Por peso</p>
+                  <div style={{ display: 'flex', gap: '4px', background: 'var(--dax-surface-2)', padding: '2px', borderRadius: '8px', border: '1px solid var(--dax-border)' }}>
+                    {(['quick','numpad'] as const).map(m => (
+                      <button key={m} onClick={() => setWeightMode(m)}
+                        style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: weightMode===m ? 'var(--dax-surface)' : 'transparent', color: weightMode===m ? C : 'var(--dax-text-muted)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', boxShadow: weightMode===m ? 'var(--dax-shadow-sm)' : 'none' }}>
+                        {m === 'quick' ? '⚡ Rápido' : '🔢 Numpad'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
+                  {(produceProducts as any[]).map((pp: any) => {
+                    const w      = parseFloat(weightInput[pp.id] ?? '0') || 0;
+                    const total  = w * Number(pp.pricePerUnit);
+                    const active = activeWeightId === pp.id;
+
+                    const doAddToCart = () => {
+                      if (w > 0) {
+                        addToCart(
+                          { id: pp.productId, name: pp.product?.name, price: Number(pp.pricePerUnit) },
+                          { quantity: w, unit: pp.weightUnit, weight: w }
+                        );
+                        setWeightInput(p => ({ ...p, [pp.id]: '' }));
+                        setActiveWeightId(null);
+                      }
+                    };
+
+                    const numpadPress = (key: string) => {
+                      const cur = weightInput[pp.id] ?? '';
+                      if (key === 'DEL') {
+                        setWeightInput(p => ({ ...p, [pp.id]: cur.slice(0,-1) }));
+                      } else if (key === 'OK') {
+                        doAddToCart();
+                      } else if (key === '.' && cur.includes('.')) {
+                        // no doble punto
+                      } else {
+                        setWeightInput(p => ({ ...p, [pp.id]: cur + key }));
+                      }
+                    };
+
+                    const quickAdd = (grams: number) => {
+                      const kg = grams >= 1000 ? grams/1000 : grams/1000;
+                      const unit = pp.weightUnit ?? 'kg';
+                      const qty  = unit === 'g' ? grams : grams/1000;
+                      addToCart(
+                        { id: pp.productId, name: pp.product?.name, price: Number(pp.pricePerUnit) },
+                        { quantity: qty, unit, weight: qty }
+                      );
+                    };
+
+                    return (
+                      <div key={pp.id}
+                        style={{ background: active ? `${C}06` : 'var(--dax-surface)', border: `1.5px solid ${active ? C : 'var(--dax-border)'}`, borderRadius: '14px', overflow: 'hidden', transition: 'all .2s', boxShadow: active ? `0 0 0 2px ${C}20, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)' }}>
+
+                        {/* Header producto */}
+                        <div style={{ padding: '12px 13px 10px', cursor: 'pointer' }} onClick={() => setActiveWeightId(active ? null : pp.id)}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.3, flex: 1, marginRight: '6px' }}>{pp.product?.name}</p>
+                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: active ? `${C}20` : 'var(--dax-surface-2)', border: `1px solid ${active ? C : 'var(--dax-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
+                              <span style={{ fontSize: '10px', color: active ? C : 'var(--dax-text-muted)', fontWeight: 700 }}>{active ? '▲' : '▼'}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 800, color: C }}>{formatCurrency(Number(pp.pricePerUnit))}<span style={{ fontSize: '10px', fontWeight: 500, color: 'var(--dax-text-muted)' }}>/{pp.weightUnit}</span></span>
+                            {w > 0 && <span style={{ fontSize: '11px', fontWeight: 700, color: C, background: `${C}12`, padding: '2px 8px', borderRadius: '20px' }}>{w}{pp.weightUnit} = {formatCurrency(total)}</span>}
+                          </div>
+                        </div>
+
+                        {/* Panel expandido */}
+                        {active && (
+                          <div style={{ borderTop: `1px solid ${C}20`, padding: '10px 13px 13px' }}>
+
+                            {weightMode === 'quick' ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {/* Input directo */}
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <div style={{ position: 'relative', flex: 1 }}>
+                                    <input
+                                      type="number" min="0" step="0.001"
+                                      placeholder={`Peso en ${pp.weightUnit}`}
+                                      value={weightInput[pp.id] ?? ''}
+                                      onChange={e => setWeightInput(p => ({ ...p, [pp.id]: e.target.value }))}
+                                      onKeyDown={e => { if (e.key === 'Enter') doAddToCart(); }}
+                                      autoFocus
+                                      style={{ width: '100%', padding: '9px 12px', background: 'var(--dax-surface-2)', border: `1px solid ${C}40`, borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '15px', fontWeight: 700, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box' as const }}
+                                    />
+                                  </div>
+                                  <button onClick={doAddToCart} disabled={w <= 0}
+                                    style={{ padding: '9px 14px', background: w>0 ? `linear-gradient(135deg,${C},${C}CC)` : 'var(--dax-surface-2)', color: w>0 ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '9px', fontSize: '13px', fontWeight: 800, cursor: w>0 ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all .2s', boxShadow: w>0 ? `0 4px 12px ${C}40` : 'none', whiteSpace: 'nowrap' as const }}>
+                                    Agregar
+                                  </button>
+                                </div>
+
+                                {/* Botones rápidos */}
+                                <p style={{ fontSize: '9px', fontWeight: 700, color: 'var(--dax-text-muted)', letterSpacing: '.08em', textTransform: 'uppercase' as const }}>Accesos rápidos</p>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '5px' }}>
+                                  {[
+                                    { label: '100g',  val: 100  },
+                                    { label: '250g',  val: 250  },
+                                    { label: '500g',  val: 500  },
+                                    { label: '1 kg',  val: 1000 },
+                                    { label: '1.5kg', val: 1500 },
+                                    { label: '2 kg',  val: 2000 },
+                                    { label: '3 kg',  val: 3000 },
+                                    { label: '5 kg',  val: 5000 },
+                                  ].map(({ label, val }) => (
+                                    <button key={val} onClick={() => quickAdd(val)}
+                                      style={{ padding: '7px 4px', borderRadius: '8px', border: `1px solid ${C}25`, background: `${C}08`, color: C, fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', textAlign: 'center' as const }}
+                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${C}18`; (e.currentTarget as HTMLElement).style.borderColor = `${C}50`; }}
+                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${C}08`; (e.currentTarget as HTMLElement).style.borderColor = `${C}25`; }}>
+                                      {label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              /* NUMPAD */
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {/* Display */}
+                                <div style={{ padding: '10px 14px', background: 'var(--dax-surface-2)', border: `1px solid ${C}30`, borderRadius: '10px', textAlign: 'right' as const }}>
+                                  <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginBottom: '2px' }}>{pp.weightUnit}</p>
+                                  <p style={{ fontSize: '26px', fontWeight: 900, color: w>0 ? C : 'var(--dax-text-muted)', fontFamily: 'monospace', letterSpacing: '-.02em', lineHeight: 1 }}>
+                                    {weightInput[pp.id] || '0'}
+                                  </p>
+                                  {w > 0 && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>= {formatCurrency(total)}</p>}
+                                </div>
+
+                                {/* Teclado */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px' }}>
+                                  {['7','8','9','4','5','6','1','2','3','.','0','DEL'].map(key => (
+                                    <button key={key} onClick={() => numpadPress(key)}
+                                      style={{ padding: '12px 8px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: key==='DEL' ? 'var(--dax-danger-bg)' : 'var(--dax-surface-2)', color: key==='DEL' ? 'var(--dax-danger)' : 'var(--dax-text-primary)', fontSize: key==='DEL'?'11px':'16px', fontWeight: 700, cursor: 'pointer', fontFamily: key==='DEL'?'inherit':'monospace', transition: 'all .1s', textAlign: 'center' as const }}
+                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = key==='DEL' ? 'var(--dax-danger-bg)' : `${C}10`; }}
+                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = key==='DEL' ? 'var(--dax-danger-bg)' : 'var(--dax-surface-2)'; }}>
+                                      {key === 'DEL' ? '⌫' : key}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                {/* Botón agregar */}
+                                <button onClick={doAddToCart} disabled={w <= 0}
+                                  style={{ width: '100%', padding: '12px', background: w>0 ? `linear-gradient(135deg,${C},${C}CC)` : 'var(--dax-surface-2)', color: w>0 ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 800, cursor: w>0 ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all .2s', boxShadow: w>0 ? `0 4px 16px ${C}40` : 'none' }}>
+                                  {w > 0 ? `Agregar ${w}${pp.weightUnit} · ${formatCurrency(total)}` : 'Ingresa el peso'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
