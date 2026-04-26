@@ -46,6 +46,9 @@ const PAYMENT_METHODS = [
   { value: 'transfer', label: 'SINPE', icon: '📱' },
   { value: 'mixed', label: 'Mixto', icon: '🔀' },
 ];
+const WEIGHT_UNITS = new Set(['kg','g','lb','oz','Kg','KG','gramos','libra']);
+const isWeightUnit = (unit?: string) => unit ? WEIGHT_UNITS.has(unit) : false;
+
 const MIXED_METHODS = [
   { key: 'cash', label: 'Efectivo', icon: '💵' },
   { key: 'card', label: 'Tarjeta', icon: '💳' },
@@ -472,165 +475,7 @@ export default function POSPage() {
               </div>
             )}
 
-            {industry === 'produce' && (produceProducts as any[]).length > 0 && !search && (
-              <div style={{ marginBottom: '16px' }}>
-                {/* Header sección */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <p style={{ fontSize: '11px', fontWeight: 700, color: C, letterSpacing: '.1em', textTransform: 'uppercase' as const }}>⚖️ Por peso</p>
-                  <div style={{ display: 'flex', gap: '4px', background: 'var(--dax-surface-2)', padding: '2px', borderRadius: '8px', border: '1px solid var(--dax-border)' }}>
-                    {(['quick','numpad'] as const).map(m => (
-                      <button key={m} onClick={() => setWeightMode(m)}
-                        style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: weightMode===m ? 'var(--dax-surface)' : 'transparent', color: weightMode===m ? C : 'var(--dax-text-muted)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', boxShadow: weightMode===m ? 'var(--dax-shadow-sm)' : 'none' }}>
-                        {m === 'quick' ? '⚡ Rápido' : '🔢 Numpad'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
-                  {(produceProducts as any[]).map((pp: any) => {
-                    const w      = parseFloat(weightInput[pp.id] ?? '0') || 0;
-                    const total  = w * Number(pp.pricePerUnit);
-                    const active = activeWeightId === pp.id;
-
-                    const doAddToCart = () => {
-                      if (w > 0) {
-                        addToCart(
-                          { id: pp.productId, name: pp.product?.name, price: Number(pp.pricePerUnit) },
-                          { quantity: w, unit: pp.weightUnit, weight: w }
-                        );
-                        setWeightInput(p => ({ ...p, [pp.id]: '' }));
-                        setActiveWeightId(null);
-                      }
-                    };
-
-                    const numpadPress = (key: string) => {
-                      const cur = weightInput[pp.id] ?? '';
-                      if (key === 'DEL') {
-                        setWeightInput(p => ({ ...p, [pp.id]: cur.slice(0,-1) }));
-                      } else if (key === 'OK') {
-                        doAddToCart();
-                      } else if (key === '.' && cur.includes('.')) {
-                        // no doble punto
-                      } else {
-                        setWeightInput(p => ({ ...p, [pp.id]: cur + key }));
-                      }
-                    };
-
-                    const quickAdd = (grams: number) => {
-                      const kg = grams >= 1000 ? grams/1000 : grams/1000;
-                      const unit = pp.weightUnit ?? 'kg';
-                      const qty  = unit === 'g' ? grams : grams/1000;
-                      addToCart(
-                        { id: pp.productId, name: pp.product?.name, price: Number(pp.pricePerUnit) },
-                        { quantity: qty, unit, weight: qty }
-                      );
-                    };
-
-                    return (
-                      <div key={pp.id}
-                        style={{ background: active ? `${C}06` : 'var(--dax-surface)', border: `1.5px solid ${active ? C : 'var(--dax-border)'}`, borderRadius: '14px', overflow: 'hidden', transition: 'all .2s', boxShadow: active ? `0 0 0 2px ${C}20, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)' }}>
-
-                        {/* Header producto */}
-                        <div style={{ padding: '12px 13px 10px', cursor: 'pointer' }} onClick={() => setActiveWeightId(active ? null : pp.id)}>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dax-text-primary)', lineHeight: 1.3, flex: 1, marginRight: '6px' }}>{pp.product?.name}</p>
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: active ? `${C}20` : 'var(--dax-surface-2)', border: `1px solid ${active ? C : 'var(--dax-border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
-                              <span style={{ fontSize: '10px', color: active ? C : 'var(--dax-text-muted)', fontWeight: 700 }}>{active ? '▲' : '▼'}</span>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <span style={{ fontSize: '12px', fontWeight: 800, color: C }}>{formatCurrency(Number(pp.pricePerUnit))}<span style={{ fontSize: '10px', fontWeight: 500, color: 'var(--dax-text-muted)' }}>/{pp.weightUnit}</span></span>
-                            {w > 0 && <span style={{ fontSize: '11px', fontWeight: 700, color: C, background: `${C}12`, padding: '2px 8px', borderRadius: '20px' }}>{w}{pp.weightUnit} = {formatCurrency(total)}</span>}
-                          </div>
-                        </div>
-
-                        {/* Panel expandido */}
-                        {active && (
-                          <div style={{ borderTop: `1px solid ${C}20`, padding: '10px 13px 13px' }}>
-
-                            {weightMode === 'quick' ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {/* Input directo */}
-                                <div style={{ display: 'flex', gap: '6px' }}>
-                                  <div style={{ position: 'relative', flex: 1 }}>
-                                    <input
-                                      type="number" min="0" step="0.001"
-                                      placeholder={`Peso en ${pp.weightUnit}`}
-                                      value={weightInput[pp.id] ?? ''}
-                                      onChange={e => setWeightInput(p => ({ ...p, [pp.id]: e.target.value }))}
-                                      onKeyDown={e => { if (e.key === 'Enter') doAddToCart(); }}
-                                      autoFocus
-                                      style={{ width: '100%', padding: '9px 12px', background: 'var(--dax-surface-2)', border: `1px solid ${C}40`, borderRadius: '9px', color: 'var(--dax-text-primary)', fontSize: '15px', fontWeight: 700, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box' as const }}
-                                    />
-                                  </div>
-                                  <button onClick={doAddToCart} disabled={w <= 0}
-                                    style={{ padding: '9px 14px', background: w>0 ? `linear-gradient(135deg,${C},${C}CC)` : 'var(--dax-surface-2)', color: w>0 ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '9px', fontSize: '13px', fontWeight: 800, cursor: w>0 ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all .2s', boxShadow: w>0 ? `0 4px 12px ${C}40` : 'none', whiteSpace: 'nowrap' as const }}>
-                                    Agregar
-                                  </button>
-                                </div>
-
-                                {/* Botones rápidos */}
-                                <p style={{ fontSize: '9px', fontWeight: 700, color: 'var(--dax-text-muted)', letterSpacing: '.08em', textTransform: 'uppercase' as const }}>Accesos rápidos</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '5px' }}>
-                                  {[
-                                    { label: '100g',  val: 100  },
-                                    { label: '250g',  val: 250  },
-                                    { label: '500g',  val: 500  },
-                                    { label: '1 kg',  val: 1000 },
-                                    { label: '1.5kg', val: 1500 },
-                                    { label: '2 kg',  val: 2000 },
-                                    { label: '3 kg',  val: 3000 },
-                                    { label: '5 kg',  val: 5000 },
-                                  ].map(({ label, val }) => (
-                                    <button key={val} onClick={() => quickAdd(val)}
-                                      style={{ padding: '7px 4px', borderRadius: '8px', border: `1px solid ${C}25`, background: `${C}08`, color: C, fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', textAlign: 'center' as const }}
-                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${C}18`; (e.currentTarget as HTMLElement).style.borderColor = `${C}50`; }}
-                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${C}08`; (e.currentTarget as HTMLElement).style.borderColor = `${C}25`; }}>
-                                      {label}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              /* NUMPAD */
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {/* Display */}
-                                <div style={{ padding: '10px 14px', background: 'var(--dax-surface-2)', border: `1px solid ${C}30`, borderRadius: '10px', textAlign: 'right' as const }}>
-                                  <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginBottom: '2px' }}>{pp.weightUnit}</p>
-                                  <p style={{ fontSize: '26px', fontWeight: 900, color: w>0 ? C : 'var(--dax-text-muted)', fontFamily: 'monospace', letterSpacing: '-.02em', lineHeight: 1 }}>
-                                    {weightInput[pp.id] || '0'}
-                                  </p>
-                                  {w > 0 && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>= {formatCurrency(total)}</p>}
-                                </div>
-
-                                {/* Teclado */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '5px' }}>
-                                  {['7','8','9','4','5','6','1','2','3','.','0','DEL'].map(key => (
-                                    <button key={key} onClick={() => numpadPress(key)}
-                                      style={{ padding: '12px 8px', borderRadius: '9px', border: '1px solid var(--dax-border)', background: key==='DEL' ? 'var(--dax-danger-bg)' : 'var(--dax-surface-2)', color: key==='DEL' ? 'var(--dax-danger)' : 'var(--dax-text-primary)', fontSize: key==='DEL'?'11px':'16px', fontWeight: 700, cursor: 'pointer', fontFamily: key==='DEL'?'inherit':'monospace', transition: 'all .1s', textAlign: 'center' as const }}
-                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = key==='DEL' ? 'var(--dax-danger-bg)' : `${C}10`; }}
-                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = key==='DEL' ? 'var(--dax-danger-bg)' : 'var(--dax-surface-2)'; }}>
-                                      {key === 'DEL' ? '⌫' : key}
-                                    </button>
-                                  ))}
-                                </div>
-
-                                {/* Botón agregar */}
-                                <button onClick={doAddToCart} disabled={w <= 0}
-                                  style={{ width: '100%', padding: '12px', background: w>0 ? `linear-gradient(135deg,${C},${C}CC)` : 'var(--dax-surface-2)', color: w>0 ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 800, cursor: w>0 ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all .2s', boxShadow: w>0 ? `0 4px 16px ${C}40` : 'none' }}>
-                                  {w > 0 ? `Agregar ${w}${pp.weightUnit} · ${formatCurrency(total)}` : 'Ingresa el peso'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            
 
             {filtered.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--dax-text-muted)' }}>
@@ -647,26 +492,118 @@ export default function POSPage() {
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   const imgUrl = getImageUrl(product.imageUrl);
                   return (
-                    <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }}
-                      style={{ padding: '0', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'all .15s cubic-bezier(.22,1,.36,1)', position: 'relative', overflow: 'hidden', boxShadow: inCart ? `0 0 0 2px ${C}25, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)' }}>
-                      {/* Imagen */}
-                      <div style={{ height: '80px', background: 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                        {imgUrl
-                          ? <img src={imgUrl} alt="" onError={e => { (e.target as HTMLImageElement).parentElement!.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;width:100%"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21 4-4 4 4"/></svg></div>'; }} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
-                          : <Package size={24} style={{ opacity: .15, color: 'var(--dax-text-primary)' }} />
-                        }
-                        {inCart && <div style={{ position: 'absolute', top: '6px', right: '6px', background: C, color: '#fff', borderRadius: '8px', minWidth: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, padding: '0 4px', boxShadow: '0 2px 6px rgba(0,0,0,.2)' }}>{inCart.quantity}</div>}
-                        {hasOffer && <div style={{ position: 'absolute', top: '6px', left: '6px', background: '#F97316', color: '#fff', borderRadius: '6px', padding: '2px 6px', fontSize: '9px', fontWeight: 800 }}>⚡ Oferta</div>}
-                      </div>
-                      {/* Info */}
-                      <div style={{ padding: '9px 10px 10px' }}>
-                        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</p>
-                        {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.sku}</p>}
-                        {hasOffer && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', textDecoration: 'line-through', lineHeight: 1 }}>{formatCurrency(Number(product.price))}</p>}
-                        <p style={{ fontSize: '14px', fontWeight: 900, color: hasOffer ? '#F97316' : C, lineHeight: 1, letterSpacing: '-.01em' }}>{formatCurrency(price)}</p>
-                        {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 700 }}>{pvariants.length} variantes ›</p>}
-                      </div>
-                    </button>
+                    {/* ── Card normal o por peso ── */}
+                    {(() => {
+                      const unit       = product.metadata?.unit ?? 'unidad';
+                      const byWeight   = isWeightUnit(unit);
+                      const wVal       = parseFloat(weightInput[product.id] ?? '0') || 0;
+                      const wTotal     = wVal * price;
+
+                      if (byWeight) {
+                        // ── CARD POR PESO ──────────────────────────────────
+                        return (
+                          <div key={product.id}
+                            style={{ background: inCart ? `${C}06` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '12px', overflow: 'hidden', transition: 'all .15s', boxShadow: inCart ? `0 0 0 2px ${C}20, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+
+                            {/* Imagen */}
+                            <div style={{ height: '70px', background: 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                              {imgUrl
+                                ? <img src={imgUrl} alt="" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+                                : <Package size={22} style={{ opacity: .15, color: 'var(--dax-text-primary)' }} />
+                              }
+                              {/* Badge ⚖️ */}
+                              <div style={{ position: 'absolute', top: '5px', left: '5px', background: `${C}90`, backdropFilter: 'blur(4px)', borderRadius: '5px', padding: '1px 5px', fontSize: '9px', fontWeight: 700, color: '#fff' }}>⚖️ {unit}</div>
+                              {inCart && <div style={{ position: 'absolute', top: '5px', right: '5px', background: C, color: '#fff', borderRadius: '6px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, padding: '0 3px' }}>{inCart.quantity}{unit}</div>}
+                            </div>
+
+                            {/* Info */}
+                            <div style={{ padding: '8px 9px 4px' }}>
+                              <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '1px', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{product.name}</p>
+                              <p style={{ fontSize: '12px', fontWeight: 900, color: C, letterSpacing: '-.01em', lineHeight: 1 }}>{formatCurrency(price)}<span style={{ fontSize: '9px', fontWeight: 500, color: 'var(--dax-text-muted)' }}>/{unit}</span></p>
+                            </div>
+
+                            {/* Input de peso */}
+                            <div style={{ padding: '6px 9px 9px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                              {/* Botones rápidos */}
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '3px' }}>
+                                {(unit === 'g'
+                                  ? [100, 250, 500, 1000]
+                                  : [0.1, 0.25, 0.5, 1]
+                                ).map(val => (
+                                  <button key={val} onClick={() => {
+                                    addToCart(product, { quantity: val, unit, weight: val });
+                                  }}
+                                    style={{ padding: '4px 2px', borderRadius: '6px', border: `1px solid ${C}25`, background: `${C}08`, color: C, fontSize: '10px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s', textAlign: 'center' as const }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${C}20`; }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `${C}08`; }}>
+                                    {unit === 'g' ? (val >= 1000 ? '1kg' : `${val}g`) : (val < 1 ? `${val*1000}g` : `${val}kg`)}
+                                  </button>
+                                ))}
+                              </div>
+                              {/* Input + botón agregar */}
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                <input
+                                  type="number" min="0" step={unit==='g'?'1':'0.001'}
+                                  placeholder={`0.000 ${unit}`}
+                                  value={weightInput[product.id] ?? ''}
+                                  onChange={e => setWeightInput(p => ({ ...p, [product.id]: e.target.value }))}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter' && wVal > 0) {
+                                      addToCart(product, { quantity: wVal, unit, weight: wVal });
+                                      setWeightInput(p => ({ ...p, [product.id]: '' }));
+                                    }
+                                  }}
+                                  onClick={e => e.stopPropagation()}
+                                  style={{ flex: 1, padding: '6px 7px', background: 'var(--dax-surface-2)', border: `1px solid ${wVal > 0 ? C : 'var(--dax-border)'}`, borderRadius: '7px', color: 'var(--dax-text-primary)', fontSize: '12px', fontWeight: 700, fontFamily: 'monospace', outline: 'none', minWidth: 0, transition: 'border-color .15s' }}
+                                />
+                                <button
+                                  disabled={wVal <= 0}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (wVal > 0) {
+                                      addToCart(product, { quantity: wVal, unit, weight: wVal });
+                                      setWeightInput(p => ({ ...p, [product.id]: '' }));
+                                    }
+                                  }}
+                                  style={{ padding: '6px 10px', background: wVal > 0 ? `linear-gradient(135deg,${C},${C}CC)` : 'var(--dax-surface-2)', color: wVal > 0 ? '#fff' : 'var(--dax-text-muted)', border: 'none', borderRadius: '7px', fontSize: '13px', fontWeight: 900, cursor: wVal > 0 ? 'pointer' : 'not-allowed', transition: 'all .15s', boxShadow: wVal > 0 ? `0 2px 8px ${C}40` : 'none', flexShrink: 0 }}>
+                                  +
+                                </button>
+                              </div>
+                              {/* Total en tiempo real */}
+                              {wVal > 0 && (
+                                <p style={{ fontSize: '10px', fontWeight: 700, color: C, textAlign: 'right' as const }}>
+                                  {wVal}{unit} = {formatCurrency(wTotal)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // ── CARD NORMAL ────────────────────────────────────
+                      return (
+                        <button key={product.id} onClick={() => { if (industry === 'clothing' && pvariants.length > 0) { setShowVariantModal({ product, variants: pvariants }); return; } if (industry === 'restaurant') { setShowModifierModal(product); return; } addToCart(product); }}
+                          style={{ padding: '0', background: inCart ? `${C}08` : 'var(--dax-surface)', border: `1.5px solid ${inCart ? C : 'var(--dax-border)'}`, borderRadius: '12px', cursor: 'pointer', textAlign: 'left', transition: 'all .15s cubic-bezier(.22,1,.36,1)', position: 'relative', overflow: 'hidden', boxShadow: inCart ? `0 0 0 2px ${C}25, var(--dax-shadow-sm)` : 'var(--dax-shadow-sm)' }}>
+                          {/* Imagen */}
+                          <div style={{ height: '80px', background: 'var(--dax-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                            {imgUrl
+                              ? <img src={imgUrl} alt="" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
+                              : <Package size={24} style={{ opacity: .15, color: 'var(--dax-text-primary)' }} />
+                            }
+                            {inCart && <div style={{ position: 'absolute', top: '6px', right: '6px', background: C, color: '#fff', borderRadius: '8px', minWidth: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, padding: '0 4px', boxShadow: '0 2px 6px rgba(0,0,0,.2)' }}>{inCart.quantity}</div>}
+                            {hasOffer && <div style={{ position: 'absolute', top: '6px', left: '6px', background: '#F97316', color: '#fff', borderRadius: '6px', padding: '2px 6px', fontSize: '9px', fontWeight: 800 }}>⚡ Oferta</div>}
+                          </div>
+                          {/* Info */}
+                          <div style={{ padding: '9px 10px 10px' }}>
+                            <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-primary)', marginBottom: '2px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</p>
+                            {product.sku && <p style={{ fontSize: '9px', color: 'var(--dax-text-muted)', marginBottom: '3px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.sku}</p>}
+                            {hasOffer && <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)', textDecoration: 'line-through', lineHeight: 1 }}>{formatCurrency(Number(product.price))}</p>}
+                            <p style={{ fontSize: '14px', fontWeight: 900, color: hasOffer ? '#F97316' : C, lineHeight: 1, letterSpacing: '-.01em' }}>{formatCurrency(price)}</p>
+                            {industry === 'clothing' && pvariants.length > 0 && <p style={{ fontSize: '9px', color: C, marginTop: '3px', fontWeight: 700 }}>{pvariants.length} variantes ›</p>}
+                          </div>
+                        </button>
+                      );
+                    })()}
                   );
                 })}
               </div>
