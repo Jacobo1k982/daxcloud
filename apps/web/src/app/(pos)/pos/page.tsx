@@ -492,8 +492,7 @@ export default function POSPage() {
                   const pvariants = (variants as any[]).filter((v: any) => v.productId === product.id);
                   const imgUrl = getImageUrl(product.imageUrl);
                   return (
-                    {/* ── Card normal o por peso ── */}
-                    {(() => {
+                    <>{(() => {
                       const unit       = product.metadata?.unit ?? 'unidad';
                       const byWeight   = isWeightUnit(unit);
                       const wVal       = parseFloat(weightInput[product.id] ?? '0') || 0;
@@ -603,7 +602,7 @@ export default function POSPage() {
                           </div>
                         </button>
                       );
-                    })()}
+                    })()}</>
                   );
                 })}
               </div>
