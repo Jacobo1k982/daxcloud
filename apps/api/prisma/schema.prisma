@@ -1479,6 +1479,7 @@ model CashRegisterShift {
   status         String    @default("open")
   openedAt       DateTime  @default(now())
   closedAt       DateTime?
+  expenses       CashExpense[]
 
   tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch Branch? @relation(fields: [branchId], references: [id])
@@ -1582,5 +1583,24 @@ model OnlineOrder {
   @@index([tenantId, createdAt])
   @@map("online_orders")
 }
+model CashExpense {
+  id           String   @id @default(uuid())
+  tenantId     String
+  branchId     String?
+  shiftId      String
+  userId       String
+  amount       Decimal  @db.Decimal(10, 2)
+  concept      String
+  category     String   @default("general")
+  supplier     String?
+  notes        String?
+  authorized   Boolean  @default(false)
+  authorizedBy String?
+  createdAt    DateTime @default(now())
 
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
 
+  @@map("cash_expenses")
+}

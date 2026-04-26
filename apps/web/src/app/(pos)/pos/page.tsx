@@ -19,6 +19,7 @@ import { useReceiptPrinter } from '@/hooks/useReceiptPrinter';
 import { usePrintConfig } from '@/hooks/usePrintConfig';
 import type { ReceiptData } from '@/hooks/useReceiptPrinter';
 import { useCashDrawer } from '@/hooks/useCashDrawer';
+import { CashExpenseModal } from '@/components/pos/CashExpenseModal';
 
 interface CartItem {
   id: string; productId: string; variantId?: string;
@@ -96,6 +97,7 @@ export default function POSPage() {
 
   // ── Órdenes en espera ─────────────────────────────────────────────────────
   const [showHeld, setShowHeld] = useState(false);
+  const [showExpenses, setShowExpenses] = useState(false);
   const [holdLabel, setHoldLabel] = useState('');
   const [showHoldInput, setShowHoldInput] = useState(false);
 
@@ -416,10 +418,16 @@ export default function POSPage() {
               <span style={{ fontSize: '10px', fontWeight: 700, color: C, background: `${C}15`, padding: '3px 8px', borderRadius: '6px' }}>⚡ Happy Hour</span>
             )}
 
+            {/* Botón caja chica */}
+            <button onClick={() => setShowExpenses(true)}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '9px', border: '1px solid rgba(240,160,48,.35)', background: 'rgba(240,160,48,.08)', color: '#F0A030', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+              💰 Caja chica
+            </button>
+
             {/* Botón órdenes en espera */}
             <button
               onClick={() => setShowHeld(true)}
-              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '9px', border: `1px solid ${heldOrders.length > 0 ? 'rgba(240,160,48,.4)' : 'var(--dax-border)'}`, background: heldOrders.length > 0 ? 'rgba(240,160,48,.1)' : 'var(--dax-surface-2)', color: heldOrders.length > 0 ? '#F0A030' : 'var(--dax-text-muted)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '9px', border: `1px solid ${heldOrders.length > 0 ? 'rgba(240,160,48,.4)' : 'var(--dax-border)'}`, background: heldOrders.length > 0 ? 'rgba(240,160,48,.1)' : 'var(--dax-surface-2)', color: heldOrders.length > 0 ? '#F0A030' : 'var(--dax-text-muted)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
             >
               <Clock size={13} />
               En espera
@@ -788,6 +796,11 @@ export default function POSPage() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* ══ MODAL CAJA CHICA ══ */}
+        {showExpenses && branchId && (
+          <CashExpenseModal branchId={branchId} accentColor={C} formatCurrency={formatCurrency} onClose={() => setShowExpenses(false)} />
         )}
 
         <style>{`
