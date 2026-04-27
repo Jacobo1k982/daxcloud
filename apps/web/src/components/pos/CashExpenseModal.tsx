@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -9,14 +9,14 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { value: 'compra_proveedor', label: '🛒 Compra a proveedor', color: '#FF5C35' },
-  { value: 'servicios', label: '🔧 Servicios', color: '#5AAAF0' },
-  { value: 'transporte', label: '🚗 Transporte', color: '#F0A030' },
-  { value: 'limpieza', label: '🧹 Limpieza y aseo', color: '#3DBF7F' },
-  { value: 'papeleria', label: '📄 Papelería', color: '#A78BFA' },
-  { value: 'alimentacion', label: '🍽️ Alimentación', color: '#F97316' },
-  { value: 'mantenimiento', label: '🔨 Mantenimiento', color: '#EAB308' },
-  { value: 'varios', label: '📦 Varios', color: '#6B7280' },
+  { value: 'compra_proveedor', label: 'ðŸ›’ Compra a proveedor', color: '#FF5C35' },
+  { value: 'servicios', label: 'ðŸ”§ Servicios', color: '#5AAAF0' },
+  { value: 'transporte', label: 'ðŸš— Transporte', color: '#F0A030' },
+  { value: 'limpieza', label: 'ðŸ§¹ Limpieza y aseo', color: '#3DBF7F' },
+  { value: 'papeleria', label: 'ðŸ“„ PapelerÃ­a', color: '#A78BFA' },
+  { value: 'alimentacion', label: 'ðŸ½ï¸ AlimentaciÃ³n', color: '#F97316' },
+  { value: 'mantenimiento', label: 'ðŸ”¨ Mantenimiento', color: '#EAB308' },
+  { value: 'varios', label: 'ðŸ“¦ Varios', color: '#6B7280' },
 ];
 
 interface Props {
@@ -39,11 +39,11 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // ── Datos del turno + gastos ──────────────────────────────────────────────
+  // â”€â”€ Datos del turno + gastos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { data: shiftData, isLoading } = useQuery({
     queryKey: ['cash-expenses', branchId],
     queryFn: async () => {
-      const r = await api.get(`/cash-register/expenses?branchId=${branchId}`);
+      const r = await api.get(`/cash-expenses?branchId=${branchId}`);
       console.log('expenses response:', r.data);
       return r.data;
     },
@@ -51,7 +51,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
   });
 
   const createMutation = useMutation({
-    mutationFn: (payload: any) => api.post('/cash-register/expenses', payload),
+    mutationFn: (payload: any) => api.post('/cash-expenses', payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['cash-expenses', branchId] });
       qc.invalidateQueries({ queryKey: ['cash-register-active', branchId] });
@@ -63,7 +63,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/cash-register/expenses/${id}`),
+    mutationFn: (id: string) => api.delete(`/cash-expenses/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cash-expenses', branchId] }),
     onError: (e: any) => setError(e?.response?.data?.message ?? 'No se puede eliminar'),
   });
@@ -71,7 +71,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
   const handleSubmit = () => {
     setError('');
     const amt = parseFloat(amount);
-    if (!amt || amt <= 0) return setError('Ingresa un monto válido');
+    if (!amt || amt <= 0) return setError('Ingresa un monto vÃ¡lido');
     if (!concept.trim()) return setError('El concepto es requerido');
     if (usePin && !pin.trim()) return setError('Ingresa el PIN del gerente');
 
@@ -136,7 +136,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '2px', padding: '10px 20px 0', borderBottom: '1px solid var(--dax-border)' }}>
-          {([['new', '+ Nuevo gasto'], ['list', `📋 Historial (${expenses.length})`]] as const).map(([t, label]) => (
+          {([['new', '+ Nuevo gasto'], ['list', `ðŸ“‹ Historial (${expenses.length})`]] as const).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               style={{ padding: '8px 14px', borderRadius: '8px 8px 0 0', border: 'none', borderBottom: tab === t ? '2px solid #F0A030' : '2px solid transparent', background: tab === t ? 'rgba(240,160,48,0.08)' : 'transparent', color: tab === t ? '#F0A030' : 'var(--dax-text-muted)', fontSize: '12px', fontWeight: tab === t ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', marginBottom: '-1px', transition: 'all .15s' }}>
               {label}
@@ -147,7 +147,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
         {/* Body */}
         <div style={{ padding: '20px', maxHeight: '60vh', overflowY: 'auto' }}>
 
-          {/* ── NUEVO GASTO ── */}
+          {/* â”€â”€ NUEVO GASTO â”€â”€ */}
           {tab === 'new' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
@@ -162,7 +162,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                     onBlur={e => { e.target.style.borderColor = 'var(--dax-border)'; e.target.style.boxShadow = 'none'; }}
                     autoFocus />
                 </div>
-                {/* Montos rápidos */}
+                {/* Montos rÃ¡pidos */}
                 <div style={{ display: 'flex', gap: '5px', marginTop: '7px', flexWrap: 'wrap' }}>
                   {[1000, 2000, 5000, 10000, 20000, 50000].map(q => (
                     <button key={q} type="button" onClick={() => setAmount(String(q))}
@@ -185,9 +185,9 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                 </div>
               </div>
 
-              {/* Categoría */}
+              {/* CategorÃ­a */}
               <div>
-                <label style={S.label}>Categoría</label>
+                <label style={S.label}>CategorÃ­a</label>
                 <div style={{ position: 'relative' }}>
                   <Tag size={13} color="var(--dax-text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   <select value={category} onChange={e => setCategory(e.target.value)}
@@ -220,7 +220,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: usePin ? '10px' : 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Lock size={13} color="#F0A030" />
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>Autorización del gerente</span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--dax-text-secondary)' }}>AutorizaciÃ³n del gerente</span>
                   </div>
                   <div onClick={() => setUsePin(p => !p)} style={{ width: '34px', height: '19px', borderRadius: '10px', background: usePin ? '#F0A030' : 'var(--dax-border)', position: 'relative', cursor: 'pointer', transition: 'background .2s', flexShrink: 0 }}>
                     <div style={{ position: 'absolute', top: '2px', left: usePin ? '17px' : '2px', width: '15px', height: '15px', borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
@@ -230,7 +230,7 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                   <input type="password" maxLength={6} value={pin} onChange={e => setPin(e.target.value)} placeholder="PIN del gerente"
                     style={{ ...S.input, textAlign: 'center' as const, fontSize: '20px', fontFamily: 'monospace', letterSpacing: '.3em' }} />
                 )}
-                {!usePin && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>Activa para requerir autorización</p>}
+                {!usePin && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '2px' }}>Activa para requerir autorizaciÃ³n</p>}
               </div>
 
               {/* Error / Success */}
@@ -247,18 +247,18 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                 </div>
               )}
 
-              {/* Botón */}
+              {/* BotÃ³n */}
               <button type="button" onClick={handleSubmit} disabled={createMutation.isPending}
                 style={{ width: '100%', padding: '13px', background: createMutation.isPending ? 'var(--dax-surface-2)' : 'linear-gradient(135deg,#F0A030,#E08020)', border: 'none', borderRadius: '11px', color: createMutation.isPending ? 'var(--dax-text-muted)' : '#fff', fontSize: '14px', fontWeight: 800, cursor: createMutation.isPending ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', boxShadow: createMutation.isPending ? 'none' : '0 4px 16px rgba(240,160,48,0.3)', transition: 'all .2s' }}>
                 {createMutation.isPending
                   ? <><Loader2 size={14} style={{ animation: 'spin .7s linear infinite' }} /> Registrando...</>
-                  : <><Plus size={14} /> Registrar gasto {parseFloat(amount) > 0 ? `· ${formatCurrency(parseFloat(amount))}` : ''}</>
+                  : <><Plus size={14} /> Registrar gasto {parseFloat(amount) > 0 ? `Â· ${formatCurrency(parseFloat(amount))}` : ''}</>
                 }
               </button>
             </div>
           )}
 
-          {/* ── HISTORIAL ── */}
+          {/* â”€â”€ HISTORIAL â”€â”€ */}
           {tab === 'list' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {isLoading && (
@@ -271,16 +271,16 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--dax-text-muted)' }}>
                   <Wallet size={32} style={{ margin: '0 auto 12px', display: 'block', opacity: .2 }} />
                   <p style={{ fontSize: '14px', fontWeight: 600 }}>Sin gastos registrados</p>
-                  <p style={{ fontSize: '12px', marginTop: '4px' }}>Los gastos del turno aparecerán aquí</p>
+                  <p style={{ fontSize: '12px', marginTop: '4px' }}>Los gastos del turno aparecerÃ¡n aquÃ­</p>
                 </div>
               )}
               {expenses.map((exp: any) => {
                 const cat = CATEGORIES.find(c => c.value === exp.category);
                 return (
                   <div key={exp.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 14px', background: 'var(--dax-surface-2)', border: '1px solid var(--dax-border)', borderRadius: '11px' }}>
-                    {/* Categoría ícono */}
+                    {/* CategorÃ­a Ã­cono */}
                     <div style={{ width: '36px', height: '36px', borderRadius: '9px', background: `${cat?.color ?? '#6B7280'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }}>
-                      {cat?.label.split(' ')[0] ?? '📦'}
+                      {cat?.label.split(' ')[0] ?? 'ðŸ“¦'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3px' }}>
@@ -289,13 +289,13 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
                       </div>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' as const }}>
                         <span style={{ fontSize: '10px', fontWeight: 600, color: cat?.color ?? '#6B7280', background: `${cat?.color ?? '#6B7280'}12`, padding: '2px 7px', borderRadius: '20px' }}>{cat?.label.split(' ').slice(1).join(' ') ?? exp.category}</span>
-                        {exp.supplier && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>· {exp.supplier}</span>}
-                        {exp.authorized && <span style={{ fontSize: '9px', fontWeight: 700, color: '#3DBF7F', background: 'var(--dax-success-bg)', padding: '1px 6px', borderRadius: '4px' }}>✓ Autorizado</span>}
+                        {exp.supplier && <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>Â· {exp.supplier}</span>}
+                        {exp.authorized && <span style={{ fontSize: '9px', fontWeight: 700, color: '#3DBF7F', background: 'var(--dax-success-bg)', padding: '1px 6px', borderRadius: '4px' }}>âœ“ Autorizado</span>}
                         <span style={{ fontSize: '10px', color: 'var(--dax-text-muted)', marginLeft: 'auto' }}>{new Date(exp.createdAt).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                       {exp.notes && <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)', marginTop: '3px' }}>{exp.notes}</p>}
                     </div>
-                    {/* Botón eliminar */}
+                    {/* BotÃ³n eliminar */}
                     {!exp.authorized && (
                       <button onClick={() => deleteMutation.mutate(exp.id)} style={{ width: '26px', height: '26px', borderRadius: '7px', border: '1px solid rgba(224,80,80,.15)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--dax-danger-bg)'; }}
