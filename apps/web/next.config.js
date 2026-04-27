@@ -1,15 +1,12 @@
-import withSerwistInit from '@serwist/next';
-
+﻿import withSerwistInit from "@serwist/next";
 const withSerwist = withSerwistInit({
-  swSrc: 'src/app/sw.ts',
-  swDest: 'public/sw.js',
-  cacheOnNavigation: true,
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: false,
   reloadOnOnline: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: false,
 });
-
 const nextConfig = {
-  output: 'standalone',
+  output: "standalone",
 };
-
 export default withSerwist(nextConfig);
