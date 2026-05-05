@@ -227,14 +227,25 @@ export function CloseShiftModal({
                   <p style={{ fontSize: '12px', color: 'var(--dax-text-muted)' }}>Total recaudado</p>
                   <p style={{ fontSize: '16px', fontWeight: 800, color: C }}>{formatCurrency(bd.total)}</p>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: 'rgba(34,197,94,0.08)', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)' }}>
-                  <div>
-                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#22C55E' }}>💵 Efectivo esperado en caja</p>
-                    <p style={{ fontSize: '10px', color: 'var(--dax-text-muted)' }}>
-                      Apertura {formatCurrency(openingAmt)} + cobrado en efectivo {formatCurrency(cashReal)}
-                    </p>
+                <div style={{ background: 'rgba(34,197,94,0.06)', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.2)', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderBottom: '1px solid rgba(34,197,94,0.1)' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>💵 Apertura de caja</p>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--dax-text-secondary)' }}>{formatCurrency(openingAmt)}</p>
                   </div>
-                  <p style={{ fontSize: '15px', fontWeight: 800, color: '#22C55E' }}>{formatCurrency(expectedAmt)}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderBottom: '1px solid rgba(34,197,94,0.1)' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>➕ Cobrado en efectivo</p>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#22C55E' }}>+{formatCurrency(cashReal)}</p>
+                  </div>
+                  {totalExpenses > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderBottom: '1px solid rgba(34,197,94,0.1)' }}>
+                      <p style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>➖ Gastos de caja chica</p>
+                      <p style={{ fontSize: '12px', fontWeight: 700, color: '#E05050' }}>-{formatCurrency(totalExpenses)}</p>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 12px', background: 'rgba(34,197,94,0.1)' }}>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#22C55E' }}>💵 Efectivo esperado en caja</p>
+                    <p style={{ fontSize: '15px', fontWeight: 800, color: '#22C55E' }}>{formatCurrency(expectedAmt)}</p>
+                  </div>
                 </div>
               </div>
             )}
