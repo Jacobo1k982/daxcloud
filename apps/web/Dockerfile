@@ -1,4 +1,3 @@
-# ── Build stage ───────────────────────────────────────
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -15,7 +14,6 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 WORKDIR /app/apps/web
 RUN npm run build
 
-# ── Production stage ──────────────────────────────────
 FROM node:20-alpine AS runner
 
 WORKDIR /app
@@ -25,15 +23,17 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser  --system --uid 1001 nextjs
 
-COPY --from=builder /app/apps/web/public        ./public
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static  ./.next/static
+# Copia el standalone completo
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+# Copia los archivos estáticos al lugar correcto
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+# Copia los archivos públicos
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 USER nextjs
 
 EXPOSE 3005
-
 ENV PORT=3005
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]

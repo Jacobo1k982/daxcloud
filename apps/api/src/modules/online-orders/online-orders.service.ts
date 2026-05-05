@@ -80,6 +80,27 @@ export class OnlineOrdersService {
             link: '/sales',
         });
 
+        // Webhook n8n — nuevo pedido
+        try {
+            await fetch("https://n8n.daxcloud.shop/webhook-test/nuevo-pedido", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    orderNumber,
+                    customerName: dto.customerName,
+                    customerPhone: dto.customerPhone,
+                    type: dto.type,
+                    total: subtotal,
+                    items: dto.items,
+                    notes: dto.notes ?? "",
+                    tenantName: tenant.name,
+                    createdAt: new Date().toISOString(),
+                }),
+            });
+        } catch (e) {
+            // No bloquea el pedido si n8n falla
+        }
+
         return order;
     }
 
