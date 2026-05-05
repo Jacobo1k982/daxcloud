@@ -54,8 +54,9 @@ export function CloseShiftModal({
   const totalSalesReal  = bd?.total  ?? Number(shift.totalSales);
   const totalOrdersReal = bd?.breakdown.reduce((a, r) => a + r.count, 0) ?? shift.totalOrders;
 
-  const cashReal    = bd?.cashReal ?? bd?.cashTotal ?? 0;
-  const expectedAmt = openingAmt + cashReal;
+  const cashReal      = bd?.cashReal ?? bd?.cashTotal ?? 0;
+  const totalExpenses = shift.totalExpenses ?? 0;
+  const expectedAmt   = openingAmt + cashReal - totalExpenses;
 
   const diff    = amount !== '' ? parsed - expectedAmt : null;
   const diffAbs = diff !== null ? Math.abs(diff) : 0;
@@ -141,10 +142,16 @@ export function CloseShiftModal({
               sub={`${totalOrdersReal} transacc.`}
             />
             <StatCard
+              label="Gastos caja"
+              value={totalExpenses > 0 ? `-${formatCurrency(totalExpenses)}` : formatCurrency(0)}
+              color={totalExpenses > 0 ? "#E05050" : "var(--dax-text-muted)"}
+              sub="Salidas de efectivo"
+            />
+            <StatCard
               label="Efectivo esp."
               value={formatCurrency(expectedAmt)}
               color="#22C55E"
-              sub="Apertura + efectivo"
+              sub="Apertura + efectivo - gastos"
             />
           </div>
 

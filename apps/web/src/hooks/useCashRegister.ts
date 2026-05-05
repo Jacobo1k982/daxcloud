@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -42,6 +42,7 @@ export interface CashShift {
   user:           { firstName: string; lastName: string; avatarUrl?: string };
   branch:         { name: string };
   paymentBreakdown?: PaymentBreakdown;
+  totalExpenses?:   number;
 }
 
 export function useCashRegister(branchId: string | undefined) {

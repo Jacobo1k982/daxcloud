@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   BadRequestException,
   NotFoundException,
@@ -105,7 +105,14 @@ export class CashRegisterService {
       shift.openedAt,
     );
 
-    const expectedAmount = Number(shift.openingAmount) + breakdown.cashReal;
+    // Gastos de caja chica del turno
+    const expensesAgg = await this.prisma.cashExpense.aggregate({
+      where:  { tenantId, shiftId: shift.id },
+      _sum:   { amount: true },
+    });
+    const totalExpenses = Number(expensesAgg._sum.amount ?? 0);
+
+    const expectedAmount = Number(shift.openingAmount) + breakdown.cashReal - totalExpenses;
     const difference     = dto.closingAmount - expectedAmount;
 
     return this.prisma.cashRegisterShift.update({

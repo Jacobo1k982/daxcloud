@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState }        from 'react';
 import { LogOut, Loader2 } from 'lucide-react';
 import { useRouter }       from 'next/navigation';
@@ -19,8 +19,14 @@ export function CashRegisterGate({
 }: Props) {
   const [showClose, setShowClose] = useState(false);
   const router = useRouter();
-  const { activeShift, isLoading, isOpen, openMutation, closeMutation } =
-    useCashRegister(branchId);
+  const { activeShift, isLoading, isOpen, openMutation, closeMutation } = useCashRegister(branchId);
+
+  const totalExpenses  = activeShift?.totalExpenses ?? 0;
+  const bd             = activeShift?.paymentBreakdown;
+  const cashReal       = bd?.cashReal ?? bd?.cashTotal ?? 0;
+  const currentBalance = activeShift
+    ? Number(activeShift.openingAmount) + cashReal - totalExpenses
+    : null;
 
   if (isLoading || !branchId) {
     return (
@@ -63,6 +69,16 @@ export function CashRegisterGate({
         <span style={{ fontSize: '11px', color: C, fontWeight: 700 }}>
           {formatCurrency(Number(activeShift?.openingAmount ?? 0))} apertura
         </span>
+        {totalExpenses > 0 && (
+          <span style={{ fontSize: '11px', color: '#E05050', fontWeight: 700 }}>
+            -{formatCurrency(totalExpenses)} gastos
+          </span>
+        )}
+        {currentBalance !== null && (
+          <span style={{ fontSize: '11px', color: currentBalance >= 0 ? '#22C55E' : '#E05050', fontWeight: 800, background: currentBalance >= 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', padding: '1px 8px', borderRadius: '5px' }}>
+            Saldo: {formatCurrency(currentBalance)}
+          </span>
+        )}
         <div style={{ flex: 1 }} />
         <span style={{ fontSize: '11px', color: 'var(--dax-text-muted)' }}>
           {activeShift?.totalOrders ?? 0} ventas · {formatCurrency(Number(activeShift?.totalSales ?? 0))}
