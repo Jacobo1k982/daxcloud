@@ -82,7 +82,7 @@ export class OnlineOrdersService {
 
         // Webhook n8n — nuevo pedido
         try {
-            await fetch("https://n8n.daxcloud.shop/webhook-test/nuevo-pedido", {
+            await fetch("https://n8n.daxcloud.shop/webhook/nuevo-pedido", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
