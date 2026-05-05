@@ -39,7 +39,6 @@ export function CashExpenseModal({ branchId, accentColor: C, formatCurrency, onC
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // â”€â”€ Datos del turno + gastos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { data: shiftData, isLoading } = useQuery({
     queryKey: ['cash-expenses', branchId],
     queryFn: async () => {
