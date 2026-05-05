@@ -9,14 +9,14 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { value: 'compra_proveedor', label: 'ðŸ›’ Compra a proveedor', color: '#FF5C35' },
-  { value: 'servicios', label: 'ðŸ”§ Servicios', color: '#5AAAF0' },
-  { value: 'transporte', label: 'ðŸš— Transporte', color: '#F0A030' },
-  { value: 'limpieza', label: 'ðŸ§¹ Limpieza y aseo', color: '#3DBF7F' },
-  { value: 'papeleria', label: 'ðŸ“„ PapelerÃ­a', color: '#A78BFA' },
-  { value: 'alimentacion', label: 'ðŸ½ï¸ AlimentaciÃ³n', color: '#F97316' },
-  { value: 'mantenimiento', label: 'ðŸ”¨ Mantenimiento', color: '#EAB308' },
-  { value: 'varios', label: 'ðŸ“¦ Varios', color: '#6B7280' },
+  { value: 'compra_proveedor', label: 'Compra a proveedor', color: '#FF5C35' },
+  { value: 'servicios', label: 'Servicios', color: '#5AAAF0' },
+  { value: 'transporte', label: 'Transporte', color: '#F0A030' },
+  { value: 'limpieza', label: 'Limpieza y aseo', color: '#3DBF7F' },
+  { value: 'papeleria', label: 'Papeleria', color: '#A78BFA' },
+  { value: 'alimentacion', label: 'Alimentacion', color: '#F97316' },
+  { value: 'mantenimiento', label: 'Mantenimiento', color: '#EAB308' },
+  { value: 'varios', label: 'Varios', color: '#6B7280' },
 ];
 
 interface Props {
