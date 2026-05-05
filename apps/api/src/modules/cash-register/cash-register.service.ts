@@ -153,7 +153,13 @@ export class CashRegisterService {
       shift.openedAt,
     );
 
-    return { ...shift, paymentBreakdown };
+    const expensesAgg = await this.prisma.cashExpense.aggregate({
+      where: { tenantId, shiftId: shift.id },
+      _sum:  { amount: true },
+    });
+    const totalExpenses = Number(expensesAgg._sum.amount ?? 0);
+
+    return { ...shift, paymentBreakdown, totalExpenses };
   }
 
   // ── Valida caja abierta ───────────────────────────────────────────────────
