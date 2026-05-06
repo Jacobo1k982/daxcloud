@@ -55,7 +55,7 @@ export function CloseShiftModal({
   const totalOrdersReal = bd?.breakdown.reduce((a, r) => a + r.count, 0) ?? shift.totalOrders;
 
   const cashReal      = bd?.cashReal ?? bd?.cashTotal ?? 0;
-  const totalExpenses = shift.totalExpenses ?? 0;
+  const totalExpenses = Number(shift.totalExpenses ?? 0);
   const expectedAmt   = openingAmt + cashReal - totalExpenses;
 
   const diff    = amount !== '' ? parsed - expectedAmt : null;
