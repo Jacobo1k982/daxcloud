@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api }         from '@/lib/api';
 import { useAuth }     from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import { getImageUrl } from '@/lib/imageUrl';
 import { Building2, Camera, Loader2 } from 'lucide-react';
 
@@ -41,6 +42,8 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 
 export function BusinessSection({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) {
   const { tenant }   = useAuth();
+  const setTenant    = useAuthStore(s => s.setAuth);
+  const authStore    = useAuthStore();
   const queryClient  = useQueryClient();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -80,6 +83,15 @@ export function BusinessSection({ showToast }: { showToast: (msg: string, type?:
     mutationFn: async () => api.put('/tenants/me/profile', form),
     onSuccess:  () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-me'] });
+      // Actualizar industria en el store para que el sidebar refleje el cambio inmediatamente
+      if (authStore.token && authStore.user && authStore.tenant && authStore.features) {
+        authStore.setAuth(
+          authStore.token,
+          authStore.user,
+          { ...authStore.tenant, industry: form.industry },
+          authStore.features,
+        );
+      }
       showToast('Datos del negocio actualizados correctamente');
     },
     onError: (err: any) => showToast(err.response?.data?.message ?? 'Error al actualizar', 'error'),
