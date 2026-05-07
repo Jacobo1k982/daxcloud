@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,7 +9,7 @@ import {
   LayoutDashboard, ShoppingCart, BarChart2,
   Package, Warehouse, GitBranch, Settings, LogOut,
   ChefHat, Pill, Scissors, Shirt, Leaf, Utensils,
-  TrendingUp, Barcode, Users, BookOpen,
+  TrendingUp, Barcode, Users, BookOpen, CreditCard,
 } from 'lucide-react';
 
 const NAV_BASE = [
@@ -36,6 +36,7 @@ const NAV_INDUSTRY: Record<string, { href: string; label: string; icon: any }[]>
 
 const NAV_MANAGEMENT = [
   { href: '/branches', label: 'Sucursales', icon: GitBranch },
+  { href: '/billing', label: 'Plan y facturación', icon: CreditCard },
   { href: '/settings', label: 'Configuración', icon: Settings },
 ];
 
@@ -166,6 +167,3 @@ export function Sidebar() {
     </>
   );
 }
-
-
-
